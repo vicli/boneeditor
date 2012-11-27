@@ -3,11 +3,7 @@ package backend;
 public class Edit {
 
     /**
-     * @param args
+     * Edit class: includes buffer
      */
-    public static void main(String[] args) {
-        // TODO Auto-generated method stub
-
-    }
 
 }

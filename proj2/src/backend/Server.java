@@ -1,5 +1,10 @@
 package backend;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+
 /**
  * Server for the realtime collaborative editor
  * 
@@ -9,14 +14,15 @@ package backend;
  *
  */
 public class Server {
-    private final ServerSocket serverSocket
+    private final ServerSocket serverSocket;
     private ArrayList<ServerDocument> docList;
 
     /**
      * Makes Server that listens for connections on port.
      * @param port port number, requires 0 <= port <= 65535
+     * @throws IOException 
      */
-    public Server (int port) {
+    public Server (int port) throws IOException {
         serverSocket = new ServerSocket(port);
         docList = new ArrayList<ServerDocument>();
     }
@@ -108,7 +114,7 @@ public class Server {
      */
     public static void runMinesweeperServer(int port) throws IOException
     {
-        MinesweeperServer server = new MinesweeperServer(port);
+        Server server = new Server(port);
         server.serve();
     }
 }

@@ -2,7 +2,7 @@ package backend;
 
 public class Edit {
     final private char value;
-    private String owner
+    private String owner;
     /**
      * Edit class: includes buffer
      */

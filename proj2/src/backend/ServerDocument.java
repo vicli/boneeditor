@@ -9,7 +9,13 @@ import javax.swing.text.Element;
 import javax.swing.text.Position;
 import javax.swing.text.Segment;
 
-public class ServerDocument implements Document {
+public class ServerDocument {
+    
+    public final String TitleProperty;
+    
+    public ServerDocument (String title) {
+        this.TitleProperty = title;
+    }
 
     public void insertEdit(int cursorLoc, String val) {
         

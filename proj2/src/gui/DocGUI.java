@@ -1,11 +1,14 @@
 package gui;
 
+import java.awt.Dialog;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
@@ -34,6 +37,11 @@ public class DocGUI extends JFrame implements ActionListener{
     private static JTextField nameField;
     private static JTextField colorField;
     private static WindowOne dialog1;
+    private static DocumentWindow dialog2;
+    private static FileWindow fileWindow;
+    private static NameWindow nameWindow;
+    private JButton newButton; 
+    private JButton openButton;
     
     private String clientColor;
     private String clientName;
@@ -41,8 +49,8 @@ public class DocGUI extends JFrame implements ActionListener{
     public DocGUI(){
         welcomeWindow.setSize(600, 200);
         welcomeWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        welcomeWindow.setVisible(true);
         welcomeWindow.setLocationRelativeTo(null);
+        welcomeWindow.setVisible(true);
         
         JLabel welcomeMessage = new JLabel("Welcome to Bone Editor! Please enter your name and color to get started.");
         JLabel name = new JLabel("Name (6 letters max):");
@@ -116,19 +124,18 @@ public class DocGUI extends JFrame implements ActionListener{
             }
         });
 }
-    public class WindowOne extends JFrame{
+    
+    public class WindowOne extends JFrame implements ActionListener{
         private JFrame windowOne = new JFrame("New/Open");
-        private JButton newButton; 
-        private JButton openButton;
+        
         
         public WindowOne(){
             windowOne.setSize(300, 150);
             windowOne.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            windowOne.setVisible(true);
             windowOne.setLocationRelativeTo(null);
+            windowOne.setVisible(true);
             
-            
-            ImageIcon newicon = new ImageIcon ();
+            ImageIcon newicon = new ImageIcon ("/Users/vicli/Documents/workspace/vicli-liherman-miren/proj2/src/resources/newicon.jpg");
             newButton = new JButton(newicon);
             newButton.setName("newButton");
             
@@ -137,12 +144,120 @@ public class DocGUI extends JFrame implements ActionListener{
             openButton.setName("openButton");
             
             windowOne.add(newButton);
-            newButton.setBounds(50, 20, 100, 100);
+            newButton.setBounds(50, 20, 80, 80);
+            newButton.addActionListener(this);
             windowOne.add(openButton);
             openButton.setBounds(170, 20, 80, 80);
+            openButton.addActionListener(this);
+            
+            
+        }
+        public void actionPerformed(ActionEvent e){
+            if(e.getSource() == newButton){
+                nameWindow = new NameWindow();
+                openButton.setEnabled(false);
+                newButton.setEnabled(false);
+                //windowOne.setVisible(false);
+            }
+            
+            if(e.getSource() == openButton){
+                fileWindow = new FileWindow();
+                windowOne.setVisible(false);
+            }
             
         }
         
+    }
+    public class NameWindow extends JFrame implements ActionListener, WindowListener, PropertyChangeListener {
+        private JFrame frm = new JFrame();
+        private JFrame nameWindow = new JFrame("New");
+        private JLabel nameInstruction;
+        private JButton nameOkay;
+        private JTextField nameField;
         
+        public NameWindow(){
+            nameWindow.setSize(500, 150);
+            nameWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            
+            nameWindow.setLocationRelativeTo(null);
+            frm.setLocationRelativeTo(null);
+            nameWindow.addWindowListener(this);
+            nameWindow.setVisible(true);
+            
+            nameInstruction = new JLabel("Document Name (Letters/numbers without spaces only):");
+            nameInstruction.setBounds(60, 20, 400, 20);
+            nameWindow.add(nameInstruction);
+           
+            nameField = new JTextField();
+            nameField.setName("nameField");
+            nameField.setBounds(140, 50, 200, 20);
+            nameWindow.add(nameField);
+            nameField.addPropertyChangeListener(this);
+            nameOkay = new JButton("Okay");
+            nameOkay.setEnabled(false);
+            nameOkay.setName("nameOkay");
+            nameWindow.add(nameOkay);
+            nameOkay.setBounds(200, 80, 80, 30);
+            nameOkay.addActionListener(this);
+        }
+        @Override
+        public void propertyChange(PropertyChangeEvent e) {
+            if(e.getSource() == nameField){
+                String text = nameField.getText();
+                if(text.matches("[a-zA-Z0-9]+")){
+                    nameOkay.setEnabled(true);
+                }
+                else{
+                    nameOkay.setEnabled(false);
+                }
+            }
+            
+        }
+        @Override
+        public void actionPerformed(ActionEvent e) {
+        }
+
+        @Override
+        public void windowActivated(WindowEvent arg0) {}
+
+        @Override
+        public void windowClosed(WindowEvent arg0) {
+            openButton.setEnabled(true);
+            newButton.setEnabled(true);    
+        }
+
+        @Override
+        public void windowClosing(WindowEvent arg0) {}
+        @Override
+        public void windowDeactivated(WindowEvent arg0) {}
+        @Override
+        public void windowDeiconified(WindowEvent arg0) {}
+        @Override
+        public void windowOpened(WindowEvent arg0) {}
+        @Override
+        public void windowIconified(WindowEvent e) {}
+
+    }
+    public class DocumentWindow extends JFrame implements ActionListener{
+        public DocumentWindow(){
+            
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // TODO Auto-generated method stub
+            
+        }
+    }
+    public class FileWindow extends JFrame implements ActionListener{
+        public FileWindow(){
+            // TODO have to wait until server is written
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // TODO Auto-generated method stub
+            
+        }
     }
 }

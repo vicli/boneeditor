@@ -11,6 +11,18 @@ import javax.swing.text.Segment;
 
 public class ServerDocument implements Document {
 
+    public void insertEdit(int cursorLoc, String val) {
+        
+    }
+    
+    public void removeEdit(int begin, int end) {
+        
+    }
+    
+    public void endEdit(String clientName) {
+        
+    }
+    
     @Override
     public void addDocumentListener(DocumentListener arg0) {
         // TODO Auto-generated method stub

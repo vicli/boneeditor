@@ -127,19 +127,17 @@ public class DocGUI extends JFrame implements ActionListener{
             windowOne.setVisible(true);
             windowOne.setLocationRelativeTo(null);
             
-            newButton = new JButton ();
+            
+            ImageIcon newicon = new ImageIcon ();
+            newButton = new JButton(newicon);
             newButton.setName("newButton");
-            try {
-                Image img = ImageIO.read(getClass().getResource("resources/newicon.bmp"));
-                newButton.setIcon(new ImageIcon(img));
-              } catch (IOException ex) {
-              }
+            
             
             openButton = new JButton("Open");
             openButton.setName("openButton");
             
             windowOne.add(newButton);
-            newButton.setBounds(50, 20, 80, 80);
+            newButton.setBounds(50, 20, 100, 100);
             windowOne.add(openButton);
             openButton.setBounds(170, 20, 80, 80);
             

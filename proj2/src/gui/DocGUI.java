@@ -100,16 +100,6 @@ public class DocGUI extends JFrame implements ActionListener{
             dialog1 = new WindowOne();
             welcomeWindow.setVisible(false);
             
-            /**
-             * Prog1 prog = new Prog1();
-        prog.setTextFieldText("ls -l");
-         
-        JDialog dialog = new JDialog(frm, "Prog 1", false);
-        dialog.getContentPane().add(prog.getMainPanel());
-        dialog.pack();
-        dialog.setLocationRelativeTo(null);
-        dialog.setVisible(true);
-             */
         }
         if(e.getSource() == nameField){
             clientName = nameField.getText();
@@ -139,19 +129,19 @@ public class DocGUI extends JFrame implements ActionListener{
             windowOne.setLocationRelativeTo(null);
             windowOne.setVisible(true);
             
-            ImageIcon newicon = new ImageIcon ("/Users/vicli/Documents/workspace/vicli-liherman-miren/proj2/src/resources/newicon.jpg");
+            ImageIcon newicon = new ImageIcon ("/Users/vicli/Documents/workspace/vicli-liherman-miren/proj2/src/resources/newicon.png");
             newButton = new JButton(newicon);
             newButton.setName("newButton");
             
-            
-            openButton = new JButton("Open");
+            ImageIcon openicon = new ImageIcon("/Users/vicli/Documents/workspace/vicli-liherman-miren/proj2/src/resources/openicon.png");
+            openButton = new JButton(openicon);
             openButton.setName("openButton");
             
             windowOne.add(newButton);
-            newButton.setBounds(50, 20, 80, 80);
+            newButton.setBounds(30, 10, 100, 100);
             newButton.addActionListener(this);
             windowOne.add(openButton);
-            openButton.setBounds(170, 20, 80, 80);
+            openButton.setBounds(170, 10, 100, 100);
             openButton.addActionListener(this);
             
             

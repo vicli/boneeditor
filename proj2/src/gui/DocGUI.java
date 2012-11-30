@@ -4,6 +4,9 @@ import java.awt.Dialog;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -37,7 +40,7 @@ public class DocGUI extends JFrame implements ActionListener{
     private static JTextField nameField;
     private static JTextField colorField;
     private static WindowOne dialog1;
-    private static DocumentWindow dialog2;
+    private static DocumentWindow docWindow;
     private static FileWindow fileWindow;
     private static NameWindow nameWindow;
     private JButton newButton; 
@@ -45,6 +48,7 @@ public class DocGUI extends JFrame implements ActionListener{
     
     private String clientColor;
     private String clientName;
+    private String docName;
     
     public DocGUI(){
         welcomeWindow.setSize(600, 200);
@@ -126,7 +130,7 @@ public class DocGUI extends JFrame implements ActionListener{
 }
     
     public class WindowOne extends JFrame implements ActionListener{
-        private JFrame windowOne = new JFrame("New/Open");
+        JFrame windowOne = new JFrame("New/Open");
         
         
         public WindowOne(){
@@ -168,11 +172,12 @@ public class DocGUI extends JFrame implements ActionListener{
         }
         
     }
-    public class NameWindow extends JFrame implements ActionListener, WindowListener, PropertyChangeListener {
+    public class NameWindow extends JFrame implements ActionListener, WindowListener, KeyListener {
         private JFrame frm = new JFrame();
         private JFrame nameWindow = new JFrame("New");
         private JLabel nameInstruction;
         private JButton nameOkay;
+        private JButton nameCancel;
         private JTextField nameField;
         
         public NameWindow(){
@@ -192,31 +197,59 @@ public class DocGUI extends JFrame implements ActionListener{
             nameField.setName("nameField");
             nameField.setBounds(140, 50, 200, 20);
             nameWindow.add(nameField);
-            nameField.addPropertyChangeListener(this);
+            nameField.addKeyListener(this);
+            
             nameOkay = new JButton("Okay");
             nameOkay.setEnabled(false);
             nameOkay.setName("nameOkay");
             nameWindow.add(nameOkay);
-            nameOkay.setBounds(200, 80, 80, 30);
+            nameOkay.setBounds(150, 80, 80, 30);
             nameOkay.addActionListener(this);
-        }
-        @Override
-        public void propertyChange(PropertyChangeEvent e) {
-            if(e.getSource() == nameField){
-                String text = nameField.getText();
-                if(text.matches("[a-zA-Z0-9]+")){
-                    nameOkay.setEnabled(true);
-                }
-                else{
-                    nameOkay.setEnabled(false);
-                }
-            }
             
-        }
-        @Override
-        public void actionPerformed(ActionEvent e) {
+            nameCancel = new JButton("Cancel");
+            nameCancel.setName("nameCancel");
+            nameWindow.add(nameCancel);
+            nameCancel.setBounds(250, 80, 80, 30);
+            nameCancel.addActionListener(this);
         }
 
+        //Key Listener
+        // we listen to what the user is typing. if the user types a valid name, we enable the
+        // okay button. 
+        @Override
+        public void keyPressed(KeyEvent arg0) {}
+        @Override
+        public void keyTyped(KeyEvent arg0) {}
+        @Override
+        public void keyReleased(KeyEvent arg0) {
+            String text = nameField.getText();
+            if(text.length() > 0 && text.matches("[a-zA-Z0-9]+")){
+                nameOkay.setEnabled(true);
+            }
+            else{
+                nameOkay.setEnabled(false);
+                }
+        }
+        
+        //Action Listener
+        // when we click okay, we save the name of the document and close the name window
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if(e.getSource() == nameOkay){
+                docName = nameField.getText();
+                nameWindow.dispose();
+               // dialog1.setVisible(false);
+                docWindow = new DocumentWindow();
+            }
+            if(e.getSource() == nameCancel){
+                nameWindow.dispose();
+                openButton.setEnabled(true);
+                newButton.setEnabled(true);
+            }
+        }
+        
+        
+        //Window Listener
         @Override
         public void windowActivated(WindowEvent arg0) {}
 
@@ -236,8 +269,14 @@ public class DocGUI extends JFrame implements ActionListener{
         public void windowOpened(WindowEvent arg0) {}
         @Override
         public void windowIconified(WindowEvent e) {}
+        
 
     }
+    /**
+     * Main window that displays the Document 
+     * @author vicli
+     *
+     */
     public class DocumentWindow extends JFrame implements ActionListener{
         public DocumentWindow(){
             
@@ -249,6 +288,11 @@ public class DocGUI extends JFrame implements ActionListener{
             
         }
     }
+    /**
+     * Window when we click "open"
+     * @author vicli
+     *
+     */
     public class FileWindow extends JFrame implements ActionListener{
         public FileWindow(){
             // TODO have to wait until server is written

@@ -20,6 +20,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
@@ -29,7 +30,7 @@ import javax.swing.SwingUtilities;
  * This is the DocGUI, which re
  *
  */
-public class DocGUI extends JFrame implements ActionListener{
+public class DocGUI extends JFrame implements ActionListener, KeyListener{
     
     /**
      * The GUI
@@ -74,7 +75,7 @@ public class DocGUI extends JFrame implements ActionListener{
         name.setBounds(160, 55, 150, 20);
         welcomeWindow.add(nameField);
         nameField.setBounds(310, 55, 120, 20);
-        nameField.addActionListener(this);
+        nameField.addKeyListener(this);
         welcomeWindow.add(color);
         color.setBounds(160, 80, 100, 20);
         welcomeWindow.add(colorField);
@@ -84,7 +85,22 @@ public class DocGUI extends JFrame implements ActionListener{
         okay.setSize(80, 35);
         okay.setLocation(260, 120);
         okay.addActionListener(this);
+        okay.setEnabled(false);
         welcomeWindow.addWindowListener(closeWindow);
+    }
+    @Override
+    public void keyPressed(KeyEvent e) {}
+    @Override
+    public void keyTyped(KeyEvent e) {}
+    @Override
+    public void keyReleased(KeyEvent e) {
+        clientName = nameField.getText();
+        if(clientName.length() < 6 && clientName.matches("[a-zA-Z]+")){
+            okay.setEnabled(true);
+        }
+        else{
+            okay.setEnabled(false);
+            }
     }
     private static WindowListener closeWindow = new WindowAdapter(){
         public void windowClosing(WindowEvent e) {
@@ -101,9 +117,9 @@ public class DocGUI extends JFrame implements ActionListener{
             welcomeWindow.setVisible(false);
             
         }
-        if(e.getSource() == nameField){
-            clientName = nameField.getText();
-        }
+        //if(e.getSource() == nameField){
+            //clientName = nameField.getText();
+        //}
         if(e.getSource() == colorField){
             clientColor = colorField.getText();
         }
@@ -228,7 +244,7 @@ public class DocGUI extends JFrame implements ActionListener{
             if(e.getSource() == nameOkay){
                 docName = nameField.getText();
                 nameWindow.dispose();
-               // dialog1.setVisible(false);
+               
                 docWindow = new DocumentWindow();
             }
             if(e.getSource() == nameCancel){
@@ -268,6 +284,18 @@ public class DocGUI extends JFrame implements ActionListener{
      *
      */
     public class DocumentWindow extends JFrame implements ActionListener{
+        
+        private JButton saveButton;
+        
+        private JPanel menuPanel(){
+            return null;
+            
+        }
+        
+        private JPanel textPanel(){
+            return null;
+            
+        }
         public DocumentWindow(){
             
         }

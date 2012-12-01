@@ -1,12 +1,12 @@
 package backend;
 
 public class Edit {
-    final private char value;
+    final private String value;
     private String owner;
     /**
      * Edit class: includes buffer
      */
-    public Edit(char input, String clientName) {
+    public Edit(String input, String clientName) {
         value = input;
         owner = clientName;
     }
@@ -23,7 +23,7 @@ public class Edit {
      * Returns the value
      * @return The value of this edit
      */
-    public char getValue() {
+    public String getValue() {
         return value;
     }
     

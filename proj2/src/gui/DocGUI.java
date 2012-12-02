@@ -1,7 +1,16 @@
 package gui;
 
+import gui.DocGUI.DocumentWindow.RedoAction;
+import gui.DocGUI.DocumentWindow.UndoAction;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -13,16 +22,41 @@ import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.util.HashMap;
 
 import javax.imageio.ImageIO;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultEditorKit;
+import javax.swing.text.JTextComponent;
+import javax.swing.text.StyledDocument;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
 
 
 
@@ -50,6 +84,14 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private String clientColor;
     private String clientName;
     private String docName;
+    
+    private AbstractDocument displayedDoc;
+    protected UndoAction undoAction;
+    protected RedoAction redoAction;
+    protected UndoManager undo = new UndoManager();
+    private String newline = "\n";
+    private HashMap<Object, Action> action;
+    private Border docBorder;
     
     public DocGUI(){
         welcomeWindow.setSize(600, 200);
@@ -125,12 +167,15 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         }
     }
 
-    
+    private static void createAndShowGUI(){
+        final DocGUI startframe = new DocGUI();
+        startframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        startframe.pack();
+    }
     public static void main(final String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                new DocGUI();
-                
+                createAndShowGUI();
             }
         });
 }
@@ -283,28 +328,232 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      * @author vicli
      *
      */
-    public class DocumentWindow extends JFrame implements ActionListener{
+    public class DocumentWindow extends JFrame implements ActionListener, DocumentListener{
         
-        private JButton saveButton;
+        private JTextPane docpane; 
+        private JPanel menu;
+        private JTextArea content;
         
-        private JPanel menuPanel(){
-            return null;
-            
-        }
-        
-        private JPanel textPanel(){
-            return null;
-            
-        }
         public DocumentWindow(){
+            super(docName);
+            docpane = new JTextPane();
+            docpane.setName("docpane");
+            docpane.setCaretPosition(0);
+            //docpane.setCaretColor(Color.decode(clientColor));
+            //docBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY, 50);
+            //docpane.setBorder(docBorder);
             
+            docpane.setMargin(new Insets(100,100,100,100));
+            StyledDocument styled = docpane.getStyledDocument();
+            displayedDoc = (AbstractDocument) styled;
+            JScrollPane scroll = new JScrollPane(docpane);
+            scroll.setPreferredSize(new Dimension(200, 200));
+            
+            // StatusPane keeps track of the caret location; this will make debugging 
+            // less painful, and also allows user to know where their cursor is.
+            JPanel statusPane = new JPanel(new GridLayout(1,1));
+            CaretListenerLabel caretLabel = new CaretListenerLabel("Caret Status");
+            statusPane.add(caretLabel);
+            
+            //Adding statusPane to the main pane.
+            getContentPane().add(statusPane, BorderLayout.PAGE_END);
+            
+            //Creating the Menubar.
+            action = createActions(docpane);
+            JMenu editMenu = createEditMenu();
+            JMenuBar menuBar = new JMenuBar();
+            menuBar.add(editMenu);
+            setJMenuBar(menuBar);
+            
+            //Adding key bindings for keyboard shortcuts (if necessary)
+            addBindings();
+            
+            //Initial text is empty, set caret position
+            docpane.setCaretPosition(0);
+            
+            // Listener for undoable edits and for caret changes
+            displayedDoc.addUndoableEditListener(new UndoEditListener());
+            docpane.addCaretListener(caretLabel);
+            displayedDoc.addDocumentListener(this);
+            setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            pack();
+            
+            add(docpane);
+            setSize(1200, 800);
+            setLocationRelativeTo(null);
+            setVisible(true);
         }
+        
+        @Override
+        public void changedUpdate(DocumentEvent e) {}
+        @Override
+        public void insertUpdate(DocumentEvent e) {}
+        @Override
+        public void removeUpdate(DocumentEvent e) {}
+        
+        private HashMap<Object, Action>  createActions(JTextComponent comp){
+            HashMap<Object, Action> action = new HashMap<Object, Action>();
+            Action [] actionArray = comp.getActions();
+            for (int i = 0; i< actionArray.length; i++){
+                Action a = actionArray[i];
+                action.put(a.getValue(Action.NAME), a);
+            }
+            return action;
+        }
+        
+        // Used to listen for undoable edits. 
+        protected class UndoEditListener implements UndoableEditListener{
+            @Override
+            public void undoableEditHappened(UndoableEditEvent e) {
+                undo.addEdit(e.getEdit());
+                undoAction.updateUndoState();
+                redoAction.updateRedoState();
+            }        
+        }
+              
+        protected void addBindings(){          
+        }
+        
+        private JMenu createEditMenu() {
+            JMenu menu = new JMenu("Edit");
+            
+            //Add the undo and redo actions that we defined
+            undoAction = new UndoAction();
+            menu.add(undoAction);
+            redoAction = new RedoAction();
+            menu.add(redoAction);
+            menu.addSeparator();
+            
+            //We add actions that come from default editor kit
+            Action copyAction = new DefaultEditorKit.CopyAction();
+            copyAction.putValue(Action.NAME, "Copy");
+            Action pasteAction = new DefaultEditorKit.PasteAction();
+            pasteAction.putValue(Action.NAME, "Paste");
+            Action cutAction = new DefaultEditorKit.CutAction();
+            cutAction.putValue(Action.NAME, "Cut");
+            menu.add(copyAction);
+            menu.add(pasteAction);
+            menu.add(cutAction);
+                        
+            return menu;
+        }
+        private Action getAction(String name) {
+            return action.get(name);
+        }
+
+        protected class CaretListenerLabel extends JLabel implements CaretListener {
+            public CaretListenerLabel(String label) {
+                super(label);
+            }
+
+            //Might not be invoked from the event dispatch thread.
+            public void caretUpdate(CaretEvent e) {
+                displaySelectionInfo(e.getDot(), e.getMark());
+            }
+
+            //This method can be invoked from any thread.  It 
+            //invokes the setText and modelToView methods, which 
+            //must run on the event dispatch thread. We use
+            //invokeLater to schedule the code for execution
+            //on the event dispatch thread.
+            protected void displaySelectionInfo(final int dot,final int mark) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        if (dot == mark) {  // no selection
+                            try {
+                                Rectangle caretCoords = docpane.modelToView(dot);
+                                //Convert it to view coordinates.
+                                setText("Caret Position: " + dot
+                                        + ", view location = ["
+                                        + caretCoords.x + ", "
+                                        + caretCoords.y + "]"
+                                        + newline);
+                            } catch (BadLocationException ble) {
+                                setText("Caret Position: " + dot + newline);
+                            }
+                        } else if (dot < mark) {
+                            setText("selection from: " + dot
+                                    + " to " + mark + newline);
+                        } else {
+                            setText("selection from: " + mark
+                                    + " to " + dot + newline);
+                        }
+                    }
+                });
+            }
+        }
+        class UndoAction extends AbstractAction {
+            public UndoAction() {
+                super("Undo");
+                setEnabled(false);
+            }
+     
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    undo.undo();
+                } catch (CannotUndoException ex) {
+                    System.out.println("Unable to undo: " + ex);
+                    ex.printStackTrace();
+                }
+                updateUndoState();
+                redoAction.updateRedoState();
+            }
+     
+            protected void updateUndoState() {
+                if (undo.canUndo()) {
+                    setEnabled(true);
+                    putValue(Action.NAME, undo.getUndoPresentationName());
+                } else {
+                    setEnabled(false);
+                    putValue(Action.NAME, "Undo");
+                }
+            }
+        }
+        
+        protected class MyUndoableEditListener implements UndoableEditListener {
+            public void undoableEditHappened(UndoableEditEvent e) {
+                //Remember the edit and update the menus.
+                undo.addEdit(e.getEdit());
+                undoAction.updateUndoState();
+                redoAction.updateRedoState();
+                }
+        }
+        
+        class RedoAction extends AbstractAction {
+            public RedoAction() {
+                super("Redo");
+                setEnabled(false);
+            }
+     
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    undo.redo();
+                } catch (CannotRedoException ex) {
+                    System.out.println("Unable to redo: " + ex);
+                    ex.printStackTrace();
+                }
+                updateRedoState();
+                undoAction.updateUndoState();
+            }
+     
+            protected void updateRedoState() {
+                if (undo.canRedo()) {
+                    setEnabled(true);
+                    putValue(Action.NAME, undo.getRedoPresentationName());
+                } else {
+                    setEnabled(false);
+                    putValue(Action.NAME, "Redo");
+                }
+            }
+        }
+        
 
         @Override
         public void actionPerformed(ActionEvent e) {
             // TODO Auto-generated method stub
             
         }
+        
     }
     /**
      * Window when we click "open"

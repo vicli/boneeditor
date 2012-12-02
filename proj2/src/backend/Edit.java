@@ -7,8 +7,8 @@ public class Edit {
      * Edit class: includes buffer
      */
     public Edit(String input, String clientName) {
-        value = input;
-        owner = clientName;
+        this.value = input;
+        this.owner = clientName;
     }
 
     /**
@@ -16,7 +16,7 @@ public class Edit {
      * @return The owner of the edit
      */
     public String getOwner() {
-        return owner;
+        return this.owner;
     }
     
     /**
@@ -24,13 +24,13 @@ public class Edit {
      * @return The value of this edit
      */
     public String getValue() {
-        return value;
+        return this.value;
     }
     
     /**
      * Changes the owner to the doc
      */
     public void changeOwner() {
-        owner = "doc";
+        this.owner = "doc";
     }
 }

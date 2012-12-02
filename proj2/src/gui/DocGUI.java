@@ -4,6 +4,7 @@ import gui.DocGUI.DocumentWindow.RedoAction;
 import gui.DocGUI.DocumentWindow.UndoAction;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.Dimension;
@@ -13,6 +14,7 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -24,11 +26,13 @@ import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
@@ -56,16 +60,22 @@ import javax.swing.event.UndoableEditListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
+import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.StyledDocument;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 
+import backend.Server;
+import backend.ServerDocument;
+
 
 
 /**
- * This is the DocGUI, which re
+ * This is the DocGUI, which takes care of all windows that the user will see. 
+ * There are 4 main windows, as listed below:
+ * 
  *
  */
 public class DocGUI extends JFrame implements ActionListener, KeyListener{
@@ -89,13 +99,14 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private String clientName;
     private String docName;
     
-    private AbstractDocument displayedDoc;
+    private Document displayedDoc;
     protected UndoAction undoAction;
     protected RedoAction redoAction;
     protected UndoManager undo = new UndoManager();
     private String newline = "\n";
     private HashMap<Object, Action> action;
     private Border docBorder;
+    private boolean isNew;
     
     public DocGUI(){
         FlowLayout layout = new FlowLayout();
@@ -224,7 +235,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             
             if(e.getSource() == openButton){
                 fileWindow = new FileWindow();
-                windowOne.setVisible(false);
+                isNew = false;
+                System.out.println(Arrays.toString(Server.getDocs()));
+                //windowOne.setVisible(false);
             }
             
         }
@@ -283,7 +296,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         @Override
         public void keyReleased(KeyEvent arg0) {
             String text = nameField.getText();
-            if(text.length() > 0 && text.matches("[a-zA-Z0-9]+")){
+            if(!Server.docListEmptyCheck()){
+                if(text.length() > 0 && text.matches("[a-zA-Z0-9]+") &&!existingCheck(Server.getDocs(), text)){
+                    nameOkay.setEnabled(true);
+                    }
+            }
+            else if(text.length() > 0 && text.matches("[a-zA-Z0-9]+")){
                 nameOkay.setEnabled(true);
             }
             else{
@@ -291,14 +309,26 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 }
         }
         
+        private boolean existingCheck(String[] existing, String newdoc){
+            if(!existing.equals(null)){
+                for(int i = 0; i < existing.length; i++){
+                    if(existing[i].equals(newdoc)){
+                        return true;
+                    }
+                }
+            }   
+            return false;
+        }
         //Action Listener
         // when we click okay, we save the name of the document and close the name window
         @Override
         public void actionPerformed(ActionEvent e) {
-            if(e.getSource() == nameOkay){
+            if(e.getSource() == nameOkay){           
                 docName = nameField.getText();
+                System.out.println("docname is now" + docName);
+                Server.addDocument(docName);
+                System.out.println("after added you now have" + Arrays.toString(Server.getDocs()));
                 nameWindow.dispose();
-               
                 docWindow = new DocumentWindow();
             }
             if(e.getSource() == nameCancel){
@@ -342,10 +372,32 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         private JTextPane docpane; 
         private JPanel menu;
         private JTextArea content;
+        private JPanel documentPanel;
+        private ServerDocument loadDoc;
         
         public DocumentWindow(){
             super(docName);
             docpane = new JTextPane();
+//            if (!isNew){
+//                
+//            }
+//            else{
+//                StyledDocument styled = docpane.getStyledDocument();
+//                displayedDoc = styled;
+//            }
+            loadDoc = Server.getDocument(docName);
+            displayedDoc = loadDoc;
+            documentPanel = new JPanel();
+            documentPanel.add(docpane);
+            //JPanel stacked = new JPanel(new CardLayout());
+            
+            JPanel grayPanel = new JPanel();
+            grayPanel.setVisible(true);
+            grayPanel.setBackground(Color.LIGHT_GRAY);
+            grayPanel.setSize(600, 600);
+            
+            grayPanel.setLocation(0, 0);
+            
             FlowLayout layout = new FlowLayout();
             docpane.setLayout(layout);
             docpane.setName("docpane");
@@ -355,10 +407,14 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             //docpane.setBorder(docBorder);
             
             docpane.setMargin(new Insets(100,100,100,100));
-            StyledDocument styled = docpane.getStyledDocument();
-            displayedDoc = (AbstractDocument) styled;
+            docpane.setBounds(20, 20, 560, 580);
+            docpane.setVisible(true);
+            
+            
             JScrollPane scroll = new JScrollPane(docpane);
-            scroll.setPreferredSize(new Dimension(200, 200));
+            setPreferredSize(new Dimension(450, 500));
+            //scroll.setPreferredScrollableViewportSize(docpane.getPreferredScrollableViewportSize());
+
             
             // StatusPane keeps track of the caret location; this will make debugging 
             // less painful, and also allows user to know where their cursor is.
@@ -389,8 +445,11 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             pack();
             
+            add(grayPanel);
             add(docpane);
-            setSize(1200, 800);
+            add(scroll, BorderLayout.CENTER);
+            
+            setSize(600, 600);
             setLocationRelativeTo(null);
             setVisible(true);
         }
@@ -422,12 +481,24 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             }        
         }
               
-        protected void addBindings(){
-            InputMap map = docpane.getInputMap();
+        private void addBindings(){
+            ActionMap actionMap = docpane.getActionMap();
+            actionMap.put("Undo", new UndoAction());
+            InputMap[] inputMaps =  new InputMap[]{
+                    docpane.getInputMap(docpane.WHEN_FOCUSED),
+                    docpane.getInputMap(docpane.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT),
+                    docpane.getInputMap(docpane.WHEN_IN_FOCUSED_WINDOW)
+            };
+            for(InputMap i : inputMaps) {
+                i.put(KeyStroke.getKeyStroke("control Z"), "Undo");
+            }
+            
+            
             
             // ctrl z to redo 
-            KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_Z, Event.CTRL_MASK);
-            map.put(key, new UndoAction());
+//            KeyStroke key = KeyStroke.getKeyStroke(Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()+ " Z");
+//            inputMap.put(key, "Undo");
+//            actionMap.put("Undo", new UndoAction());   
         }
         
         private JMenu createEditMenu() {
@@ -442,11 +513,11 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             
             //We add actions that come from default editor kit
             Action copyAction = new DefaultEditorKit.CopyAction();
-            copyAction.putValue(Action.NAME, "Copy");
+            copyAction.putValue(Action.NAME, "Copy (Ctrl c)");
             Action pasteAction = new DefaultEditorKit.PasteAction();
-            pasteAction.putValue(Action.NAME, "Paste");
+            pasteAction.putValue(Action.NAME, "Paste (Ctrl v)");
             Action cutAction = new DefaultEditorKit.CutAction();
-            cutAction.putValue(Action.NAME, "Cut");
+            cutAction.putValue(Action.NAME, "Cut (Ctrl x)");
             menu.add(copyAction);
             menu.add(pasteAction);
             menu.add(cutAction);
@@ -498,18 +569,34 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 });
             }
         }
+        
+        /**
+         *  public ExitAction() {
+            putValue(Action.NAME, "Exit");
+            putValue(Action.SHORT_DESCRIPTION, getValue(Action.NAME));
+            putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_X));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            System.exit(0);
+        }
+    }
+         * @author vicli
+         *
+         */
         class UndoAction extends AbstractAction {
             public UndoAction() {
-                super("Undo");
+                putValue(Action.NAME, "Undo");
                 setEnabled(false);
             }
      
             public void actionPerformed(ActionEvent e) {
                 try {
-                    undo.undo();
-                } catch (CannotUndoException ex) {
-                    System.out.println("Unable to undo: " + ex);
-                    ex.printStackTrace();
+                    if (undo.canUndo()){
+                        undo.undo();
+                    }                    
+                } catch (CannotUndoException ex) {                
                 }
                 updateUndoState();
                 redoAction.updateRedoState();
@@ -524,6 +611,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                     putValue(Action.NAME, "Undo");
                 }
             }
+            
         }
         
         protected class MyUndoableEditListener implements UndoableEditListener {
@@ -581,6 +669,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         public FileWindow(){
             FlowLayout layout = new FlowLayout();
             fileWindow.setLayout(layout);
+            
+            String[] fileNames = Server.getDocs();
+            
         }
 
         @Override

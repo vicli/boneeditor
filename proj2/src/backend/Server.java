@@ -5,7 +5,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+
+import javax.swing.text.DefaultStyledDocument;
 
 /**
  * Server for the realtime collaborative editor
@@ -17,7 +20,7 @@ import java.util.Set;
  */
 public class Server {
     private final ServerSocket serverSocket;
-    private static HashMap<String, ServerDocument> docList;
+    private static Map<String, ServerDocument> docList  = new HashMap<String, ServerDocument>();
 
     /**
      * Makes Server that listens for connections on port.
@@ -25,10 +28,10 @@ public class Server {
      * @throws IOException 
      */
     public Server (int port) throws IOException {
-        serverSocket = new ServerSocket(port);
-        docList = new HashMap<String, ServerDocument>();
+        this.serverSocket = new ServerSocket(port);
+        
     }
-    
+
     /**
      * Run the server, listening for client connections and handling them.
      * Never returns 
@@ -149,21 +152,33 @@ public class Server {
      * Returns the titles of all the documents
      * @return The titles of the documents
      */
-    public String[] getDocs() {
-        Set<String> keys = docList.keySet();
-        String[] toReturn = new String[keys.size()];
-        int i = 0;
-        for (String k : keys) {
-            toReturn[i] = k;
-        }
-        return toReturn;
+    public static String[] getDocs() {
+            Set<String> keys = docList.keySet();
+            System.out.println("keys are" + keys);
+            String[] toReturn = new String[keys.size()];
+            int i = 0;
+            for (String k : keys) {
+                toReturn[i] = k;
+            }
+            return toReturn;
     }
     
+    public static boolean docListEmptyCheck(){
+        if (docList == null){
+            return true;
+        }
+        return false;
+    }
+    
+    public static void addDocument(String title){
+        docList.put(title, new ServerDocument(title));
+        System.out.println("doclist after adding" + docList.toString());
+    }
     /**
      * Returns the document with the given title or null if there is nothing with that title.
      * @param title The title
      */
-    public ServerDocument getDocument(String title) {
+    public static ServerDocument getDocument(String title) {
         return docList.get(title);
     }
 }

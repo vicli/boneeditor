@@ -67,6 +67,7 @@ public class Server {
                  * @param socket socket where the client is connected
                  * @throws IOException if connection has an error or terminates unexpectedly
                  */
+                // LOOOK AT TABLE @ BOTTOM OF DESIGN DOC
                 private void handleConnection(Socket socket) throws IOException {
                     numUsers++;
                     // We create a new instance of the Document GUI for each client

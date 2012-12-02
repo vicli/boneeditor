@@ -366,7 +366,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      * @author vicli
      *
      */
-    public class DocumentWindow extends JFrame implements ActionListener, DocumentListener, WindowListener{
+    public class DocumentWindow extends JFrame implements ActionListener, DocumentListener,KeyListener, WindowListener{
         
         private JTextPane docpane; 
         private JPanel menu;
@@ -438,6 +438,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             // Listener for undoable edits and for caret changes
             displayedDoc.addUndoableEditListener(new UndoEditListener());
             docpane.addCaretListener(caretLabel);
+            docpane.addKeyListener(this);
             displayedDoc.addDocumentListener(this);
             setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             pack();
@@ -450,6 +451,24 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             setSize(600, 600);
             setLocationRelativeTo(null);
             setVisible(true);
+        }
+        @Override
+        public void keyPressed(KeyEvent e) {
+            e.getKeyChar();
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+            if(String.valueOf(e.getKeyChar()).matches("[a-zA-Z0-9]")){
+                
+            }
+            
         }
         
         @Override
@@ -691,6 +710,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
 
         @Override
         public void windowOpened(WindowEvent e) {}
+
         
     }
     

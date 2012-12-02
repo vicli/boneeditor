@@ -34,8 +34,27 @@ public class ServerDocument extends DefaultStyledDocument{
         docTitle = title;
     }
     
- 
+    public void updateContent(String c){
+        content = stringToList(c);
+    }
+    
+    private ArrayList<Edit> stringToList(String s){
+        char[] newarray = s.toCharArray();
+        ArrayList<Edit> newList = new ArrayList<Edit>();
+        for(int i = 0; i < newarray.length; i++){
+            newList.add(Edit.toEdit(newarray[i]));
+        }
+        
+        return newList;
+    }
+    private String listToString(ArrayList<Edit> e){
+        StringBuilder string = new StringBuilder("");
+        for (int i=0; i< e.size(); i++){
+            string.append(e.get(i).toString());
+        }
+        return string.toString();
+    }
     public String getDocContent(){
-        return content.toString();
+        return listToString(content);
     }
 }

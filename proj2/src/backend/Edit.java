@@ -1,13 +1,13 @@
 package backend;
 
 public class Edit {
-    final private String value;
-    private String owner;
+    private static String value;
+    private static String owner;
     /**
      * Edit class: includes buffer
      */
     public Edit(String input, String clientName) {
-        this.value = input;
+        value = input;
         this.owner = clientName;
     }
 
@@ -18,7 +18,14 @@ public class Edit {
     public String getOwner() {
         return this.owner;
     }
+    public static Edit toEdit(char a){
+        return new Edit(String.valueOf(a), owner);
+    }
     
+    @Override
+    public String toString(){
+        return value;
+    }
     /**
      * Returns the value
      * @return The value of this edit

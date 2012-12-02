@@ -7,6 +7,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
@@ -30,6 +32,7 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
+import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -41,6 +44,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.event.CaretEvent;
@@ -94,6 +98,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private Border docBorder;
     
     public DocGUI(){
+        FlowLayout layout = new FlowLayout();
+        welcomeWindow.setLayout(layout);
         welcomeWindow.setSize(600, 200);
         welcomeWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         welcomeWindow.setLocationRelativeTo(null);
@@ -182,9 +188,10 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     
     public class WindowOne extends JFrame implements ActionListener{
         JFrame windowOne = new JFrame("New/Open");
-        
-        
+
         public WindowOne(){
+            FlowLayout layout = new FlowLayout();
+            windowOne.setLayout(layout);
             windowOne.setSize(300, 150);
             windowOne.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             windowOne.setLocationRelativeTo(null);
@@ -232,6 +239,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         private JTextField nameField;
         
         public NameWindow(){
+            FlowLayout layout = new FlowLayout();
+            nameWindow.setLayout(layout);
             nameWindow.setSize(500, 150);
             nameWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             
@@ -337,6 +346,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         public DocumentWindow(){
             super(docName);
             docpane = new JTextPane();
+            FlowLayout layout = new FlowLayout();
+            docpane.setLayout(layout);
             docpane.setName("docpane");
             docpane.setCaretPosition(0);
             //docpane.setCaretColor(Color.decode(clientColor));
@@ -411,7 +422,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             }        
         }
               
-        protected void addBindings(){          
+        protected void addBindings(){
+            InputMap map = docpane.getInputMap();
+            
+            // ctrl z to redo 
+            KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_Z, Event.CTRL_MASK);
+            map.put(key, new UndoAction());
         }
         
         private JMenu createEditMenu() {
@@ -561,8 +577,10 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      *
      */
     public class FileWindow extends JFrame implements ActionListener{
+        private JFrame fileWindow = new JFrame ("Files");
         public FileWindow(){
-            // TODO have to wait until server is written
+            FlowLayout layout = new FlowLayout();
+            fileWindow.setLayout(layout);
         }
 
         @Override

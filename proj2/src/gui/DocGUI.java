@@ -377,13 +377,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         public DocumentWindow(){
             super(docName);
             docpane = new JTextPane();
-//            if (!isNew){
-//                
-//            }
-//            else{
-//                StyledDocument styled = docpane.getStyledDocument();
-//                displayedDoc = styled;
-//            }
+
             loadDoc = Server.getDocument(docName);
             String content = loadDoc.getDocContent();
             System.out.println("docname is " + docName);

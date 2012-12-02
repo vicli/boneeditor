@@ -1,5 +1,7 @@
 package backend;
 
+import gui.DocGUI;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -20,6 +22,8 @@ import javax.swing.text.DefaultStyledDocument;
  */
 public class Server {
     private final ServerSocket serverSocket;
+    private int numUsers;
+
     private static Map<String, ServerDocument> docList  = new HashMap<String, ServerDocument>();
 
     /**
@@ -29,7 +33,7 @@ public class Server {
      */
     public Server (int port) throws IOException {
         this.serverSocket = new ServerSocket(port);
-        
+        numUsers = 0;
     }
 
     /**
@@ -43,7 +47,7 @@ public class Server {
             // block until a client connects
             final Socket socket = serverSocket.accept();
             // makes threads
-            Thread thread = new Thread(new Runnable() {
+            Thread clientThread = new Thread(new Runnable() {
                 public void run() {
                         try {
                             handleConnection(socket);
@@ -58,68 +62,75 @@ public class Server {
                         }
                     
                 }
+                /**
+                 * Handles a single client connection. Returns when client disconnects.
+                 * @param socket socket where the client is connected
+                 * @throws IOException if connection has an error or terminates unexpectedly
+                 */
+                private void handleConnection(Socket socket) throws IOException {
+                    numUsers++;
+                    // We create a new instance of the Document GUI for each client
+                    DocGUI clientGUI = new DocGUI();
+                    
+                   
+                    // We want to track the caret and the keys. 
+                    // TODO: stuff that happens on start up of client connection
+                    // TODO: stuff that happens aftern start up of client
+                    String input = ""; //get this from the GUI somehow
+                    String output = handleRequest(input);
+                }
+
+                /**
+                 * Handler for client input
+                 * 
+                 * make requested mutations on game state if applicable, then return
+                 * appropriate message to user
+                 * @param input
+                 *
+                 */
+                private String handleRequest(String input) {
+                    // TODO: define regex of protocol from user to server
+                    String regex = "";
+                    if(!input.matches(regex)) {
+                        //invalid input
+                        return null;
+                    }
+                    String[] tokens = input.split(" ");
+                    // TODO: if/else statement dealing with inputs from user
+                    
+                    //pseudocode for if/else statement
+                    if (tokens[0].equals("NewDoc")) { 
+                        //if makenew
+                        String title = tokens[1];
+                        docList.put(title, new ServerDocument(title));
+                        return "current doc: " + title;
+                    } else if (tokens[0].equals("Open")) {
+                        String title = tokens[1];
+                        return "current doc: " + title;
+                    } else if (tokens[0].equals("Go") && tokens[1].equals("back")) {
+                        //if back
+                        return "Go back one screen";
+                    } else if (tokens[0].equals("Cursor")) {
+                        //if movecursor
+                        
+                        return "Cursor move recognized";
+                    } else if (tokens[0].equals("Edit")) {
+                        //if edit
+                        
+                    } else {
+                        return "Invalid input";
+                    }
+                    
+                    // Should never get here--make sure to return in each of the valid cases above.
+                    throw new UnsupportedOperationException();
+                }
+
             });
-            thread.start();
+            clientThread.start();
         }
     }
 
-    /**
-     * Handles a single client connection. Returns when client disconnects.
-     * @param socket socket where the client is connected
-     * @throws IOException if connection has an error or terminates unexpectedly
-     */
-    private void handleConnection(Socket socket) throws IOException {
-        // TODO: stuff that happens on start up of client connection
-        // TODO: stuff that happens aftern start up of client
-        String input = ""; //get this from the GUI somehow
-        String output = handleRequest(input);
-    }
-
-    /**
-     * Handler for client input
-     * 
-     * make requested mutations on game state if applicable, then return
-     * appropriate message to user
-     * @param input
-     *
-     */
-    private static String handleRequest(String input) {
-        // TODO: define regex of protocol from user to server
-        String regex = "";
-        if(!input.matches(regex)) {
-            //invalid input
-            return null;
-        }
-        String[] tokens = input.split(" ");
-        // TODO: if/else statement dealing with inputs from user
-        
-        //pseudocode for if/else statement
-        if (tokens[0].equals("NewDoc")) { 
-            //if makenew
-            String title = tokens[1];
-            docList.put(title, new ServerDocument(title));
-            return "current doc: " + title;
-        } else if (tokens[0].equals("Open")) {
-            String title = tokens[1];
-            return "current doc: " + title;
-        } else if (tokens[0].equals("Go") && tokens[1].equals("back")) {
-            //if back
-            return "Go back one screen";
-        } else if (tokens[0].equals("Cursor")) {
-            //if movecursor
-            
-            return "Cursor move recognized";
-        } else if (tokens[0].equals("Edit")) {
-            //if edit
-            
-        } else {
-            return "Invalid input";
-        }
-        
-        // Should never get here--make sure to return in each of the valid cases above.
-        throw new UnsupportedOperationException();
-    }
-
+    
     /**
      * Start a Server running on the default port (4444).
      * 
@@ -155,15 +166,6 @@ public class Server {
     public static ArrayList<String> getDocs() {           
             Set<String> keys = docList.keySet();
             ArrayList<String> titleList = new ArrayList<String>(keys);
-
-//            
-//            System.out.println("keys are" + keys);
-//            int size = keys.size();
-//            String[] toReturn = new String[keys.size()];
-//            int i = 0;
-//            for (String k : keys) {
-//                toReturn[i] = k;
-//            }
             return titleList;
     }
     

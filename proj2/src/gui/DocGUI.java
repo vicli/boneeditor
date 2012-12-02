@@ -26,6 +26,7 @@ import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -236,7 +237,10 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             if(e.getSource() == openButton){
                 fileWindow = new FileWindow();
                 isNew = false;
-                System.out.println(Arrays.toString(Server.getDocs()));
+                System.out.println(Server.getDocs().toString());
+                System.out.println("your saved doc is" + Server.getDocument("hello").getDocContent());
+                System.out.println("your saved doc is" + Server.getDocument("extra").getDocContent());
+
                 //windowOne.setVisible(false);
             }
             
@@ -309,10 +313,10 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 }
         }
         
-        private boolean existingCheck(String[] existing, String newdoc){
-            if(!existing.equals(null)){
-                for(int i = 0; i < existing.length; i++){
-                    if(existing[i].equals(newdoc)){
+        private boolean existingCheck(ArrayList<String> titles, String newdoc){
+            if(!titles.equals(null)){
+                for(int i = 0; i < titles.size(); i++){
+                    if(titles.get(i).equals(newdoc)){
                         return true;
                     }
                 }
@@ -327,7 +331,6 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 docName = nameField.getText();
                 System.out.println("docname is now" + docName);
                 Server.addDocument(docName);
-                System.out.println("after added you now have" + Arrays.toString(Server.getDocs()));
                 nameWindow.dispose();
                 docWindow = new DocumentWindow();
             }
@@ -367,7 +370,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      * @author vicli
      *
      */
-    public class DocumentWindow extends JFrame implements ActionListener, DocumentListener{
+    public class DocumentWindow extends JFrame implements ActionListener, DocumentListener, WindowListener{
         
         private JTextPane docpane; 
         private JPanel menu;
@@ -448,6 +451,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             add(grayPanel);
             add(docpane);
             add(scroll, BorderLayout.CENTER);
+            addWindowListener(this);
             
             setSize(600, 600);
             setLocationRelativeTo(null);
@@ -455,7 +459,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         }
         
         @Override
-        public void changedUpdate(DocumentEvent e) {}
+        public void changedUpdate(DocumentEvent e) {
+            
+        }
         @Override
         public void insertUpdate(DocumentEvent e) {}
         @Override
@@ -518,11 +524,16 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             pasteAction.putValue(Action.NAME, "Paste (Ctrl v)");
             Action cutAction = new DefaultEditorKit.CutAction();
             cutAction.putValue(Action.NAME, "Cut (Ctrl x)");
+            
             menu.add(copyAction);
             menu.add(pasteAction);
             menu.add(cutAction);
                         
             return menu;
+        }
+        private Action saveAction(){
+            return redoAction;
+            //TODO fucking save 
         }
         private Action getAction(String name) {
             return action.get(name);
@@ -651,14 +662,44 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             }
         }
         
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             // TODO Auto-generated method stub
             
         }
+        private void save(){
+            String saveContents = docpane.getText();
+            loadDoc.updateContent(saveContents);
+            System.out.println("save contents" + saveContents);
+            System.out.println("document content is" + loadDoc.getDocContent().toString());
+        }
+
+        @Override
+        public void windowActivated(WindowEvent e) {}
+
+        @Override
+        public void windowClosed(WindowEvent e) {}
+
+        @Override
+        public void windowClosing(WindowEvent e) {
+            save();   
+        }
+
+        @Override
+        public void windowDeactivated(WindowEvent e) {}
+
+        @Override
+        public void windowDeiconified(WindowEvent e) {}
+
+        @Override
+        public void windowIconified(WindowEvent e) {}
+
+        @Override
+        public void windowOpened(WindowEvent e) {}
         
     }
+    
     /**
      * Window when we click "open"
      * @author vicli
@@ -670,7 +711,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             FlowLayout layout = new FlowLayout();
             fileWindow.setLayout(layout);
             
-            String[] fileNames = Server.getDocs();
+            ArrayList<String> fileNames = Server.getDocs();
             
         }
 

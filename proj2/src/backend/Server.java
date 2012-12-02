@@ -152,15 +152,19 @@ public class Server {
      * Returns the titles of all the documents
      * @return The titles of the documents
      */
-    public static String[] getDocs() {
+    public static ArrayList<String> getDocs() {           
             Set<String> keys = docList.keySet();
-            System.out.println("keys are" + keys);
-            String[] toReturn = new String[keys.size()];
-            int i = 0;
-            for (String k : keys) {
-                toReturn[i] = k;
-            }
-            return toReturn;
+            ArrayList<String> titleList = new ArrayList<String>(keys);
+
+//            
+//            System.out.println("keys are" + keys);
+//            int size = keys.size();
+//            String[] toReturn = new String[keys.size()];
+//            int i = 0;
+//            for (String k : keys) {
+//                toReturn[i] = k;
+//            }
+            return titleList;
     }
     
     public static boolean docListEmptyCheck(){

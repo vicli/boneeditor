@@ -1,5 +1,7 @@
 package backend;
 
+import java.util.ArrayList;
+
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.AbstractDocument;
@@ -17,11 +19,11 @@ public class ServerDocument extends DefaultStyledDocument{
      */
     private static final long serialVersionUID = 1L;
     private String docTitle;
-    private String content;
+    private ArrayList<Edit> content;
     
     public ServerDocument(String title) {
         docTitle = title;
-        content = "";
+        content = new ArrayList<Edit>();
     }  
     
     public String getTitle(){
@@ -32,12 +34,8 @@ public class ServerDocument extends DefaultStyledDocument{
         docTitle = title;
     }
     
-    public void updateContent(String c){
-        content = c;
-    }
-    
  
     public String getDocContent(){
-        return content;
+        return content.toString();
     }
 }

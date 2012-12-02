@@ -72,7 +72,9 @@ public class Server {
                     // We create a new instance of the Document GUI for each client
                     DocGUI clientGUI = new DocGUI();
                     
-                   
+                   // handles closing client connection, and thats it. everything else seems
+                    // to be handled in handleRequest, as everything is client input. 
+                    
                     // We want to track the caret and the keys. 
                     // TODO: stuff that happens on start up of client connection
                     // TODO: stuff that happens aftern start up of client
@@ -89,6 +91,10 @@ public class Server {
                  *
                  */
                 private String handleRequest(String input) {
+                 // Create a caret and a key listener, and listen to client.
+                    // sent client input as an EDIT message, to Edit queue
+                    // edit queue will handle processing 
+                    
                     // TODO: define regex of protocol from user to server
                     String regex = "";
                     if(!input.matches(regex)) {

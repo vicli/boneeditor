@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Server for the realtime collaborative editor
@@ -142,5 +143,27 @@ public class Server {
     {
         Server server = new Server(port);
         server.serve();
+    }
+    
+    /**
+     * Returns the titles of all the documents
+     * @return The titles of the documents
+     */
+    public String[] getDocs() {
+        Set<String> keys = docList.keySet();
+        String[] toReturn = new String[keys.size()];
+        int i = 0;
+        for (String k : keys) {
+            toReturn[i] = k;
+        }
+        return toReturn;
+    }
+    
+    /**
+     * Returns the document with the given title or null if there is nothing with that title.
+     * @param title The title
+     */
+    public ServerDocument getDocument(String title) {
+        return docList.get(title);
     }
 }

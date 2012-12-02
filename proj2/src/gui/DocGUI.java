@@ -39,6 +39,7 @@ import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -237,11 +238,6 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             if(e.getSource() == openButton){
                 fileWindow = new FileWindow();
                 isNew = false;
-                System.out.println(Server.getDocs().toString());
-                System.out.println("your saved doc is" + Server.getDocument("hello").getDocContent());
-                System.out.println("your saved doc is" + Server.getDocument("extra").getDocContent());
-
-                //windowOne.setVisible(false);
             }
             
         }
@@ -389,7 +385,11 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
 //                displayedDoc = styled;
 //            }
             loadDoc = Server.getDocument(docName);
+            String content = loadDoc.getDocContent();
+            System.out.println("docname is " + docName);
+            System.out.println("doc content is" + loadDoc.getDocContent());
             displayedDoc = loadDoc;
+            docpane.setText(content);
             documentPanel = new JPanel();
             documentPanel.add(docpane);
             //JPanel stacked = new JPanel(new CardLayout());
@@ -707,17 +707,67 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      */
     public class FileWindow extends JFrame implements ActionListener{
         private JFrame fileWindow = new JFrame ("Files");
+        private JLabel fileLabel = new JLabel("Please select a file:");
+        private  JComboBox docList;
+        private JButton fileOpen;
+        private JButton fileCancel;
+        private String fileName;
+        
         public FileWindow(){
             FlowLayout layout = new FlowLayout();
             fileWindow.setLayout(layout);
+            fileWindow.setSize(300, 150);
+            
+            fileLabel.setBounds(30,30, 100, 20);
+            fileLabel.setVisible(true);
+            fileWindow.add(fileLabel);
             
             ArrayList<String> fileNames = Server.getDocs();
+            docList = new JComboBox();
+            for (String i: fileNames){
+                docList.addItem(i);
+            }
+            docList.setSelectedIndex(0);
+            docList.setName("docList");
+            docList.setLocation(130, 20);
             
+            fileOpen =  new JButton("Open");
+            fileOpen.setName("fileOpen");
+            fileOpen.setSize(80, 35);
+            fileOpen.setLocation(90, 90);
+            fileOpen.addActionListener(this);
+            
+            fileCancel =  new JButton("Cancel");
+            fileCancel.setName("fileCancel");
+            fileCancel.setSize(80, 35);
+            fileCancel.setLocation(200, 90);
+            fileCancel.addActionListener(this);
+            
+            
+            fileWindow.add(docList);
+            fileWindow.add(fileOpen);
+            fileWindow.add(fileCancel);
+            fileWindow.setLocationRelativeTo(null);
+            fileWindow.setVisible(true);
+            //setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            // TODO Auto-generated method stub
+            if (e.getSource()  == docList){
+                fileName = docList.getSelectedItem().toString();
+            }
+           
+           if(e.getSource() == fileOpen){
+               fileName = docList.getSelectedItem().toString();
+               System.out.println(fileName);
+               docName = fileName;
+               fileWindow.dispose();
+               docWindow = new DocumentWindow();
+           }
+           if(e.getSource() == fileCancel){
+               fileWindow.dispose();
+           }
             
         }
     }

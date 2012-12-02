@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Server for the realtime collaborative editor
@@ -15,7 +17,7 @@ import java.util.ArrayList;
  */
 public class Server {
     private final ServerSocket serverSocket;
-    private ArrayList<ServerDocument> docList;
+    private static HashMap<String, ServerDocument> docList;
 
     /**
      * Makes Server that listens for connections on port.
@@ -24,7 +26,7 @@ public class Server {
      */
     public Server (int port) throws IOException {
         serverSocket = new ServerSocket(port);
-        docList = new ArrayList<ServerDocument>();
+        docList = new HashMap<String, ServerDocument>();
     }
     
     /**
@@ -66,10 +68,12 @@ public class Server {
     private void handleConnection(Socket socket) throws IOException {
         // TODO: stuff that happens on start up of client connection
         // TODO: stuff that happens aftern start up of client
+        String input = ""; //get this from the GUI somehow
+        String output = handleRequest(input);
     }
 
     /**
-     * handler for client input
+     * Handler for client input
      * 
      * make requested mutations on game state if applicable, then return
      * appropriate message to user
@@ -85,6 +89,29 @@ public class Server {
         }
         String[] tokens = input.split(" ");
         // TODO: if/else statement dealing with inputs from user
+        
+        //pseudocode for if/else statement
+        if (tokens[0].equals("NewDoc")) { 
+            //if makenew
+            String title = tokens[1];
+            docList.put(title, new ServerDocument(title));
+            return "current doc: " + title;
+        } else if (tokens[0].equals("Open")) {
+            String title = tokens[1];
+            return "current doc: " + title;
+        } else if (tokens[0].equals("Go") && tokens[1].equals("back")) {
+            //if back
+            return "Go back one screen";
+        } else if (tokens[0].equals("Cursor")) {
+            //if movecursor
+            
+            return "Cursor move recognized";
+        } else if (tokens[0].equals("Edit")) {
+            //if edit
+            
+        } else {
+            return "Invalid input";
+        }
         
         // Should never get here--make sure to return in each of the valid cases above.
         throw new UnsupportedOperationException();
@@ -116,5 +143,27 @@ public class Server {
     {
         Server server = new Server(port);
         server.serve();
+    }
+    
+    /**
+     * Returns the titles of all the documents
+     * @return The titles of the documents
+     */
+    public String[] getDocs() {
+        Set<String> keys = docList.keySet();
+        String[] toReturn = new String[keys.size()];
+        int i = 0;
+        for (String k : keys) {
+            toReturn[i] = k;
+        }
+        return toReturn;
+    }
+    
+    /**
+     * Returns the document with the given title or null if there is nothing with that title.
+     * @param title The title
+     */
+    public ServerDocument getDocument(String title) {
+        return docList.get(title);
     }
 }

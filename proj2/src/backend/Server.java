@@ -61,6 +61,7 @@ public class Server {
                         } finally {
                             try {
                                 socket.close();
+                                serverSocket.close();
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -72,12 +73,7 @@ public class Server {
                  * @param socket socket where the client is connected
                  * @throws IOException if connection has an error or terminates unexpectedly
                  */
-                private void handleConnection(Socket socket) throws IOException {
-                    //handles closing client connection, and thats it. everything else seems
-                    // to be handled in handleRequest, as everything is client input. 
-                    
-                    // TODO: finish this
-                    
+                private void handleConnection(Socket socket) throws IOException {                    
                     numUsers++;
                     // We create a new instance of the Document GUI for each client
                     DocGUI clientGUI = new DocGUI();
@@ -87,7 +83,6 @@ public class Server {
                     try {
                         for (String line =in.readLine(); line!=null; line=in.readLine()) {
                             String output = handleRequest(line);
-                            //remember to use debug here
                             if(output != null) {
                                 out.print(output);
                                 out.flush();
@@ -168,20 +163,11 @@ public class Server {
         // TODO: figure out how ports work for running things across multiple computers
         final int port = 4444;
         try {
-            runServer(port);
+            Server server = new Server(port);
+            server.serve();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-    
-    /**
-     * Start a Server running on the specified port
-     * @param port The network port on which the server should listen.
-     */
-    public static void runServer(int port) throws IOException
-    {
-        Server server = new Server(port);
-        server.serve();
     }
     
     /**
@@ -189,9 +175,9 @@ public class Server {
      * @return The titles of the documents
      */
     public static ArrayList<String> getDocs() {           
-            Set<String> keys = docList.keySet();
-            ArrayList<String> titleList = new ArrayList<String>(keys);
-            return titleList;
+        Set<String> keys = docList.keySet();
+        ArrayList<String> titleList = new ArrayList<String>(keys);
+        return titleList;
     }
     
     public static boolean docListEmptyCheck(){

@@ -367,7 +367,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      *
      */
     public class DocumentWindow extends JFrame implements ActionListener, DocumentListener,KeyListener, WindowListener{
-        
+        //write get cursor position
         private JTextPane docpane; 
         private JPanel menu;
         private JTextArea content;
@@ -778,6 +778,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                docName = fileName;
                fileWindow.dispose();
                docWindow = new DocumentWindow();
+               // take care of setting text 
            }
            if(e.getSource() == fileCancel){
                fileWindow.dispose();

@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import javax.swing.text.DefaultStyledDocument;
 public class Server {
     private final ServerSocket serverSocket;
     private int numUsers;
+    private final EditController editCont;
 
     private static Map<String, ServerDocument> docList  = new HashMap<String, ServerDocument>();
 
@@ -37,6 +39,7 @@ public class Server {
     public Server (int port) throws IOException {
         this.serverSocket = new ServerSocket(port);
         numUsers = 0;
+        editCont = new EditController();
     }
 
     /**
@@ -59,6 +62,7 @@ public class Server {
                         } finally {
                             try {
                                 socket.close();
+                                serverSocket.close();
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -70,6 +74,7 @@ public class Server {
                  * @param socket socket where the client is connected
                  * @throws IOException if connection has an error or terminates unexpectedly
                  */
+
                 
                 //Open a socket.
                 // Open an input stream and output stream to the socket.
@@ -77,13 +82,15 @@ public class Server {
                 //Close the streams.
                 //Close the socket.
                 // LOOOK AT TABLE @ BOTTOM OF DESIGN DOC
-                private void handleConnection(Socket socket) throws IOException {
+                
+                private void handleConnection(Socket socket) throws IOException {                    
                     numUsers++;
                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);  
                     // We create a new instance of the Document GUI for each client
                     DocGUI clientGUI = new DocGUI();
                     
+
                    // handles closing client connection, and thats it. everything else seems
                     // to be handled in handleRequest, as everything is client input. 
                     
@@ -101,14 +108,12 @@ public class Server {
                             if(output.equals("bye")){
                                 break;
                             }
-                            if(output.equals("BOOM!") && !debug){
+                            if(output.equals("BOOM!") ){
                                 break;
                             }
                         }
 
                     } finally {  
-
-                        numUsers--;
                         out.close();
                         in.close();
                     }
@@ -137,30 +142,28 @@ public class Server {
                     // TODO: if/else statement dealing with inputs from user
                     
                     //pseudocode for if/else statement
-                    if (tokens[0].equals("NewDoc")) { 
-                        //if makenew
-                        String title = tokens[1];
-                        docList.put(title, new ServerDocument(title));
-                        return "current doc: " + title;
-                    } else if (tokens[0].equals("Open")) {
-                        String title = tokens[1];
-                        return "current doc: " + title;
-                    } else if (tokens[0].equals("Go") && tokens[1].equals("back")) {
-                        //if back
-                        return "Go back one screen";
-                    } else if (tokens[0].equals("Cursor")) {
-                        //if movecursor
-                        
-                        return "Cursor move recognized";
-                    } else if (tokens[0].equals("Edit")) {
-                        //if edit
-                        
+                    if (tokens[1].equals("NewDoc")) { 
+                        String title = "";
+                        for (int i = 2; i < tokens.length; i++) {
+                            title += tokens[i];
+                            title += " ";
+                        }
+                        title = title.substring(0, title.length() - 1);
+                        if (docList.containsKey(title)) {
+                            return "Invalid Doc Title";
+                        } else {
+                            docList.put(title, new ServerDocument(title));
+                            return "Update doc";
+                        }
+                    } else if (tokens[2].equals("Insert")) {
+                        return editCont.insert(input);
+                    } else if (tokens[2].equals("Remove")) {
+                        return editCont.remove(input);
+                    } else if (tokens[2].equals("SpaceEntered")) {
+                        return editCont.endEdit(input);
                     } else {
                         return "Invalid input";
                     }
-                    
-                    // Should never get here--make sure to return in each of the valid cases above.
-                    throw new UnsupportedOperationException();
                 }
 
             });
@@ -181,30 +184,26 @@ public class Server {
         // TODO: figure out how ports work for running things across multiple computers
         final int port = 4444;
         try {
-            runMinesweeperServer(port);
+            InetAddress address = InetAddress.getLocalHost();
+            String ip = address.getHostAddress();
+ 
+            System.out.println("IP Address = " + ip);
+            Server server = new Server(port);
+            server.serve();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
     
-    /**
-     * Start a Server running on the specified port
-     * @param port The network port on which the server should listen.
-     */
-    public static void runMinesweeperServer(int port) throws IOException
-    {
-        Server server = new Server(port);
-        server.serve();
-    }
     
     /**
      * Returns the titles of all the documents
      * @return The titles of the documents
      */
     public static ArrayList<String> getDocs() {           
-            Set<String> keys = docList.keySet();
-            ArrayList<String> titleList = new ArrayList<String>(keys);
-            return titleList;
+        Set<String> keys = docList.keySet();
+        ArrayList<String> titleList = new ArrayList<String>(keys);
+        return titleList;
     }
     
     public static boolean docListEmptyCheck(){

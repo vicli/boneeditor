@@ -12,20 +12,21 @@ public class EditController {
      * @return
      */
     public String insert(String input) {
-        
+        return "";
     }
     
     /**
      * Deals with removals
      */
     public String remove(String input) {
-        
+        return "";
     }
     
     /**
-     * 
+     * Deals with the end of an edit, iterates through and changes
+     * the owner and color of the finished edit
      */
     public String endEdit(String input) {
-        
+        return "";
     }
 }

@@ -36,13 +36,16 @@ public class ServerDocument extends DefaultStyledDocument{
     
     public void updateContent(String c){
         content = stringToList(c);
+        System.out.println("updated content is" + content.toString());
     }
     
     private ArrayList<Edit> stringToList(String s){
+        System.out.println("string is" + s);
         char[] newarray = s.toCharArray();
+        System.out.println("array is" + newarray.toString() + "with size" + newarray.length);
         ArrayList<Edit> newList = new ArrayList<Edit>();
         for(int i = 0; i < newarray.length; i++){
-            newList.add(Edit.toEdit(newarray[i]));
+            newList.add(new Edit(String.valueOf(newarray[i]), clientName));
         }
         
         return newList;

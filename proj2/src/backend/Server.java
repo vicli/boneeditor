@@ -2,7 +2,10 @@ package backend;
 
 import gui.DocGUI;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -67,9 +70,17 @@ public class Server {
                  * @param socket socket where the client is connected
                  * @throws IOException if connection has an error or terminates unexpectedly
                  */
+                
+                //Open a socket.
+                // Open an input stream and output stream to the socket.
+                //Read from and write to the stream according to the server's protocol.
+                //Close the streams.
+                //Close the socket.
                 // LOOOK AT TABLE @ BOTTOM OF DESIGN DOC
                 private void handleConnection(Socket socket) throws IOException {
                     numUsers++;
+                    BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);  
                     // We create a new instance of the Document GUI for each client
                     DocGUI clientGUI = new DocGUI();
                     
@@ -79,8 +90,28 @@ public class Server {
                     // We want to track the caret and the keys. 
                     // TODO: stuff that happens on start up of client connection
                     // TODO: stuff that happens aftern start up of client
-                    String input = ""; //get this from the GUI somehow
-                    String output = handleRequest(input);
+                    
+                    try {
+                        for (String line =in.readLine(); line!=null; line=in.readLine()) {
+                            String output = handleRequest(line);
+                            if(output != null) {
+                                out.println(output);
+                                
+                            }
+                            if(output.equals("bye")){
+                                break;
+                            }
+                            if(output.equals("BOOM!") && !debug){
+                                break;
+                            }
+                        }
+
+                    } finally {  
+
+                        numUsers--;
+                        out.close();
+                        in.close();
+                    }
                 }
 
                 /**

@@ -111,7 +111,21 @@ public class Server {
                             if(output.equals("BOOM!") ){
                                 break;
                             }
-                        }
+                                out.print(output);
+                                out.flush();
+                                if (output.equals("Exit")) {
+                                    numUsers--;
+                                    return;
+                                } else if (output.equals("Successful")) {
+                                    //tell the GUI to update
+                                } 
+//                                    else if (output.equals("Successful insert")) {
+//                                    //tell the GUI to update
+//                                } else if (output.equals("Successful removal")) {
+//                                    //tell the GUI to update
+//                                }
+                            } 
+                        
 
                     } finally {  
                         out.close();
@@ -155,12 +169,18 @@ public class Server {
                             docList.put(title, new ServerDocument(title));
                             return "Update doc";
                         }
+                    } else if (tokens[2].equals("Save")) {
+                        return editCont.endEdit(input);
                     } else if (tokens[2].equals("Insert")) {
                         return editCont.insert(input);
                     } else if (tokens[2].equals("Remove")) {
                         return editCont.remove(input);
                     } else if (tokens[2].equals("SpaceEntered")) {
                         return editCont.endEdit(input);
+                    } else if (tokens[2].equals("CursorMoved")) {
+                        return editCont.endEdit(input);
+                    } else if (tokens[2].equals("Disconnect")) {
+                        return "Exit";  
                     } else {
                         return "Invalid input";
                     }

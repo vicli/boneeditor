@@ -204,10 +204,16 @@ public class Server {
      * Returns the titles of all the documents
      * @return The titles of the documents
      */
-    public static ArrayList<String> getDocs() {           
+    public static ArrayList<String> getDocs() { 
+        ArrayList<String> titleList = new ArrayList<String>();
         Set<String> keys = docList.keySet();
-        ArrayList<String> titleList = new ArrayList<String>(keys);
-        return titleList;
+        if (!keys.isEmpty()){
+            titleList = new ArrayList<String>(keys);
+        }
+        else{
+            return titleList;
+        }
+        
     }
     
     public static boolean docListEmptyCheck(){

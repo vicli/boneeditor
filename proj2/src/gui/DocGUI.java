@@ -307,7 +307,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             
             if(e.getSource() == openButton){
                 fileWindow = new FileWindow();
-                isNew = false;
+                //isNew = false;
             }
             
         }
@@ -372,14 +372,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         @Override
         public void keyReleased(KeyEvent arg0) {
             String text = nameField.getText();
-            if(!Server.docListEmptyCheck()){
-                if(text.length() > 0 && text.matches("[a-zA-Z0-9]+") &&!existingCheck(Server.getDocs(), text)){
-                    nameOkay.setEnabled(true);
-                    }
-            }
-            else if(text.length() > 0 && text.matches("[a-zA-Z0-9]+")){
+            if(text.length() > 0 && text.matches("[a-zA-Z0-9]+")){
                 nameOkay.setEnabled(true);
-            }
+                }
             else{
                 nameOkay.setEnabled(false);
                 }

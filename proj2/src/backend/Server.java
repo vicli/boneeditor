@@ -38,7 +38,7 @@ public class Server {
     private final EditController editCont;
     
     // TODO: make the queue work here. Make sure the constructor is right
-    private EditQueue queue = new EditQueue(100);
+    private EditQueue queue = new EditQueue();
     private static Map<String, ServerDocument> docList  = new HashMap<String, ServerDocument>();
     private static Map<String, DocGUI> clientList = new HashMap<String, DocGUI>();
 

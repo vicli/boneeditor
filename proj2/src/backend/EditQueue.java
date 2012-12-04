@@ -25,7 +25,7 @@ public class EditQueue implements BlockingQueue{
      * Constructor for EditQueue
      * @param length
      */
-    public EditQueue(int length) {
+    public EditQueue() {
         // TODO: finish this constructor so it makes a queue of 
         // length 100 like the BlockingQueue constructor
         

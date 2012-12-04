@@ -14,7 +14,7 @@ import javax.swing.text.Position;
 import javax.swing.text.Segment;
 
 public class ServerDocument extends DefaultStyledDocument{
-    /**
+    /*
      * 
      */
     private static final long serialVersionUID = 1L;

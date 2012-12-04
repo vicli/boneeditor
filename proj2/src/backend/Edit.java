@@ -28,7 +28,7 @@ public class Edit {
     }
     /**
      * Returns the value
-     * @return The value of this edit
+    * @return The value of this edit
      */
     public String getValue() {
         return this.value;

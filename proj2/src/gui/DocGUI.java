@@ -72,18 +72,73 @@ import javax.swing.undo.UndoManager;
 import backend.Server;
 import backend.ServerDocument;
 
-
-
-/**
- * This is the DocGUI, which takes care of all windows that the user will see. 
- * There are 4 main windows, as listed below:
- * 
- *
- */
 public class DocGUI extends JFrame implements ActionListener, KeyListener{
     
     /**
-     * The GUI
+     * This is the DocGUI, which takes care of all windows that the user will see. 
+     * There are 5 main windows, as listed below:
+     * 1. Welcome window (sets name and color of that particular client, which is used later on when editing)
+     *      Welcome Message : "Welcome to Bone Editor!..."
+     *      1. Name Field (6 letters max)      (okay button only enabled when name is filled and < 6 letters)
+     *      2. Color Field                      (optional)
+     *      Okay button        (brings user to Window 2)
+     * 
+     * 2. New/Open screen
+     *       Three possible options:
+     *       1. New:     New button, New Screen pops up   
+     *       2. Open:   Open button, Open Screen pops up
+     *       3. Close:   client disconnects from server
+     * 
+     * 3. Open screen  
+     *       1. Client chooses from existing inventory of ServerDocument. Server will open the appropriate document in Document Screen   
+     *       2. Cancel: client goes back to screen 1.
+     *       
+     * 4. New Screen       
+     *       1. Client types in ServerDocument name, and clicks Okay. creates a new ServerDocument in the Server under the name, and opens document in Document Screen.
+     *       2. Cancel: client goes back to screen 1.
+     * 
+     * 5. Document Screen
+     *      1. Menu bars up on top: Edit drop down menu    (Style drop down menu may be implemented later)
+     *      2. Document edit area (a JTextPane over a grey panel)
+     *    Closing the Document Screen saves the Document, returns to screen 1.      
+     *       
+     *
+     * >>> TESTING STRATEGY <<<<
+     * Currently: Manual Testing        (If time allows, figure out how to do it via JUnit)
+     * 
+     * GUI LOOK TESTING
+     * The look of the GUI will simply be tested manually; all tests below must be passed.
+     *      1. All windows open up at the center of the screen
+     *      2. Windows are all frames: have a close, minimize, and expand button on frame
+     *      3. all components laid out in the correct place / gridbaglayout does work
+     *      4. Check GUIs on Windows and Mac computers to ensure layout still holds
+     *      5. Enlarge and shrink windows to make sure layout still holds
+     *      6. Check scrolling works (not yet implemented)   
+     * 
+     * GUI FUNCTIONALITY TESTING
+     * We will test functionality by running the Server and going through each possible option
+     *      1. Buttons are enabled only when user gives a valid input.
+     *      2. Buttons can be pressed.
+     *      3. Buttons lead to the right screen (check design above)
+     *      4. Client can only disconnect on New/Open screen and Welcome screen, by closing the window.
+     *      5. Closing all other screens should redirect user to screen 1
+     *      6. Text in TextFields are read and stored as appropriate
+     *      7. Open window opens up the window with a list of documents that are on the server
+     *      8. JComboBox of documents does indeed list all the documents on the server
+     *      9. JComboBox allows you to select document you want
+     *      10. selecting document and clicking okay opens a Document window
+     *      11. Loaded document is the correct document
+     *      12. closing Document saves the document, checked by closing and reopening document
+     *      13. creating a new document saves the document under the given name
+     *      14. creating a new document, closing it, and then opening document allows you to open
+     *          document you just created
+     *      15. Multiple documents can be created and saved
+     *      16. Undo and Redo works
+     *      17. Copy and paste works
+     *      18. Styling works (to be implmented) 
+     * (Refer to design document for possible transition paths between windows. Each transition path 
+     * will be traversed for testing purposes)     
+     *
      */
     private static JFrame frameOwner;
     private static JFrame welcomeWindow = new JFrame("Welcome");
@@ -124,7 +179,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         JLabel color = new JLabel("Color:");
         colorField = new JTextField();
         okay = new JButton("Okay");
-        name.setName("name");
+        name.setName("name"); 
         nameField.setName("nameField");
         color.setName("color");
         colorField.setName("colorField");
@@ -149,6 +204,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         okay.setEnabled(false);
         welcomeWindow.addWindowListener(closeWindow);
     }
+    //Key listener to check if the user input is valid, and only enabling the button when it is
     @Override
     public void keyPressed(KeyEvent e) {}
     @Override
@@ -168,7 +224,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         e.getWindow().dispose();
         }
         };
-        
+    // Action listeners for buttons and textfields    
     public void actionPerformed(ActionEvent e){
         if(e.getSource() == okay){
             
@@ -185,12 +241,19 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             clientColor = colorField.getText();
         }
     }
-
+    /**
+     * Creates and Shows the GUI
+     */
     private static void createAndShowGUI(){
         final DocGUI startframe = new DocGUI();
         startframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         startframe.pack();
     }
+    
+    /**
+     * Runs the GUI
+     * 
+     */
     public static void main(final String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -198,7 +261,11 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             }
         });
 }
-    
+    /**
+     * This is window 2 (refer to above)
+     * Creates a new window 2.
+     *
+     */
     public class WindowOne extends JFrame implements ActionListener{
         JFrame windowOne = new JFrame("New/Open");
 
@@ -227,6 +294,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             
             
         }
+        /**
+         * Action listener so clicking the button performs its intended function
+         */
         public void actionPerformed(ActionEvent e){
             if(e.getSource() == newButton){
                 nameWindow = new NameWindow();
@@ -243,6 +313,11 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         }
         
     }
+    /**
+     * This is window 4 (refer to above)
+     * Creates a new window 4.
+     *
+     */
     public class NameWindow extends JFrame implements ActionListener, WindowListener, KeyListener {
         private JFrame frm = new JFrame();
         private JFrame nameWindow = new JFrame("New");
@@ -285,10 +360,11 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             nameCancel.setBounds(250, 80, 80, 30);
             nameCancel.addActionListener(this);
         }
-
-        //Key Listener
-        // we listen to what the user is typing. if the user types a valid name, we enable the
-        // okay button. 
+        /**
+         * Key Listener
+         * we listen to what the user is typing. if the user types a valid name, we enable the
+         * okay button.
+         */
         @Override
         public void keyPressed(KeyEvent arg0) {}
         @Override
@@ -319,8 +395,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             }   
             return false;
         }
-        //Action Listener
-        // when we click okay, we save the name of the document and close the name window
+        /**
+         * Action Listener
+         * when we click okay, we save the name of the document and close the name window
+         * When we click cancel, we dispose of the window and return to Window 1
+         */
+
         @Override
         public void actionPerformed(ActionEvent e) {
             if(e.getSource() == nameOkay){           
@@ -337,8 +417,10 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             }
         }
         
-        
-        //Window Listener
+        /**
+         * Window listener to ensure we don't disconnect the client, and we reactive all 
+         * buttons on window 1
+         */
         @Override
         public void windowActivated(WindowEvent arg0) {}
 
@@ -363,7 +445,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     }
     /**
      * Main window that displays the Document 
-     * @author vicli
+     * This is window 5, as described above.
      *
      */
     public class DocumentWindow extends JFrame implements ActionListener, DocumentListener,KeyListener, WindowListener{
@@ -452,6 +534,11 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             setLocationRelativeTo(null);
             setVisible(true);
         }
+        
+        /**
+         * Key Listeners. Should invoke a method that sends a message to the server everytime a key is pressed.
+         * Still yet to be implemented. 
+         */
         @Override
         public void keyPressed(KeyEvent e) {
             e.getKeyChar();
@@ -471,6 +558,42 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             
         }
         
+        /**
+         * Handles communication with the server. Follows the following
+         * protocol:
+         * 
+         * Overall structure: clientName messageType messageContents
+         * 
+         * clientName currentDoc Insert edit -for when there is an insertion
+         * edit
+         * 
+         * clientName currentDoc Remove edit -for when there is a deletion edit
+         * 
+         * clientName currentDoc SpaceEntered -for when a space is entered, aka
+         * an edit finished
+         * 
+         * clientName currentDoc CursorMoved -for when the cursor is moved, aka
+         * an edit finished
+         * 
+         * clientName NewDoc fileTitle -for when a new file is made with the
+         * fileTitle
+         * 
+         * clientName currentDoc Save -for when the user presses the save button
+         * or closes the editor window
+         * 
+         * clientName currentDoc Disconnect -for when someone exits out of the
+         * whole program
+         * 
+         * @param message
+         */
+        public void serverMessage (String message){
+            
+        }
+        
+        
+        /**
+         * Document listener that listens to updates. May or may not be needed
+         */
         @Override
         public void changedUpdate(DocumentEvent e) {
             
@@ -480,6 +603,11 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         @Override
         public void removeUpdate(DocumentEvent e) {}
         
+        /**
+         * Creates a hashmap of actions, used for undo and redo 
+         * @param JTextComponent comp
+         * @return Action
+         */
         private HashMap<Object, Action>  createActions(JTextComponent comp){
             HashMap<Object, Action> action = new HashMap<Object, Action>();
             Action [] actionArray = comp.getActions();
@@ -499,7 +627,10 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 redoAction.updateRedoState();
             }        
         }
-              
+        /**
+         * Add bindings to create keyboard shortcuts.
+         * Optional, may or may not be implemented       
+         */
         private void addBindings(){
             ActionMap actionMap = docpane.getActionMap();
             actionMap.put("Undo", new UndoAction());
@@ -520,6 +651,10 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
 //            actionMap.put("Undo", new UndoAction());   
         }
         
+        /**
+         * Creates the menu bar on top of the document window
+         * @return
+         */
         private JMenu createEditMenu() {
             JMenu menu = new JMenu("Edit");
             
@@ -544,14 +679,28 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                         
             return menu;
         }
+        
+        /**
+         * Action that saves doc
+         * @return an action 
+         */
         private Action saveAction(){
-            return redoAction;
+            return null;
             //TODO fucking save 
         }
+        /**
+         * Helper method that gets an action by its name
+         * @param name
+         * @return Aciton
+         */
         private Action getAction(String name) {
             return action.get(name);
         }
-
+        /**
+         * Method to track where the cursor is, and reports this in a label.
+         * @author vicli
+         *
+         */
         protected class CaretListenerLabel extends JLabel implements CaretListener {
             public CaretListenerLabel(String label) {
                 super(label);
@@ -595,18 +744,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         }
         
         /**
-         *  public ExitAction() {
-            putValue(Action.NAME, "Exit");
-            putValue(Action.SHORT_DESCRIPTION, getValue(Action.NAME));
-            putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_X));
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            System.exit(0);
-        }
-    }
-         * @author vicli
+         *  Class for the UNDO method, with listeners that updates the undo state.
          *
          */
         class UndoAction extends AbstractAction {
@@ -646,7 +784,10 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 redoAction.updateRedoState();
                 }
         }
-        
+        /**
+         *  Class for the REDO method, with listeners that updates the redo state.
+         *
+         */
         class RedoAction extends AbstractAction {
             public RedoAction() {
                 super("Redo");
@@ -675,19 +816,28 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             }
         }
         
-        
+        /**
+         * Action Listener for DocumentWindow, will be needed if we include buttons
+         * 
+         */
         @Override
         public void actionPerformed(ActionEvent e) {
             // TODO Auto-generated method stub
             
         }
+        /**
+         * Method for saving the document. Is called every time the document is closed.
+         * 
+         */
         private void save(){
             String saveContents = docpane.getText();
             loadDoc.updateContent(saveContents);
             System.out.println("save contents" + saveContents);
             System.out.println("document content is" + loadDoc.getDocContent().toString());
         }
-
+        /**
+         * Window Listeners for the Document window, tells document to save when window is closed
+         */
         @Override
         public void windowActivated(WindowEvent e) {}
 
@@ -716,6 +866,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     
     /**
      * Window when we click "open"
+     * Displays possible documens to open using the list of saved docuemnts on the server.
+     * 
      * @author vicli
      *
      */

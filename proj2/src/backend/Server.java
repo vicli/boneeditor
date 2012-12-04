@@ -6,7 +6,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -17,19 +16,31 @@ import java.util.Set;
 import javax.swing.text.DefaultStyledDocument;
 
 /**
- * Server for the realtime collaborative editor
+ * Server for the realtime collaborative editor.
  * 
  * Thread-safe argument
  * --------------------
- * ~Something about queues and global Documents~
+ * Edits are are sent over sockets to the server and are added to the
+ * EditQueue so that they are dealt with one by one. The Edits are not
+ * inserted using indexes; instead, they are inserted using the Cursor's
+ * location for that client. This means that an edit will always be 
+ * inserted correctly into the ServerDocument even if its index changes 
+ * in between when it is sent to the server and when it is actually added
+ * to the ServerDocument. Additionally, Edits belong to the original 
+ * client until that client moves the Cursor or presses space or newline.
+ * This helps narrow down the case where clients will try to edit right on
+ * top of each other. They still type right next to each other,
  *
  */
 public class Server {
     private final ServerSocket serverSocket;
     private int numUsers;
     private final EditController editCont;
-
+    
+    // TODO: make the queue work here. Make sure the constructor is right
+    private EditQueue queue = new EditQueue(100);
     private static Map<String, ServerDocument> docList  = new HashMap<String, ServerDocument>();
+    private static Map<String, DocGUI> clientList = new HashMap<String, DocGUI>();
 
     /**
      * Makes Server that listens for connections on port.
@@ -74,60 +85,34 @@ public class Server {
                  * @param socket socket where the client is connected
                  * @throws IOException if connection has an error or terminates unexpectedly
                  */
-
-                
-                //Open a socket.
-                // Open an input stream and output stream to the socket.
-                //Read from and write to the stream according to the server's protocol.
-                //Close the streams.
-                //Close the socket.
-                // LOOOK AT TABLE @ BOTTOM OF DESIGN DOC
-                
                 private void handleConnection(Socket socket) throws IOException {                    
                     numUsers++;
-                    BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);  
                     // We create a new instance of the Document GUI for each client
                     DocGUI clientGUI = new DocGUI();
                     
-
-                   // handles closing client connection, and thats it. everything else seems
-                    // to be handled in handleRequest, as everything is client input. 
+                    // TODO: need getClientName from GUI
+                    String name = "";
+                    while (clientGUI.getClientName() == null) {
+                        name = clientGUI.getClientName();
+                    }
+                    clientList.put(name, clientGUI);
                     
-                    // We want to track the caret and the keys. 
-                    // TODO: stuff that happens on start up of client connection
-                    // TODO: stuff that happens aftern start up of client
-                    
+                    BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                     try {
                         for (String line =in.readLine(); line!=null; line=in.readLine()) {
                             String output = handleRequest(line);
                             if(output != null) {
-                                out.println(output);
-                                
-                            }
-                            if(output.equals("bye")){
-                                break;
-                            }
-                            if(output.equals("BOOM!") ){
-                                break;
-                            }
                                 out.print(output);
                                 out.flush();
                                 if (output.equals("Exit")) {
                                     numUsers--;
+                                    clientList.remove(name);
                                     return;
-                                } else if (output.equals("Successful")) {
-                                    //tell the GUI to update
                                 } 
-//                                    else if (output.equals("Successful insert")) {
-//                                    //tell the GUI to update
-//                                } else if (output.equals("Successful removal")) {
-//                                    //tell the GUI to update
-//                                }
                             } 
-                        
-
-                    } finally {  
+                        }
+                    } finally {   
                         out.close();
                         in.close();
                     }
@@ -147,15 +132,19 @@ public class Server {
                     // edit queue will handle processing 
                     
                     // TODO: define regex of protocol from user to server
-                    String regex = "";
+                    String regex = "()|" + //insert
+                            "()|" + //remove
+                            "()|" + //spaceEntered
+                            "()|" + //cursorMoved
+                            "()|" + //save
+                            "()|" + //disconnect
+                            "()"; //newDoc
                     if(!input.matches(regex)) {
                         //invalid input
                         return null;
                     }
                     String[] tokens = input.split(" ");
-                    // TODO: if/else statement dealing with inputs from user
-                    
-                    //pseudocode for if/else statement
+                    // TODO: finish if/else statement dealing with inputs from user
                     if (tokens[1].equals("NewDoc")) { 
                         String title = "";
                         for (int i = 2; i < tokens.length; i++) {
@@ -170,15 +159,15 @@ public class Server {
                             return "Update doc";
                         }
                     } else if (tokens[2].equals("Save")) {
-                        return editCont.endEdit(input);
+                        return editCont.endEdit(input, docList.get(tokens[1]));
                     } else if (tokens[2].equals("Insert")) {
-                        return editCont.insert(input);
+                        return editCont.insert(input, docList.get(tokens[1]));
                     } else if (tokens[2].equals("Remove")) {
-                        return editCont.remove(input);
+                        return editCont.remove(input, docList.get(tokens[1]));
                     } else if (tokens[2].equals("SpaceEntered")) {
-                        return editCont.endEdit(input);
+                        return editCont.endEdit(input, docList.get(tokens[1]));
                     } else if (tokens[2].equals("CursorMoved")) {
-                        return editCont.endEdit(input);
+                        return editCont.endEdit(input, docList.get(tokens[1]));
                     } else if (tokens[2].equals("Disconnect")) {
                         return "Exit";  
                     } else {
@@ -204,17 +193,12 @@ public class Server {
         // TODO: figure out how ports work for running things across multiple computers
         final int port = 4444;
         try {
-            InetAddress address = InetAddress.getLocalHost();
-            String ip = address.getHostAddress();
- 
-            System.out.println("IP Address = " + ip);
             Server server = new Server(port);
             server.serve();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    
     
     /**
      * Returns the titles of all the documents

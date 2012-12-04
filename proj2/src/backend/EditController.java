@@ -1,7 +1,17 @@
 package backend;
 
+/**
+ * Deals with the actual Edits in the docs by adding things to the
+ * EditQueue and dealing with the response from the queue. Also does
+ * things like reassign Edit owners at the end of an Edit.
+ *
+ *
+ * Testing strategy -- This will be tested using arbitrary Strings and
+ * ServerDocs to make sure that every method works correctly. The testing
+ * will include mock objects since this class interacts with so many
+ * other classes.
+ */
 public class EditController {
-
     /**
      * Empty EditController constructor
      */

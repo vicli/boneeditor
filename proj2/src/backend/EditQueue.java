@@ -21,6 +21,16 @@ public class EditQueue implements BlockingQueue{
      *
      */
 
+    /**
+     * Constructor for EditQueue
+     * @param length
+     */
+    public EditQueue(int length) {
+        // TODO: finish this constructor so it makes a queue of 
+        // length 100 like the BlockingQueue constructor
+        
+    }
+    
     @Override
     public Object element() {
         // TODO Auto-generated method stub

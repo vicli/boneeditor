@@ -6,6 +6,20 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class EditQueue implements BlockingQueue{
+    /**
+     * The EditQueue implements blocking queue, and is used to queue the edit messages
+     * being sent by different clients.
+     * 
+     * Processes the messages sequentially.
+     * Used such that no two messages will be processed at the same time and multiple versions
+     * of the document would not be created. 
+     * 
+     * >>Testing Strategy<<
+     *  Send multiple messages from multiple clients in a specified order, and see if the messages
+     *  are processed in order. 
+     *  Send many many many messages and see if the queue ever gets full.  
+     *
+     */
 
     @Override
     public Object element() {

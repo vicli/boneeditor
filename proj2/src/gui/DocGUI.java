@@ -26,6 +26,7 @@ import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -664,9 +665,21 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
 
         @Override
         public void keyTyped(KeyEvent e) {
-            if(String.valueOf(e.getKeyChar()).matches("[a-zA-Z0-9]")){
-                
+            
+            StringBuilder message = new StringBuilder();
+            String keyChar = String.valueOf(e.getKeyChar());
+            if (keyChar.matches("\\S")){
+                message.append(clientName + " " + docName + " Insert " + keyChar);
             }
+            else if(e.equals(KeyEvent.VK_SPACE) || e.equals(KeyEvent.VK_ENTER)){
+                message.append(clientName + " " + docName + " SpaceEntered");
+            }
+            else if(e.equals(KeyEvent.VK_BACK_SPACE)){
+                message.append(clientName + " " + docName + " SpaceEntered");
+            }
+            
+            serverMessage(message.toString());
+            
             
         }
         
@@ -698,8 +711,15 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
          * 
          * @param message
          */
+        // To write on Socket
+        private ObjectOutputStream outputStream;
         public void serverMessage (String message){
-            
+            try{
+                outputStream.writeObject(message);
+            }
+            catch(IOException e){
+                System.out.println("Exception writing to server: " + e);
+            }
         }
         
         
@@ -1057,12 +1077,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                fileName = documentList.getSelectedItem().toString();
                System.out.println(fileName);
                docName = fileName;
-               fileWindow.dispose();
+               dispose();
                docWindow = new DocumentWindow();
                // take care of setting text 
            }
            if(e.getSource() == fileCancel){
-               fileWindow.dispose();
+               dispose();
            }
             
         }

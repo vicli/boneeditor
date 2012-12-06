@@ -113,22 +113,22 @@ public class Server {
                  *
                  */
                 private String handleRequest(String input) {
-                 // Create a caret and a key listener, and listen to client.
+                    // Create a caret and a key listener, and listen to client.
                     // sent client input as an EDIT message, to Edit queue
                     // edit queue will handle processing 
                     
-                    // TODO: define regex of protocol from user to server
-                    String regex = "()|" + //insert
-                            "()|" + //remove
-                            "()|" + //spaceEntered
-                            "()|" + //cursorMoved
-                            "()|" + //save
-                            "()|" + //disconnect
-                            "()"; //newDoc
-                    if(!input.matches(regex)) {
-                        //invalid input
-                        return null;
-                    }
+//                    // TODO: define regex of protocol from user to server, decide if necessary
+//                    String regex = "()|" + //insert
+//                            "()|" + //remove
+//                            "()|" + //spaceEntered
+//                            "()|" + //cursorMoved
+//                            "()|" + //save
+//                            "()|" + //disconnect
+//                            "()"; //newDoc
+//                    if(!input.matches(regex)) {
+//                        //invalid input
+//                        return null;
+//                    }
                     String[] tokens = input.split(" ");
                     if (tokens[1].equals("NewDoc")) { 
                         String title = "";

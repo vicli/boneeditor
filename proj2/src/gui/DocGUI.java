@@ -357,10 +357,10 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             openButton.setName("openButton");
             
             add(newButton);
-            newButton.setBounds(70, 10, 100, 100);
+            newButton.setBounds(20, 10, 100, 100);
             newButton.addActionListener(this);
             add(openButton);
-            openButton.setBounds(170, 10, 100, 100);
+            openButton.setBounds(130, 10, 100, 100);
             openButton.addActionListener(this);
             //Create a new layout using group layout.
             GroupLayout windowLayout = new GroupLayout(getContentPane());
@@ -572,9 +572,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         public DocumentWindow(){
             super(docName);
             docpane = new JTextPane();
-
             loadDoc = Server.getDocument(docName);
-            String content = loadDoc.getDocContent();
+            String content = loadDoc.getDocContent().toString();
             System.out.println("docname is " + docName);
             System.out.println("doc content is" + loadDoc.getDocContent());
             displayedDoc = loadDoc;
@@ -987,58 +986,75 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     public class FileWindow extends JFrame implements ActionListener{
         private JFrame fileWindow = new JFrame ("Files");
         private JLabel fileLabel = new JLabel("Please select a file:");
-        private  JComboBox docList;
+        private  JComboBox documentList;
         private JButton fileOpen;
         private JButton fileCancel;
         private String fileName;
         
         public FileWindow(){
-            FlowLayout layout = new FlowLayout();
-            fileWindow.setLayout(layout);
-            fileWindow.setSize(300, 150);
+
+            setTitle("Name");
+            setSize(300, 150);
+            setLocationRelativeTo(null);
+            setVisible(true);
             
+            JPanel filePanel = new JPanel();
+            filePanel.setSize(300, 70);
             fileLabel.setBounds(30,30, 100, 20);
             fileLabel.setVisible(true);
-            fileWindow.add(fileLabel);
+            filePanel.add(fileLabel);
             
             ArrayList<String> fileNames = Server.getDocs();
-            docList = new JComboBox();
+            documentList = new JComboBox();
             for (String i: fileNames){
-                docList.addItem(i);
+                documentList.addItem(i);
             }
-            docList.setSelectedIndex(0);
-            docList.setName("docList");
-            docList.setLocation(130, 20);
+            documentList.setSelectedIndex(0);
+            documentList.setName("docList");
+            documentList.setLocation(130, 20);
+            filePanel.add(documentList);
             
+            JPanel fileSecPanel = new JPanel();
+            fileSecPanel.setSize(300,70);
             fileOpen =  new JButton("Open");
             fileOpen.setName("fileOpen");
             fileOpen.setSize(80, 35);
-            fileOpen.setLocation(90, 90);
+            fileOpen.setLocation(10, 10);
             fileOpen.addActionListener(this);
             
             fileCancel =  new JButton("Cancel");
             fileCancel.setName("fileCancel");
             fileCancel.setSize(80, 35);
-            fileCancel.setLocation(200, 90);
+            fileCancel.setLocation(200, 10);
             fileCancel.addActionListener(this);
+
+            fileSecPanel.add(fileOpen);
+            fileSecPanel.add(fileCancel);
             
+            //Create a new layout using group layout.
+            GroupLayout fileLayout = new GroupLayout(getContentPane());
+            getContentPane().setLayout(fileLayout);
+            fileLayout.setAutoCreateGaps(true);
+            fileLayout.setAutoCreateContainerGaps(true);        
             
-            fileWindow.add(docList);
-            fileWindow.add(fileOpen);
-            fileWindow.add(fileCancel);
-            fileWindow.setLocationRelativeTo(null);
-            fileWindow.setVisible(true);
-            //setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
+            fileLayout.setHorizontalGroup(fileLayout.createSequentialGroup()
+                    .addGroup(fileLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                    .addComponent(filePanel)
+                    .addComponent(fileSecPanel)));
+            
+            fileLayout.setVerticalGroup(fileLayout.createSequentialGroup()
+                    .addComponent(filePanel)
+                    .addComponent(fileSecPanel));
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (e.getSource()  == docList){
-                fileName = docList.getSelectedItem().toString();
+            if (e.getSource()  == documentList){
+                fileName = documentList.getSelectedItem().toString();
             }
            
            if(e.getSource() == fileOpen){
-               fileName = docList.getSelectedItem().toString();
+               fileName = documentList.getSelectedItem().toString();
                System.out.println(fileName);
                docName = fileName;
                fileWindow.dispose();

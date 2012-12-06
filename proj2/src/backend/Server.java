@@ -130,7 +130,6 @@ public class Server {
                         return null;
                     }
                     String[] tokens = input.split(" ");
-                    // TODO: finish if/else statement dealing with inputs from user
                     if (tokens[1].equals("NewDoc")) { 
                         String title = "";
                         for (int i = 2; i < tokens.length; i++) {
@@ -174,9 +173,8 @@ public class Server {
      * 
      */
     public static void main(String[] args) {
-        // We parse the command-line arguments for you. Do not change this method.
-        
-        // TODO: figure out how ports work for running things across multiple computers
+        // Always uses the same port. Clients connect their GUIs
+        // to this port and the host's IP address.
         final int port = 4444;
         try {
             Server server = new Server(port);

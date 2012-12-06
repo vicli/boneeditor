@@ -70,13 +70,13 @@ public class ServerDocument extends DefaultStyledDocument{
     }
     
     public synchronized String insertContent(Edit edit, int loc, String client) {
+        // Check
         if (loc > 0 && loc < content.size() - 1) {
             if (content.get(loc - 1).getOwner().equals(content.get(loc + 1).getOwner()))
                 if (!content.get(loc - 1).getOwner().equals(client)) {
-                    
+                    return "Locked edit";
                 }
         }
-        //check if insertion is allowed
         content.add(loc, edit);
         return "Done";
     }

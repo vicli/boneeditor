@@ -39,12 +39,14 @@ import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -52,9 +54,12 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.border.Border;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditEvent;
@@ -151,6 +156,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private static NameWindow nameWindow;
     private JButton newButton; 
     private JButton openButton;
+    private static JPanel entirePanel;
     
     private String clientColor;
     private String clientName;
@@ -166,43 +172,109 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private boolean isNew;
     
     public DocGUI(){
-        FlowLayout layout = new FlowLayout();
-        welcomeWindow.setLayout(layout);
-        welcomeWindow.setSize(600, 200);
-        welcomeWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        welcomeWindow.setLocationRelativeTo(null);
-        welcomeWindow.setVisible(true);
+
         
+        //We create a panel for the topRow of the window, which just contains the welcome message. 
+        JPanel topRow = new JPanel();
+        topRow.setLayout(null);
+        topRow.setLocation(0, 0);
+        topRow.setSize(600, 10);
         JLabel welcomeMessage = new JLabel("Welcome to Bone Editor! Please enter your name and color to get started.");
-        JLabel name = new JLabel("Name (6 letters max):");
-        nameField = new JTextField();
-        JLabel color = new JLabel("Color:");
-        colorField = new JTextField();
-        okay = new JButton("Okay");
-        name.setName("name"); 
-        nameField.setName("nameField");
-        color.setName("color");
-        colorField.setName("colorField");
-        okay.setName("okay");
+        welcomeMessage.setBounds(50, 10, 500, 20);
+        topRow.add(welcomeMessage);
+       
+        // We create a second panel for the secondRow of the window, which contains the
+        // the name JLabel and name JTextField
+        JPanel secondRow = new JPanel();
+        secondRow.setLayout(null);
+        secondRow.setSize(600, 10);
+        secondRow.setLocation(0, 10);
         
-        welcomeWindow.add(welcomeMessage);
-        welcomeMessage.setBounds(70, 20, 560, 20);
-        welcomeWindow.add(name);
-        name.setBounds(160, 55, 150, 20);
-        welcomeWindow.add(nameField);
-        nameField.setBounds(310, 55, 120, 20);
+        
+        JLabel name = new JLabel("Name (6 letters max):");
+        name.setName("name"); 
+        name.setBounds(50, 10, 200, 20);
+        nameField = new JTextField();
+        nameField.setName("nameField");
+        secondRow.add(name);
+        secondRow.add(nameField);
+        nameField.setLocation(300, 10);
+        nameField.setSize(100, 20);
+        
+        
+        // We create a third panel for the thirdRow of the window, which contains the
+        // the color JLabel, colorField JTextField, and the okay button 
+        JPanel thirdRow = new JPanel();
+        thirdRow.setLayout(null);
+        thirdRow.setSize(600,20);
+        thirdRow.setLocation(0, 20);
+        
+        JLabel color = new JLabel("Color:");
+        color.setName("color");
+        color.setBounds(50, 5, 150, 20);
+        colorField = new JTextField();
+        colorField.setName("colorField");
+        colorField.setLocation(300, 5);
+        colorField.setSize(100, 20);
+        
         nameField.addKeyListener(this);
-        welcomeWindow.add(color);
-        color.setBounds(160, 80, 100, 20);
-        welcomeWindow.add(colorField);
-        colorField.setBounds(310, 80, 120, 20);
         colorField.addActionListener(this);
-        welcomeWindow.add(okay);
-        okay.setSize(80, 35);
-        okay.setLocation(260, 120);
+        thirdRow.add(color);
+        thirdRow.add(colorField);
+     
+//        JColorChooser clientColor = new JColorChooser();
+//        clientColor.getSelectionModel().addChangeListener(this);
+
+//        @Override
+//        public void stateChanged(ChangeEvent arg0) {
+//            // TODO Auto-generated method stub
+//            
+//        }
+        
+        
+        JPanel lastRow = new JPanel();
+        lastRow.setLayout(null);
+        lastRow.setSize(600,20);
+        lastRow.setLocation(0, 30);
+        
+        okay = new JButton("Okay");
+        okay.setName("okay");    
+        okay.setSize(100,20);
+        okay.setLocation(250, 5);
         okay.addActionListener(this);
         okay.setEnabled(false);
-        welcomeWindow.addWindowListener(closeWindow);
+        
+        lastRow.add(okay);
+
+        addWindowListener(closeWindow);
+        
+        setTitle("Welcome!");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(600, 200);
+        setLocationRelativeTo(null);
+        setVisible(true);
+        
+        //Create a new layout using group layout.
+        GroupLayout windowLayout = new GroupLayout(getContentPane());
+        getContentPane().setLayout(windowLayout);
+        windowLayout.setAutoCreateGaps(true);
+        windowLayout.setAutoCreateContainerGaps(true);        
+        
+        windowLayout.setHorizontalGroup(windowLayout.createSequentialGroup()
+                .addGroup(windowLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                        .addComponent(topRow)
+                        .addComponent(secondRow)
+                        .addComponent(thirdRow)
+                        .addComponent(lastRow))
+                        );
+        
+        windowLayout.setVerticalGroup(windowLayout.createSequentialGroup()
+                .addComponent(topRow)
+                .addComponent(secondRow)
+                .addComponent(thirdRow)
+                .addComponent(lastRow)
+                );
+        
     }
     //Key listener to check if the user input is valid, and only enabling the button when it is
     @Override
@@ -231,7 +303,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             //WindowOne windowOne = new WindowOne();
             
             dialog1 = new WindowOne();
-            welcomeWindow.setVisible(false);
+            setVisible(false);
             
         }
         //if(e.getSource() == nameField){
@@ -247,7 +319,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private static void createAndShowGUI(){
         final DocGUI startframe = new DocGUI();
         startframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        startframe.pack();
+        //startframe.pack();
     }
     
     /**
@@ -267,31 +339,45 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      *
      */
     public class WindowOne extends JFrame implements ActionListener{
-        JFrame windowOne = new JFrame("New/Open");
+
 
         public WindowOne(){
-            FlowLayout layout = new FlowLayout();
-            windowOne.setLayout(layout);
-            windowOne.setSize(300, 150);
-            windowOne.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            windowOne.setLocationRelativeTo(null);
-            windowOne.setVisible(true);
+            setTitle("New/Open");
+            setSize(250, 150);
+            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            setLocationRelativeTo(null);
+            setVisible(true);
             
-            ImageIcon newicon = new ImageIcon ("/Users/vicli/Documents/workspace/vicli-liherman-miren/proj2/src/resources/newicon.png");
+            ImageIcon newicon = new ImageIcon ("src/resources/neww.png");
             newButton = new JButton(newicon);
             newButton.setName("newButton");
             
-            ImageIcon openicon = new ImageIcon("/Users/vicli/Documents/workspace/vicli-liherman-miren/proj2/src/resources/openicon.png");
+            ImageIcon openicon = new ImageIcon("src/resources/openicon.png");
             openButton = new JButton(openicon);
             openButton.setName("openButton");
             
-            windowOne.add(newButton);
-            newButton.setBounds(30, 10, 100, 100);
+            add(newButton);
+            newButton.setBounds(70, 10, 100, 100);
             newButton.addActionListener(this);
-            windowOne.add(openButton);
+            add(openButton);
             openButton.setBounds(170, 10, 100, 100);
             openButton.addActionListener(this);
+            //Create a new layout using group layout.
+            GroupLayout windowLayout = new GroupLayout(getContentPane());
+            getContentPane().setLayout(windowLayout);
+            windowLayout.setAutoCreateGaps(true);
+            windowLayout.setAutoCreateContainerGaps(true);        
             
+            windowLayout.setVerticalGroup(windowLayout.createSequentialGroup()
+                    .addGroup(windowLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                            .addComponent(newButton)
+                            .addComponent(openButton)
+                            ));
+            
+            windowLayout.setHorizontalGroup(windowLayout.createSequentialGroup()
+                    .addComponent(newButton)
+                    .addComponent(openButton)
+                    );
             
         }
         /**
@@ -319,46 +405,72 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      *
      */
     public class NameWindow extends JFrame implements ActionListener, WindowListener, KeyListener {
-        private JFrame frm = new JFrame();
-        private JFrame nameWindow = new JFrame("New");
+
         private JLabel nameInstruction;
         private JButton nameOkay;
         private JButton nameCancel;
         private JTextField nameField;
         
         public NameWindow(){
-            FlowLayout layout = new FlowLayout();
-            nameWindow.setLayout(layout);
-            nameWindow.setSize(500, 150);
-            nameWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            setTitle("New");
+            setSize(500, 160);
+            setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             
-            nameWindow.setLocationRelativeTo(null);
-            frm.setLocationRelativeTo(null);
-            nameWindow.addWindowListener(this);
-            nameWindow.setVisible(true);
+            setLocationRelativeTo(null);
+            addWindowListener(this);
+            setVisible(true);
             
+            JPanel topPanel = new JPanel();
+            topPanel.setSize(500, 10);
+            topPanel.setLayout(null);
             nameInstruction = new JLabel("Document Name (Letters/numbers without spaces only):");
-            nameInstruction.setBounds(60, 20, 400, 20);
-            nameWindow.add(nameInstruction);
+            nameInstruction.setBounds(60, 10, 400, 20);
+            topPanel.add(nameInstruction);
            
+            JPanel midPanel = new JPanel();
+            midPanel.setSize(500, 10);
+            midPanel.setLayout(null);
             nameField = new JTextField();
             nameField.setName("nameField");
-            nameField.setBounds(140, 50, 200, 20);
-            nameWindow.add(nameField);
+            nameField.setBounds(150, 10, 200, 20);
             nameField.addKeyListener(this);
+            midPanel.add(nameField);
             
+            JPanel bottomPanel = new JPanel();
+            bottomPanel.setSize(500, 30);
+            bottomPanel.setLayout(null);
             nameOkay = new JButton("Okay");
             nameOkay.setEnabled(false);
             nameOkay.setName("nameOkay");
-            nameWindow.add(nameOkay);
-            nameOkay.setBounds(150, 80, 80, 30);
+            bottomPanel.add(nameOkay);
+            nameOkay.setBounds(150, 10, 80, 20);
             nameOkay.addActionListener(this);
             
             nameCancel = new JButton("Cancel");
             nameCancel.setName("nameCancel");
-            nameWindow.add(nameCancel);
-            nameCancel.setBounds(250, 80, 80, 30);
+            
+            nameCancel.setBounds(250, 10, 80, 20);
             nameCancel.addActionListener(this);
+            bottomPanel.add(nameCancel);
+            
+            //Create a new layout using group layout.
+            GroupLayout nameLayout = new GroupLayout(getContentPane());
+            getContentPane().setLayout(nameLayout);
+            nameLayout.setAutoCreateGaps(true);
+            nameLayout.setAutoCreateContainerGaps(true);        
+            
+            nameLayout.setHorizontalGroup(nameLayout.createSequentialGroup()
+                    .addGroup(nameLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                            .addComponent(topPanel)
+                            .addComponent(midPanel)
+                            .addComponent(bottomPanel))
+                            );
+            
+            nameLayout.setVerticalGroup(nameLayout.createSequentialGroup()
+                    .addComponent(topPanel)
+                    .addComponent(midPanel)
+                    .addComponent(bottomPanel)
+                    );
         }
         /**
          * Key Listener
@@ -401,12 +513,18 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             if(e.getSource() == nameOkay){           
                 docName = nameField.getText();
                 System.out.println("docname is now" + docName);
-                Server.addDocument(docName);
-                nameWindow.dispose();
-                docWindow = new DocumentWindow();
+                if (Server.getDocs().contains(docName)){
+                    JOptionPane.showMessageDialog(this, "Name taken already.");
+                }
+                else{
+                    Server.addDocument(docName);
+                    nameWindow.dispose();
+                    docWindow = new DocumentWindow();
+                }
+                
             }
             if(e.getSource() == nameCancel){
-                nameWindow.dispose();
+                dispose();
                 openButton.setEnabled(true);
                 newButton.setEnabled(true);
             }
@@ -933,4 +1051,5 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             
         }
     }
+
 }

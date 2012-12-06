@@ -27,7 +27,7 @@ public class EditController {
      * @return The message to return to the server. Returns "Success" if 
      *   successful and "Error" if not successful
      */
-    public String insert(String input, ServerDocument doc) {
+    public String insert(String input, ServerDocument doc, EditQueue queue) {
         return "";
     }
     
@@ -38,7 +38,7 @@ public class EditController {
      * @param doc The ServerDocument that the GUI is currently editing
      * @return The message to return to the server
      */
-    public String remove(String input, ServerDocument doc) {
+    public String remove(String input, ServerDocument doc, EditQueue queue) {
         return "";
     }
     
@@ -50,7 +50,7 @@ public class EditController {
      * @param doc The ServerDocument that the GUI is currently editing
      * @return The message to return to the server
      */
-    public String endEdit(String input, ServerDocument doc) {
+    public String endEdit(String input, ServerDocument doc, EditQueue queue) {
         return "";
     }
 }

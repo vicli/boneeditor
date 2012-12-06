@@ -1,7 +1,5 @@
 package backend;
 
-import gui.DocGUI;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,8 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import javax.swing.text.DefaultStyledDocument;
 
 /**
  * Server for the realtime collaborative editor.
@@ -40,7 +36,6 @@ public class Server {
     // TODO: make the queue work here. Make sure the constructor is right
     private EditQueue queue = new EditQueue();
     private static Map<String, ServerDocument> docList  = new HashMap<String, ServerDocument>();
-    private static Map<String, DocGUI> clientList = new HashMap<String, DocGUI>();
 
     /**
      * Makes Server that listens for connections on port.
@@ -86,19 +81,11 @@ public class Server {
                  * @throws IOException if connection has an error or terminates unexpectedly
                  */
                 private void handleConnection(Socket socket) throws IOException {                    
-                    numUsers++;
-                    // We create a new instance of the Document GUI for each client
-                    DocGUI clientGUI = new DocGUI();
-                    
-                    // TODO: need getClientName from GUI
-                    String name = "";
-                    while (clientGUI.getClientName() == null) {
-                        name = clientGUI.getClientName();
-                    }
-                    clientList.put(name, clientGUI);
-                    
+                    numUsers++;                   
                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                    out.print("Welcome! There are currently "+numUsers+" other clients connected.");
+                    out.flush();
                     try {
                         for (String line =in.readLine(); line!=null; line=in.readLine()) {
                             String output = handleRequest(line);
@@ -107,7 +94,6 @@ public class Server {
                                 out.flush();
                                 if (output.equals("Exit")) {
                                     numUsers--;
-                                    clientList.remove(name);
                                     return;
                                 } 
                             } 
@@ -159,15 +145,15 @@ public class Server {
                             return "Update doc";
                         }
                     } else if (tokens[2].equals("Save")) {
-                        return editCont.endEdit(input, docList.get(tokens[1]));
+                        return editCont.endEdit(input, docList.get(tokens[1]), queue);
                     } else if (tokens[2].equals("Insert")) {
-                        return editCont.insert(input, docList.get(tokens[1]));
+                        return editCont.insert(input, docList.get(tokens[1]), queue);
                     } else if (tokens[2].equals("Remove")) {
-                        return editCont.remove(input, docList.get(tokens[1]));
+                        return editCont.remove(input, docList.get(tokens[1]), queue);
                     } else if (tokens[2].equals("SpaceEntered")) {
-                        return editCont.endEdit(input, docList.get(tokens[1]));
+                        return editCont.endEdit(input, docList.get(tokens[1]), queue);
                     } else if (tokens[2].equals("CursorMoved")) {
-                        return editCont.endEdit(input, docList.get(tokens[1]));
+                        return editCont.endEdit(input, docList.get(tokens[1]), queue);
                     } else if (tokens[2].equals("Disconnect")) {
                         return "Exit";  
                     } else {
@@ -210,10 +196,7 @@ public class Server {
         if (!keys.isEmpty()){
             titleList = new ArrayList<String>(keys);
         }
-        else{
-            return titleList;
-        }
-        
+        return titleList; 
     }
     
     public static boolean docListEmptyCheck(){

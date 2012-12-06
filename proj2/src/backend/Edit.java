@@ -54,4 +54,11 @@ public class Edit {
     public void changeOwner() {
         this.owner = "doc";
     }
+    
+    /**
+     * To String of values
+     */
+    public String toString() {
+        return value;
+    }
 }

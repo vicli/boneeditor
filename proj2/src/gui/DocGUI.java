@@ -25,8 +25,12 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -171,6 +175,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private HashMap<Object, Action> action;
     private Border docBorder;
     private boolean isNew;
+    private static String IPAddress;
     
     public DocGUI(){
 
@@ -330,7 +335,13 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     public static void main(final String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                createAndShowGUI();
+                if (args.length == 1){
+                    IPAddress = args[0];
+                    createAndShowGUI();
+                }
+                else{
+                    throw new IllegalArgumentException();
+                }
             }
         });
 }
@@ -675,7 +686,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 message.append(clientName + " " + docName + " SpaceEntered");
             }
             else if(e.equals(KeyEvent.VK_BACK_SPACE)){
-                message.append(clientName + " " + docName + " SpaceEntered");
+                message.append(clientName + " " + docName + " Remove " + keyChar);
             }
             
             serverMessage(message.toString());
@@ -714,12 +725,38 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         // To write on Socket
         private ObjectOutputStream outputStream;
         public void serverMessage (String message){
+            Socket newSocket = null;
+            PrintWriter out = null;
+            BufferedReader in = null;
+                    
             try{
-                outputStream.writeObject(message);
+                newSocket = new Socket(IPAddress, 4444);
+                out = new PrintWriter(newSocket.getOutputStream(), true);
+                in = new BufferedReader(new InputStreamReader(newSocket.getInputStream()));
+                out.write(message);
             }
             catch(IOException e){
                 System.out.println("Exception writing to server: " + e);
             }
+            String fromServer;
+            try {
+                while((fromServer = in.readLine()) != null){
+                    if(fromServer.equals("success")){
+                        updateGUI();
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("Exception reading from server: " + e);
+            }
+        }
+        
+        private void updateGUI(){
+            loadDoc = Server.getDocument(docName);
+            String content = loadDoc.getDocContent().toString();
+            System.out.println("docname is still" + docName);
+            System.out.println("doc content is now " + loadDoc.getDocContent());
+            displayedDoc = loadDoc;
+            docpane.setText(content);
         }
         
         
@@ -841,6 +878,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             //Might not be invoked from the event dispatch thread.
             public void caretUpdate(CaretEvent e) {
                 displaySelectionInfo(e.getDot(), e.getMark());
+                
             }
 
             //This method can be invoked from any thread.  It 

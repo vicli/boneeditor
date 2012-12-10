@@ -1255,6 +1255,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 }
                 if(messageList[0].equals("docNames")){
                     for(int i = 1; i < messageList.length; i++){
+                        System.out.println("youve reached docnames!");
                         docNameList.add(messageList[i]);
                     }
                 }

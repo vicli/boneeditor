@@ -69,7 +69,7 @@ public class Server {
                         } finally {
                             try {
                                 socket.close();
-                                serverSocket.close();
+                                //serverSocket.close();
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -88,10 +88,15 @@ public class Server {
                     //out.println("Welcome! There are currently "+numUsers+" other clients connected.");
                     //out.flush();
                     try {
+                        System.out.println("1");
                         for (String line =in.readLine(); line!=null; line=in.readLine()) {
+                            System.out.println(line);
+                            System.out.println("2");
                             String output = handleRequest(line);
+                            System.out.println("3");
+                            System.out.println(output);
                             if(output != null) {
-                                out.println(output);
+                                out.print(output);
                                 out.flush();
                                 if (output.equals("Exit")) {
                                     numUsers--;
@@ -100,8 +105,10 @@ public class Server {
                             } 
                         }
                     } finally {   
+                        System.out.println("4");
                         out.close();
                         in.close();
+                        System.out.println("closed");
                     }
                 }
 
@@ -115,8 +122,8 @@ public class Server {
                  */
                 private String handleRequest(String input) {
                     String[] tokens = input.split(" ");
+                    System.out.println("5");
                     if (tokens.length > 1 && tokens[1].equals("NewDoc")) { 
-                        
                         synchronized (this) {
                             System.out.println("new doc");
                             // If creating a new document
@@ -126,13 +133,14 @@ public class Server {
                                 return "new invalid";
                             } else {
                                 docList.put(title, new ServerDocument(title));
-                                System.out.println(docList.keySet());
+                                
                                 System.out.println("7");
                                 return "new success";
                             }
                         }
                         
                     } else if (tokens.length > 0 && tokens[0].equals("getDocNames")) {
+                        System.out.println("getdocnames");
                         // If asking for list of document names
                         String names = "";
                         for (String key: docList.keySet()) {
@@ -141,9 +149,10 @@ public class Server {
                         }
                         return names.substring(0, names.length() - 1);
                     } else if (tokens.length > 0 && tokens[0].equals("update")) {
+                        System.out.println("update");
                         ServerDocument doc = docList.get(tokens[1]);
                         if (doc == null) {
-                            return "fail";
+                            return "update fail";
                         } else {
                             String contents = doc.getDocContent();
                             return "update " + tokens[1] + " " + contents;
@@ -151,16 +160,16 @@ public class Server {
                     } else if (tokens.length > 0 && tokens[0].equals("open")) {
                         synchronized (this) {
                         System.out.println("open");
-                        System.out.println(docList.keySet());
                         ServerDocument doc = docList.get(tokens[2]);
                         if (doc == null) {
-                            return "fail";
+                            return "open fail";
                         } else {
                             String contents = doc.getDocContent();
                             return "open " + tokens[1] + " " + contents;
                         }
                         }
                     } else {
+                        System.out.println("edit msg");
                         // Gives all the edit messages to the edit controller to deal with, including:
                         // save, insert, remove, space entered, cursor moved
                         if (editCont.putOnQueue(input)) {
@@ -168,10 +177,10 @@ public class Server {
                         } else { 
                             ServerDocument doc = docList.get(tokens[1]);
                             if (doc == null) {
-                                return "fail";
+                                return tokens[2] + " " + "fail";
                             } else {
                                 String contents = doc.getDocContent();
-                                return "fail " + contents;
+                                return tokens[2] + " fail " + contents;
                             }
                         }
                     }

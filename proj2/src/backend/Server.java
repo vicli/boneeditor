@@ -29,7 +29,7 @@ import java.util.Set;
  *
  */
 public class Server {
-    private final ServerSocket serverSocket;
+    private ServerSocket serverSocket = null;
     private int numUsers;
     private final EditController editCont;
     
@@ -43,7 +43,7 @@ public class Server {
      * @throws IOException 
      */
     public Server (int port) throws IOException {
-        this.serverSocket = new ServerSocket(port);
+        serverSocket = new ServerSocket(port);
         numUsers = 0;
         editCont = new EditController();
     }
@@ -54,10 +54,14 @@ public class Server {
      * @author User
      *
      */
+    private Socket socket;
     public void serve() throws IOException {
         while (true) {
+            System.out.println("youre before socket");
             // block until a client connects
-            final Socket socket = serverSocket.accept();
+            System.out.println(serverSocket.toString());
+            socket = serverSocket.accept();
+            System.out.println("youve accepted the socket");
             // makes threads
             Thread clientThread = new Thread(new Runnable() {
                 public void run() {
@@ -84,11 +88,11 @@ public class Server {
                     numUsers++;                   
                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                    out.print("Welcome! There are currently "+numUsers+" other clients connected.");
+                    out.println("Welcome! There are currently "+numUsers+" other clients connected.");
                     out.flush();
                     try {
                         for (String line =in.readLine(); line!=null; line=in.readLine()) {
-                            out.print("success");
+                            out.println("success");
                             out.flush();
 //                            String output = handleRequest(line);
 //                            if(output != null) {

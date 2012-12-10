@@ -699,7 +699,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             else if(e.equals(KeyEvent.VK_BACK_SPACE)){
                 message.append(clientName + " " + docName + " Remove " + keyChar);
             }
-            
+            System.out.println(message);
             serverMessage(message.toString());
             
             
@@ -736,15 +736,21 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         // To write on Socket
         private ObjectOutputStream outputStream;
         public void serverMessage (String message){
+            System.out.println("youre at server message");
             Socket newSocket = null;
             PrintWriter out = null;
             BufferedReader in = null;
                     
             try{
+                System.out.println("youre at the first try catch");
+                System.out.println(IPAddress);
                 newSocket = new Socket(IPAddress, 4444);
+                System.out.println("yovue created a new socket");
                 out = new PrintWriter(newSocket.getOutputStream(), true);
                 in = new BufferedReader(new InputStreamReader(newSocket.getInputStream()));
-                out.write(message);
+                out.println(message);
+                System.out.println("youve wrote your message");
+                out.flush();
             }
             catch(IOException e){
                 System.out.println("Exception writing to server: " + e);
@@ -752,8 +758,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             String fromServer;
             try {
                 while((fromServer = in.readLine()) != null){
+                    System.out.println("youve read from server");                    
                     if(fromServer.equals("success")){
-                        updateGUI();
+                        updateGUI();  
                     }
                 }
             } catch (IOException e) {
@@ -762,12 +769,14 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         }
         
         private void updateGUI(){
+            
             loadDoc = Server.getDocument(docName);
             String content = loadDoc.getDocContent().toString();
             System.out.println("docname is still" + docName);
             System.out.println("doc content is now " + loadDoc.getDocContent());
             displayedDoc = loadDoc;
             docpane.setText(content);
+            System.out.println("youve updated gui");
         }
         
         

@@ -539,7 +539,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 docName = nameField.getText();
                 System.out.println("docname is now" + docName);
                 new ServerMessage("getDocNames");
-                if (docNameList.contains(docName) && !docNameList.isEmpty()){
+                if (!docNameList.isEmpty() && docNameList.contains(docName)){
                     JOptionPane.showMessageDialog(this, "Name taken already.");
                 }
                 else{

@@ -124,17 +124,21 @@ public class Server {
                     String[] tokens = input.split(" ");
                     System.out.println("5");
                     if (tokens.length > 1 && tokens[1].equals("NewDoc")) { 
-                        System.out.println("new doc");
-                        // If creating a new document
-                        String title = tokens[2];
-                        if (docList.containsKey(title)) {
-                            System.out.println("6");
-                            return "new invalid";
-                        } else {
-                            docList.put(title, new ServerDocument(title));
-                            System.out.println("7");
-                            return "new success";
+                        synchronized (this) {
+                            System.out.println("new doc");
+                            // If creating a new document
+                            String title = tokens[2];
+                            if (docList.containsKey(title)) {
+                                System.out.println("6");
+                                return "new invalid";
+                            } else {
+                                docList.put(title, new ServerDocument(title));
+                                
+                                System.out.println("7");
+                                return "new success";
+                            }
                         }
+                        
                     } else if (tokens.length > 0 && tokens[0].equals("getDocNames")) {
                         System.out.println("getdocnames");
                         // If asking for list of document names
@@ -154,6 +158,7 @@ public class Server {
                             return "update " + tokens[1] + " " + contents;
                         }
                     } else if (tokens.length > 0 && tokens[0].equals("open")) {
+                        synchronized (this) {
                         System.out.println("open");
                         ServerDocument doc = docList.get(tokens[2]);
                         if (doc == null) {
@@ -161,6 +166,7 @@ public class Server {
                         } else {
                             String contents = doc.getDocContent();
                             return "open " + tokens[1] + " " + contents;
+                        }
                         }
                     } else {
                         System.out.println("edit msg");

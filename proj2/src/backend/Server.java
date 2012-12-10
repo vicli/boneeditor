@@ -85,8 +85,8 @@ public class Server {
                     numUsers++;                   
                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                    out.println("Welcome! There are currently "+numUsers+" other clients connected.");
-                    out.flush();
+                    //out.println("Welcome! There are currently "+numUsers+" other clients connected.");
+                    //out.flush();
                     try {
                         for (String line =in.readLine(); line!=null; line=in.readLine()) {
                             String output = handleRequest(line);

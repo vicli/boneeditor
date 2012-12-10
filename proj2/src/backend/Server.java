@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 
 /**
  * Server for the realtime collaborative editor.
@@ -93,14 +92,14 @@ public class Server {
                             out.println("success");
                             out.flush();
                             String output = handleRequest(line);
-//                            if(output != null) {
+                            if(output != null) {
 //                                out.print(output);
 //                                out.flush();
 //                                if (output.equals("Exit")) {
 //                                    numUsers--;
 //                                    return;
 //                                } 
-//                            } 
+                            } 
                         }
                     } finally {   
                         out.close();
@@ -119,6 +118,7 @@ public class Server {
                 private String handleRequest(String input) {
                     String[] tokens = input.split(" ");
                     if (tokens.length > 1 && tokens[1].equals("NewDoc")) { 
+                        // If creating a new document
                         String title = "";
                         for (int i = 2; i < tokens.length; i++) {
                             title += tokens[i];
@@ -126,16 +126,49 @@ public class Server {
                         }
                         title = title.substring(0, title.length() - 1);
                         if (docList.containsKey(title)) {
-                            return "Invalid Doc Title";
+                            return "new invalid";
                         } else {
                             docList.put(title, new ServerDocument(title));
-                            return "Update doc";
+                            return "new success";
+                        }
+                    } else if (tokens.length > 0 && tokens[0].equals("getDocNames")) {
+                        // If asking for list of document names
+                        String names = "";
+                        for (String key: docList.keySet()) {
+                            names += key;
+                            names += " ";
+                        }
+                        return names.substring(0, names.length() - 1);
+                    } else if (tokens.length > 0 && tokens[0].equals("update")) {
+                        ServerDocument doc = docList.get(tokens[1]);
+                        if (doc == null) {
+                            return "fail";
+                        } else {
+                            String contents = doc.getDocContent();
+                            return "update " + tokens[1] + " " + contents;
+                        }
+                    } else if (tokens.length > 0 && tokens[0].equals("open")) {
+                        ServerDocument doc = docList.get(tokens[1]);
+                        if (doc == null) {
+                            return "fail";
+                        } else {
+                            String contents = doc.getDocContent();
+                            return "open " + tokens[1] + " " + contents;
                         }
                     } else {
-                        if (editCont.putOnQueue(input)) 
+                        // Gives all the edit messages to the edit controller to deal with, including:
+                        // save, insert, remove, space entered, cursor moved
+                        if (editCont.putOnQueue(input)) {
                             return "success";
-                        else 
-                            return "invalid";
+                        } else { 
+                            ServerDocument doc = docList.get(tokens[1]);
+                            if (doc == null) {
+                                return "fail";
+                            } else {
+                                String contents = doc.getDocContent();
+                                return "fail " + contents;
+                            }
+                        }
                     }
                 }
 

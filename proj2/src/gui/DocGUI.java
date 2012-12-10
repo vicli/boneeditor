@@ -1243,6 +1243,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         public void done(){
             while(fromServer != null){
                 String[] messageList = fromServer.split(" ");
+                System.out.println(fromServer);
                 System.out.println("youve read from server");  
                 if(messageList[0].equals("open")){
                     content = messageList[1];

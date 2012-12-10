@@ -1,6 +1,9 @@
 package gui;
 
+import gui.DocGUI.DocumentWindow.NewAction;
+import gui.DocGUI.DocumentWindow.OpenAction;
 import gui.DocGUI.DocumentWindow.RedoAction;
+import gui.DocGUI.DocumentWindow.SaveAction;
 import gui.DocGUI.DocumentWindow.UndoAction;
 
 import java.awt.BorderLayout;
@@ -170,6 +173,10 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private Document displayedDoc;
     protected UndoAction undoAction;
     protected RedoAction redoAction;
+    protected NewAction newAction;
+    protected SaveAction saveAction;
+    protected OpenAction openAction;
+    //protected RenameAction renameAction;
     protected UndoManager undo = new UndoManager();
     private String newline = "\n";
     private HashMap<Object, Action> action;
@@ -335,16 +342,17 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     public static void main(final String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                if (args.length == 1){
-                    IPAddress = args[0];
-                    createAndShowGUI();
-                }
-                else{
-                    throw new IllegalArgumentException();
-                }
+                createAndShowGUI();
             }
         });
 }
+//  if (args.length == 1){
+//  IPAddress = args[0];
+//  createAndShowGUI();
+//}
+//else{
+//  throw new IllegalArgumentException();
+//}
     /**
      * This is window 2 (refer to above)
      * Creates a new window 2.
@@ -631,7 +639,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             //Creating the Menubar.
             action = createActions(docpane);
             JMenu editMenu = createEditMenu();
+            JMenu fMenu = createFileMenu();
             JMenuBar menuBar = new JMenuBar();
+            menuBar.add(fMenu);
             menuBar.add(editMenu);
             setJMenuBar(menuBar);
             
@@ -848,15 +858,61 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                         
             return menu;
         }
+        private JMenu createFileMenu(){
+            JMenu fileMenu = new JMenu("File");
+            newAction = new NewAction();
+            saveAction = new SaveAction();
+            fileMenu.add(newAction);
+            fileMenu.add(saveAction);
+            openAction = new OpenAction();
+            fileMenu.add(openAction);
+            //fileMenu.add(renameAction);
+            
+            
+            return fileMenu;
+        }
         
+        class OpenAction extends AbstractAction{
+            public OpenAction(){
+                putValue(Action.NAME, "Open");
+                setEnabled(true);
+            }
+            public void actionPerformed(ActionEvent e){
+                fileWindow = new FileWindow();
+            }
+        }
+        
+        /**
+         *  Class for the New action, which creates a new document by opening up the name window.
+         *
+         */
+        class NewAction extends AbstractAction {
+            public NewAction() {
+                putValue(Action.NAME, "New");
+                setEnabled(true);
+            }
+     
+            public void actionPerformed(ActionEvent e) {
+                nameWindow = new NameWindow();
+            }       
+        }
         /**
          * Action that saves doc
          * @return an action 
          */
-        private Action saveAction(){
-            return null;
-            //TODO fucking save 
+        class SaveAction extends AbstractAction{
+            public SaveAction(){
+                putValue(Action.NAME, "Save");
+                setEnabled(true);
+            }
+            public void actionPerformed(ActionEvent e){
+                save();
+            }
         }
+        
+        
+
+
         /**
          * Helper method that gets an action by its name
          * @param name
@@ -1033,7 +1089,63 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
 
         
     }
-    
+    public class RenameWindow extends JFrame implements ActionListener, KeyListener{
+        private JLabel currentLabel = new JLabel ("Current document name is:" + docName);
+        private JLabel renameLabel = new JLabel("Rename to:");
+        private JTextField rename = new JTextField();
+        private JButton renameOkay;
+        private JButton renameCancel;
+        public RenameWindow(){
+            setTitle("Rename");
+            setSize(300, 150);
+            setLocationRelativeTo(null);
+            setVisible(true);
+            
+            JPanel renamePanel = new JPanel();
+            renamePanel.setSize(300,100);
+            currentLabel.setLocation(10,10);
+            renameLabel.setLocation(10, 30);
+            rename.setLocation(100, 30);
+            rename.addKeyListener(this);
+            renamePanel.add(currentLabel);
+            renamePanel.add(renameLabel);
+            renamePanel.add(rename);
+            
+            JPanel fileSecPanel = new JPanel();
+            fileSecPanel.setSize(300,70);
+            renameOkay =  new JButton("Okay");
+            renameOkay.setName("renameOkay");
+            renameOkay.setSize(80, 35);
+            renameOkay.setLocation(10, 10);
+            renameOkay.addActionListener(this);
+            
+            renameCancel =  new JButton("Cancel");
+            renameCancel.setName("fileCancel");
+            renameCancel.setSize(80, 35);
+            renameCancel.setLocation(200, 10);
+            renameCancel.addActionListener(this);
+
+            fileSecPanel.add(renameOkay);
+            fileSecPanel.add(renameCancel);
+        }
+        @Override
+        public void actionPerformed(ActionEvent e) {}
+        @Override
+        public void keyPressed(KeyEvent arg0) {}
+        @Override
+        public void keyReleased(KeyEvent arg0) {
+            String text = rename.getText();
+            if(text.length() > 0 && text.matches("[a-zA-Z0-9]+")){
+                renameOkay.setEnabled(true);
+                }
+            else{
+                renameOkay.setEnabled(false);
+                }
+        }
+        @Override
+        public void keyTyped(KeyEvent arg0) {}
+        
+    }
     /**
      * Window when we click "open"
      * Displays possible documens to open using the list of saved docuemnts on the server.

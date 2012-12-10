@@ -538,11 +538,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             if(e.getSource() == nameOkay){           
                 docName = nameField.getText();
                 System.out.println("docname is now" + docName);
-                if (Server.getDocs().contains(docName)){
+                new ServerMessage("getDocNames");
+                if (docNameList.contains(docName)){
                     JOptionPane.showMessageDialog(this, "Name taken already.");
                 }
                 else{
-                    Server.addDocument(docName);
+                    new ServerMessage(clientName + " NewDoc " + docName);
                     nameWindow.dispose();
                     docWindow = new DocumentWindow();
                 }
@@ -586,22 +587,24 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      * This is window 5, as described above.
      *
      */
+    private String content;
+    private JTextPane docpane; 
     public class DocumentWindow extends JFrame implements ActionListener, DocumentListener,KeyListener, WindowListener{
         //write get cursor position
-        private JTextPane docpane; 
+        
         private JPanel menu;
-        private JTextArea content;
+        
         private JPanel documentPanel;
         private ServerDocument loadDoc;
         
         public DocumentWindow(){
             super(docName);
             docpane = new JTextPane();
-            loadDoc = Server.getDocument(docName);
-            String content = loadDoc.getDocContent().toString();
-            System.out.println("docname is " + docName);
-            System.out.println("doc content is" + loadDoc.getDocContent());
-            displayedDoc = loadDoc;
+            new ServerMessage("open " + clientName + " " + docName);
+            //String content = loadDoc.getDocContent().toString();
+//            System.out.println("docname is " + docName);
+//            System.out.println("doc content is" + loadDoc.getDocContent());
+//            displayedDoc = loadDoc;
             docpane.setText(content);
             documentPanel = new JPanel();
             documentPanel.add(docpane);
@@ -694,103 +697,22 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             
             StringBuilder message = new StringBuilder();
             String keyChar = String.valueOf(e.getKeyChar());
-            if (keyChar.matches("\\S")){
-                message.append(clientName + " " + docName + " Insert " + keyChar);
-            }
-            else if(e.equals(KeyEvent.VK_SPACE) || e.equals(KeyEvent.VK_ENTER)){
+            
+            if(e.equals(KeyEvent.VK_SPACE) || e.equals(KeyEvent.VK_ENTER)){
                 message.append(clientName + " " + docName + " SpaceEntered");
             }
             else if(e.equals(KeyEvent.VK_BACK_SPACE)){
                 message.append(clientName + " " + docName + " Remove " + keyChar);
+            }
+            else if (keyChar.matches("\\S")){
+                message.append(clientName + " " + docName + " Insert " + keyChar);
             }
             System.out.println(message);
            new ServerMessage(message.toString());
             
             
         }
-        
-        /**
-         * Handles communication with the server. Follows the following
-         * protocol:
-         * 
-         * Overall structure: clientName messageType messageContents
-         * 
-         * clientName currentDoc Insert edit -for when there is an insertion
-         * edit
-         * 
-         * clientName currentDoc Remove edit -for when there is a deletion edit
-         * 
-         * clientName currentDoc SpaceEntered -for when a space is entered, aka
-         * an edit finished
-         * 
-         * clientName currentDoc CursorMoved -for when the cursor is moved, aka
-         * an edit finished
-         * 
-         * clientName NewDoc fileTitle -for when a new file is made with the
-         * fileTitle
-         * 
-         * clientName currentDoc Save -for when the user presses the save button
-         * or closes the editor window
-         * 
-         * clientName currentDoc Disconnect -for when someone exits out of the
-         * whole program
-         * 
-         * @param message
-         */
-        // To write on Socket
-        private ObjectOutputStream outputStream;
-        private String serverMessage;
-        private String fromServer;
-        private class ServerMessage extends SwingWorker<String, String>{
-            public ServerMessage(String message){
-                serverMessage = message;
-            }            
-            @Override
-            protected String doInBackground() throws Exception {
-                System.out.println("youre at server message");
-                Socket newSocket = null;
-                PrintWriter out = null;
-                BufferedReader in = null;
-                        
-                try{
-                    System.out.println("youre at the first try catch");
-                    System.out.println(IPAddress);
-                    newSocket = new Socket(IPAddress, 4444);
-                    System.out.println("yovue created a new socket");
-                    out = new PrintWriter(newSocket.getOutputStream(), true);
-                    in = new BufferedReader(new InputStreamReader(newSocket.getInputStream()));
-                    out.println(serverMessage);
-                    System.out.println("youve wrote your message");
-                    out.flush();
-                }
-                catch(IOException e){
-                    System.out.println("Exception writing to server: " + e);
-                }
-                
-                fromServer = in.readLine();
-                return fromServer;
-            }
-            public void done(){
-                while(fromServer != null){
-                    System.out.println("youve read from server");                    
-                    if(fromServer.equals("success")){
-                        updateGUI();  
-                    }
-                }
-            }
-        }
-        
-        private void updateGUI(){        
-            loadDoc = Server.getDocument(docName);
-            String content = loadDoc.getDocContent().toString();
-            System.out.println("docname is still" + docName);
-            System.out.println("doc content is now " + loadDoc.getDocContent());
-            displayedDoc = loadDoc;
-            docpane.setText(content);
-            System.out.println("youve updated gui");
-        }
-        
-        
+ 
         /**
          * Document listener that listens to updates. May or may not be needed
          */
@@ -1077,11 +999,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
          * 
          */
         private void save(){
-            String saveContents = docpane.getText();
-            loadDoc.updateContent(saveContents);
-            System.out.println("save contents" + saveContents);
-            System.out.println("document content is" + loadDoc.getDocContent().toString());
+            new ServerMessage(clientName + " " + docName + " Save");
         }
+        
         /**
          * Window Listeners for the Document window, tells document to save when window is closed
          */
@@ -1195,12 +1115,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             fileLabel.setVisible(true);
             filePanel.add(fileLabel);
             
-            ArrayList<String> fileNames = Server.getDocs();
+            new ServerMessage("getDocNames");
             documentList = new JComboBox();
-            for (String i: fileNames){
+            for (String i: docNameList){
                 documentList.addItem(i);
             }
-            documentList.setSelectedIndex(0);
+            //documentList.setSelectedIndex(0);
             documentList.setName("docList");
             documentList.setLocation(130, 20);
             filePanel.add(documentList);
@@ -1241,7 +1161,6 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource()  == documentList){
-                fileName = documentList.getSelectedItem().toString();
             }
            
            if(e.getSource() == fileOpen){
@@ -1258,5 +1177,100 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             
         }
     }
-
+    /**
+     * Handles communication with the server. Follows the following
+     * protocol:
+     * 
+     * Overall structure: clientName messageType messageContents
+     * 
+     * clientName currentDoc Insert edit -for when there is an insertion
+     * edit
+     * 
+     * clientName currentDoc Remove edit -for when there is a deletion edit
+     * 
+     * clientName currentDoc SpaceEntered -for when a space is entered, aka
+     * an edit finished
+     * 
+     * clientName currentDoc CursorMoved -for when the cursor is moved, aka
+     * an edit finished
+     * 
+     * clientName NewDoc fileTitle -for when a new file is made with the
+     * fileTitle
+     * 
+     * clientName currentDoc Save -for when the user presses the save button
+     * or closes the editor window
+     * 
+     * clientName currentDoc Disconnect -for when someone exits out of the
+     * whole program
+     * 
+     * @param message
+     */
+    // To write on Socket
+    private ObjectOutputStream outputStream;
+    private String serverMessage;
+    private String fromServer;
+    private ArrayList<String> docNameList;
+    private class ServerMessage extends SwingWorker<String, String>{
+        public ServerMessage(String message){
+            serverMessage = message;
+        }            
+        @Override
+        protected String doInBackground() throws Exception {
+            System.out.println("youre at server message");
+            Socket newSocket = null;
+            PrintWriter out = null;
+            BufferedReader in = null;
+                    
+            try{
+                System.out.println("youre at the first try catch");
+                System.out.println(IPAddress);
+                newSocket = new Socket(IPAddress, 4444);
+                System.out.println("yovue created a new socket");
+                out = new PrintWriter(newSocket.getOutputStream(), true);
+                in = new BufferedReader(new InputStreamReader(newSocket.getInputStream()));
+                out.println(serverMessage);
+                System.out.println("youve wrote your message");
+                out.flush();
+            }
+            catch(IOException e){
+                System.out.println("Exception writing to server: " + e);
+            }
+            
+            fromServer = in.readLine();
+            return fromServer;
+        }
+        public void done(){
+            while(fromServer != null){
+                String[] messageList = fromServer.split(" ");
+                System.out.println("youve read from server");  
+                if(messageList[0].equals("open")){
+                    content = messageList[1];
+                }
+                if(messageList[0].equals("docNames")){
+                    for(int i = 1; i < messageList.length; i++){
+                        docNameList.add(messageList[i]);
+                    }
+                }
+                if(messageList[0].equals("update")){
+                    content = messageList[2];
+                }
+                if(messageList.length == 1){
+                    if(messageList[0].equals("success")){
+                        updateGUI();  
+                    }
+                }
+                if(messageList.length == 2){
+                    
+                }
+                if (messageList.length == 3){
+                    
+                }
+            }
+        }
+        private void updateGUI(){
+            new ServerMessage("update " + docName);
+            docpane.setText(content);
+            System.out.println("youve updated gui");
+        }
+    }
 }

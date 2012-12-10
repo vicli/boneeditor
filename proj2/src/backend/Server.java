@@ -88,15 +88,17 @@ public class Server {
                     out.flush();
                     try {
                         for (String line =in.readLine(); line!=null; line=in.readLine()) {
-                            String output = handleRequest(line);
-                            if(output != null) {
-                                out.print(output);
-                                out.flush();
-                                if (output.equals("Exit")) {
-                                    numUsers--;
-                                    return;
-                                } 
-                            } 
+                            out.print("success");
+                            out.flush();
+//                            String output = handleRequest(line);
+//                            if(output != null) {
+//                                out.print(output);
+//                                out.flush();
+//                                if (output.equals("Exit")) {
+//                                    numUsers--;
+//                                    return;
+//                                } 
+//                            } 
                         }
                     } finally {   
                         out.close();

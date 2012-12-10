@@ -1209,7 +1209,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private ObjectOutputStream outputStream;
     private String serverMessage;
     private String fromServer;
-    private ArrayList<String> docNameList;
+    private ArrayList<String> docNameList = new ArrayList<String>();
     private class ServerMessage extends SwingWorker<String, String>{
         public ServerMessage(String message){
             serverMessage = message;

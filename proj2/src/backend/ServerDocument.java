@@ -101,14 +101,17 @@ public class ServerDocument extends DefaultStyledDocument{
     /**
      * Inserts Edits into the Doc
      * @param edit The Edit to insert
-     * @param loc The location at which it would like to be inserted
+     * @param location The location at which it would like to be inserted
      * @param client The name of the client who made the insertion
      * TODO: Maybe pass a cursor instead of a loc and call cursor.getLoc()
      * @return Success message
      */
-    public synchronized String insertContent(Edit edit, int loc, String client) {
+    public synchronized String insertContent(Edit edit, String location, String client) {
         // Check if the location isn't the beginning or end, and that the location isn't 
         // in between two edits belonging to someone else, aka in a locked location
+        
+        int loc = Integer.getInteger(location);
+        
         if (loc > 0 && loc < content.size() - 1) {
             if (!content.get(loc - 1).getOwner().equals(client) && !content.get(loc + 1).getOwner().equals(DOC_NAME)) {
                 if (content.get(loc - 1).getOwner().equals(content.get(loc + 1).getOwner())) {
@@ -128,7 +131,10 @@ public class ServerDocument extends DefaultStyledDocument{
      * TODO: Maybe pass a cursor instead of locations
      * @return Success message
      */
-    public synchronized String removeContent(int begin, int end, String client) {
+    public synchronized String removeContent(String b, String e, String client) {
+        int begin = Integer.getInteger(b);
+        int end = Integer.getInteger(e);
+        
         if (begin == end && begin >=0 && begin < content.size() && (content.get(begin).getOwner().equals(client) || 
                 content.get(begin).getOwner().equals(DOC_NAME))) {
             content.remove(begin);

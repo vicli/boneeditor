@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Server for the realtime collaborative editor.
@@ -32,9 +33,6 @@ public class Server {
     private ServerSocket serverSocket = null;
     private int numUsers;
     private final EditController editCont;
-    
-    // TODO: make the queue work here. Make sure the constructor is right
-    private EditQueue queue = new EditQueue();
     private static Map<String, ServerDocument> docList  = new HashMap<String, ServerDocument>();
 
     /**
@@ -45,7 +43,7 @@ public class Server {
     public Server (int port) throws IOException {
         serverSocket = new ServerSocket(port);
         numUsers = 0;
-        editCont = new EditController();
+        editCont = new EditController(new EditQueue(), docList);
     }
 
     /**
@@ -94,7 +92,7 @@ public class Server {
                         for (String line =in.readLine(); line!=null; line=in.readLine()) {
                             out.println("success");
                             out.flush();
-//                            String output = handleRequest(line);
+                            String output = handleRequest(line);
 //                            if(output != null) {
 //                                out.print(output);
 //                                out.flush();
@@ -119,24 +117,8 @@ public class Server {
                  *
                  */
                 private String handleRequest(String input) {
-                    // Create a caret and a key listener, and listen to client.
-                    // sent client input as an EDIT message, to Edit queue
-                    // edit queue will handle processing 
-                    
-//                    // TODO: define regex of protocol from user to server, decide if necessary
-//                    String regex = "()|" + //insert
-//                            "()|" + //remove
-//                            "()|" + //spaceEntered
-//                            "()|" + //cursorMoved
-//                            "()|" + //save
-//                            "()|" + //disconnect
-//                            "()"; //newDoc
-//                    if(!input.matches(regex)) {
-//                        //invalid input
-//                        return null;
-//                    }
                     String[] tokens = input.split(" ");
-                    if (tokens[1].equals("NewDoc")) { 
+                    if (tokens.length > 1 && tokens[1].equals("NewDoc")) { 
                         String title = "";
                         for (int i = 2; i < tokens.length; i++) {
                             title += tokens[i];
@@ -149,20 +131,11 @@ public class Server {
                             docList.put(title, new ServerDocument(title));
                             return "Update doc";
                         }
-                    } else if (tokens[2].equals("Save")) {
-                        return editCont.endEdit(input, docList.get(tokens[1]), queue);
-                    } else if (tokens[2].equals("Insert")) {
-                        return editCont.insert(input, docList.get(tokens[1]), queue);
-                    } else if (tokens[2].equals("Remove")) {
-                        return editCont.remove(input, docList.get(tokens[1]), queue);
-                    } else if (tokens[2].equals("SpaceEntered")) {
-                        return editCont.endEdit(input, docList.get(tokens[1]), queue);
-                    } else if (tokens[2].equals("CursorMoved")) {
-                        return editCont.endEdit(input, docList.get(tokens[1]), queue);
-                    } else if (tokens[2].equals("Disconnect")) {
-                        return "Exit";  
                     } else {
-                        return "Invalid input";
+                        if (editCont.putOnQueue(input)) 
+                            return "success";
+                        else 
+                            return "invalid";
                     }
                 }
 

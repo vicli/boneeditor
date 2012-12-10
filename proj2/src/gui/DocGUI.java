@@ -1110,21 +1110,24 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             setVisible(true);
             
             JPanel filePanel = new JPanel();
-            filePanel.setSize(300, 70);
+            filePanel.setSize(300, 20);
             fileLabel.setBounds(30,30, 100, 20);
             fileLabel.setVisible(true);
             filePanel.add(fileLabel);
             
+            JPanel choicePanel = new JPanel();
+            choicePanel.setSize(300,20);
             new ServerMessage("getDocNames").execute();
+            System.out.print(docNameList);
             documentList = new JComboBox();
             for (String i: docNameList){
                 documentList.addItem(i);
             }
             //documentList.setSelectedIndex(0);
-            documentList.setName("docList");
+            documentList.setName("documentList");
             documentList.setLocation(130, 20);
             documentList.setSize(100, 20);
-            filePanel.add(documentList);
+            choicePanel.add(documentList);
             
             JPanel fileSecPanel = new JPanel();
             fileSecPanel.setSize(300,70);
@@ -1152,10 +1155,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             fileLayout.setHorizontalGroup(fileLayout.createSequentialGroup()
                     .addGroup(fileLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
                     .addComponent(filePanel)
+                    .addComponent(choicePanel)
                     .addComponent(fileSecPanel)));
             
             fileLayout.setVerticalGroup(fileLayout.createSequentialGroup()
                     .addComponent(filePanel)
+                    .addComponent(choicePanel)
                     .addComponent(fileSecPanel));
         }
 

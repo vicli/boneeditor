@@ -538,12 +538,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             if(e.getSource() == nameOkay){           
                 docName = nameField.getText();
                 System.out.println("docname is now" + docName);
-                new ServerMessage("getDocNames");
+                new ServerMessage("getDocNames").execute();
                 if (!docNameList.isEmpty() && docNameList.contains(docName)){
                     JOptionPane.showMessageDialog(this, "Name taken already.");
                 }
                 else{
-                    new ServerMessage(clientName + " NewDoc " + docName);
+                    new ServerMessage(clientName + " NewDoc " + docName).execute();
                     nameWindow.dispose();
                     docWindow = new DocumentWindow();
                 }
@@ -600,7 +600,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         public DocumentWindow(){
             super(docName);
             docpane = new JTextPane();
-            new ServerMessage("open " + clientName + " " + docName);
+            new ServerMessage("open " + clientName + " " + docName).execute();
             //String content = loadDoc.getDocContent().toString();
 //            System.out.println("docname is " + docName);
 //            System.out.println("doc content is" + loadDoc.getDocContent());
@@ -708,7 +708,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 message.append(clientName + " " + docName + " Insert " + keyChar);
             }
             System.out.println(message);
-           new ServerMessage(message.toString());
+           new ServerMessage(message.toString()).execute();
             
             
         }
@@ -999,7 +999,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
          * 
          */
         private void save(){
-            new ServerMessage(clientName + " " + docName + " Save");
+            new ServerMessage(clientName + " " + docName + " Save").execute();
         }
         
         /**
@@ -1115,7 +1115,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             fileLabel.setVisible(true);
             filePanel.add(fileLabel);
             
-            new ServerMessage("getDocNames");
+            new ServerMessage("getDocNames").execute();
             documentList = new JComboBox();
             for (String i: docNameList){
                 documentList.addItem(i);
@@ -1268,7 +1268,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             }
         }
         private void updateGUI(){
-            new ServerMessage("update " + docName);
+            new ServerMessage("update " + docName).execute();
             docpane.setText(content);
             System.out.println("youve updated gui");
         }

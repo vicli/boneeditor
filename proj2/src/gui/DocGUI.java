@@ -37,6 +37,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
@@ -62,6 +64,7 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.border.Border;
 import javax.swing.event.CaretEvent;
@@ -81,6 +84,7 @@ import javax.swing.text.StyledDocument;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
+
 
 import backend.Server;
 import backend.ServerDocument;
@@ -700,7 +704,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 message.append(clientName + " " + docName + " Remove " + keyChar);
             }
             System.out.println(message);
-            serverMessage(message.toString());
+           new ServerMessage(message.toString());
             
             
         }
@@ -735,41 +739,48 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
          */
         // To write on Socket
         private ObjectOutputStream outputStream;
-        public void serverMessage (String message){
-            System.out.println("youre at server message");
-            Socket newSocket = null;
-            PrintWriter out = null;
-            BufferedReader in = null;
-                    
-            try{
-                System.out.println("youre at the first try catch");
-                System.out.println(IPAddress);
-                newSocket = new Socket(IPAddress, 4444);
-                System.out.println("yovue created a new socket");
-                out = new PrintWriter(newSocket.getOutputStream(), true);
-                in = new BufferedReader(new InputStreamReader(newSocket.getInputStream()));
-                out.println(message);
-                System.out.println("youve wrote your message");
-                out.flush();
+        private String serverMessage;
+        private String fromServer;
+        private class ServerMessage extends SwingWorker<String, String>{
+            public ServerMessage(String message){
+                serverMessage = message;
+            }            
+            @Override
+            protected String doInBackground() throws Exception {
+                System.out.println("youre at server message");
+                Socket newSocket = null;
+                PrintWriter out = null;
+                BufferedReader in = null;
+                        
+                try{
+                    System.out.println("youre at the first try catch");
+                    System.out.println(IPAddress);
+                    newSocket = new Socket(IPAddress, 4444);
+                    System.out.println("yovue created a new socket");
+                    out = new PrintWriter(newSocket.getOutputStream(), true);
+                    in = new BufferedReader(new InputStreamReader(newSocket.getInputStream()));
+                    out.println(serverMessage);
+                    System.out.println("youve wrote your message");
+                    out.flush();
+                }
+                catch(IOException e){
+                    System.out.println("Exception writing to server: " + e);
+                }
+                
+                fromServer = in.readLine();
+                return fromServer;
             }
-            catch(IOException e){
-                System.out.println("Exception writing to server: " + e);
-            }
-            String fromServer;
-            try {
-                while((fromServer = in.readLine()) != null){
+            public void done(){
+                while(fromServer != null){
                     System.out.println("youve read from server");                    
                     if(fromServer.equals("success")){
                         updateGUI();  
                     }
                 }
-            } catch (IOException e) {
-                System.out.println("Exception reading from server: " + e);
             }
         }
         
-        private void updateGUI(){
-            
+        private void updateGUI(){        
             loadDoc = Server.getDocument(docName);
             String content = loadDoc.getDocContent().toString();
             System.out.println("docname is still" + docName);

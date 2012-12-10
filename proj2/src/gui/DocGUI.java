@@ -342,17 +342,18 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     public static void main(final String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                createAndShowGUI();
+                //createAndShowGUI();
+                if (args.length == 1){
+                    IPAddress = args[0];
+                    createAndShowGUI();
+                  }
+                  else{
+                    throw new IllegalArgumentException();
+                  }
             }
         });
 }
-//  if (args.length == 1){
-//  IPAddress = args[0];
-//  createAndShowGUI();
-//}
-//else{
-//  throw new IllegalArgumentException();
-//}
+
     /**
      * This is window 2 (refer to above)
      * Creates a new window 2.

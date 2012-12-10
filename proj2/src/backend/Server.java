@@ -133,7 +133,7 @@ public class Server {
                                 return "new invalid";
                             } else {
                                 docList.put(title, new ServerDocument(title));
-                                
+                                System.out.println(docList.keySet());
                                 System.out.println("7");
                                 return "new success";
                             }
@@ -160,6 +160,7 @@ public class Server {
                     } else if (tokens.length > 0 && tokens[0].equals("open")) {
                         synchronized (this) {
                         System.out.println("open");
+                        System.out.println(docList.keySet());
                         ServerDocument doc = docList.get(tokens[2]);
                         if (doc == null) {
                             return "open fail";

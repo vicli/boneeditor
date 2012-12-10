@@ -660,10 +660,10 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             docpane.setCaretPosition(0);
             
             // Listener for undoable edits and for caret changes
-            displayedDoc.addUndoableEditListener(new UndoEditListener());
+            //displayedDoc.addUndoableEditListener(new UndoEditListener());
             docpane.addCaretListener(caretLabel);
             docpane.addKeyListener(this);
-            displayedDoc.addDocumentListener(this);
+            //displayedDoc.addDocumentListener(this);
             setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             pack();
             

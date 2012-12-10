@@ -91,7 +91,7 @@ public class Server {
                         for (String line =in.readLine(); line!=null; line=in.readLine()) {
                             String output = handleRequest(line);
                             if(output != null) {
-                                out.print(output);
+                                out.println(output);
                                 out.flush();
                                 if (output.equals("Exit")) {
                                     numUsers--;

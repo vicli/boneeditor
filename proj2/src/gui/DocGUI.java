@@ -1123,6 +1123,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             //documentList.setSelectedIndex(0);
             documentList.setName("docList");
             documentList.setLocation(130, 20);
+            documentList.setSize(100, 20);
             filePanel.add(documentList);
             
             JPanel fileSecPanel = new JPanel();

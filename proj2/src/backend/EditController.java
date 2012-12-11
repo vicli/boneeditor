@@ -1,6 +1,7 @@
 package backend;
 
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * Deals with the actual Edits in the docs by adding things to the
@@ -14,13 +15,13 @@ import java.util.Map;
  * other classes.
  */
 public class EditController {
-    private EditQueue queue;
+    private ArrayBlockingQueue<String> queue;
     private Map<String, ServerDocument> docList;
     
     /**
      * Empty EditController constructor
      */
-    public EditController(EditQueue queue, Map<String, ServerDocument> docList) {
+    public EditController(ArrayBlockingQueue<String> queue, Map<String, ServerDocument> docList) {
         this.queue = queue;
         this.docList = docList;
     }
@@ -67,8 +68,13 @@ public class EditController {
         return doc.endEdit(tokens[0]);
     }
     
-    public boolean putOnQueue(String input) {
-        return queue.add(input);
+    public String putOnQueue(String input) {
+        if (!queue.add(input)) {
+            return "fail with message: " + input;
+        } else {
+            // TODO: figure out how this works
+            return "";
+        }
     }
     
     public String takeFromQueue() {

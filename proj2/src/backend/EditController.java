@@ -42,6 +42,13 @@ public class EditController {
             ServerDocument doc1 = docList.get(tokens[2]);
             System.out.println("new input: "+input);
             return doc1.insertContent(new Edit(" ", tokens[1]), tokens[5], tokens[1]);
+        } else if (tokens[0].equals("addOneEnter")) {
+            
+            ServerDocument doc1 = docList.get(tokens[2]);
+            System.out.println("new input: "+input);
+            String str = doc1.insertContent(new Edit("\n", tokens[1]), tokens[5], tokens[1]);
+            System.out.println(doc1.getDocContent());
+            return str;
         }
         ServerDocument doc = docList.get(tokens[1]);
         Edit edit;
@@ -64,7 +71,7 @@ public class EditController {
     public String remove(String input) {
         String[] tokens = input.split(" ");
         ServerDocument doc = docList.get(tokens[1]);
-        return doc.removeContent(tokens[4], tokens[5], tokens[0]);
+        return doc.removeContent(tokens[3], tokens[4], tokens[0]);
     }
     
     /**
@@ -148,6 +155,15 @@ public class EditController {
                 names += key;
             }
             return names;
+        } else if (tokens.length > 0 && tokens[0].equals("checkNames")) {
+            System.out.println("reached checknames");
+            // If asking for list of document names
+            String names = "checkNames";
+            for (String key: docList.keySet()) {
+                names += " ";
+                names += key;
+            }
+            return names;
         } else if (tokens.length > 0 && tokens[0].equals("update")) {
             System.out.println("update");
             ServerDocument doc = docList.get(tokens[1]);
@@ -165,7 +181,11 @@ public class EditController {
         } else if (tokens.length > 2 && tokens[2].equals("Remove")) {
             return remove(next) + " "  + tokens[1];
         } else if (tokens.length > 2 && tokens[2].equals("SpaceEntered")) {
-            insert("addOneSpace "+ next);
+            if (tokens[3].equals("space")) {
+                insert("addOneSpace "+ next);
+            } else if (tokens[3].equals("enter")) {
+                insert("addOneEnter "+next);
+            }
             return endEdit(next) + " " + tokens[1];
         } else if (tokens.length > 2 && tokens[2].equals("CursorMoved")) {
             return endEdit(next) + " "  + tokens[1];

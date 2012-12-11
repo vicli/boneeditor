@@ -100,21 +100,22 @@ public class Server {
                             out.println(output);
                             out.flush();
                             
-                            String[] outTokens = output.split(" ");
-                            
-                            if (outTokens[0].equals("EndEditDone") || outTokens[0].equals("InsertDone") || 
-                                    outTokens[0].equals("RemoveDone") || outTokens[0].equals("save")) {
-                                for (int i = 0; i < socketList.size(); i++) {
-                                    String content = docList.get(outTokens[1]).getDocContent();
-                                    String update = "update " + outTokens[1] + content;
-                                    if (socketList.get(i) != socket) {
-                                        PrintWriter newOut = new PrintWriter(socketList.get(i).getOutputStream(), true);
-                                        newOut.println(update);
-                                        newOut.flush();
-                                        newOut.close();
-                                    }
-                                }
-                            }
+//                            String[] outTokens = output.split(" ");
+//                            
+//                            if (outTokens[0].equals("EndEditDone") || outTokens[0].equals("InsertDone") || 
+//                                    outTokens[0].equals("RemoveDone") || outTokens[0].equals("save")) {
+//                                for (int i = 0; i < socketList.size(); i++) {
+//                                    String content = docList.get(outTokens[1]).getDocContent();
+//                                    String update = "update " + outTokens[1] + content;
+//                                    if (socketList.get(i) != socket) {
+//                                        PrintWriter newOut = new PrintWriter(socketList.get(i).getOutputStream(), true);
+//                                        System.out.println(update);
+//                                        newOut.println(update);
+//                                        newOut.flush();
+//                                        newOut.close();
+//                                    }
+//                                }
+//                            }
                             // TODO: make this return for more cases than just save.
                                     if (output.equals("save EndEditDone")) {
                                         return;

@@ -1276,8 +1276,15 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                         
                         System.out.println("gui contnet is now" + GUIcontent);
                     }
-                    
-                    docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
+                    System.out.println("mur gui" + GUIcontent + GUIcontent.length());
+                    if(GUIcontent.length() == 0){
+                        System.out.println("woo true");
+                        docpane.setText(GUIcontent.toString());
+                    }
+                    else{
+                        System.out.println("mur bad");
+                        docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
+                    }
                 }
                 if(messageList[0].equals("new") && messageList[1].equals("success")){
                     nameWindow.dispose();

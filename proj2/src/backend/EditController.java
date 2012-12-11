@@ -74,7 +74,7 @@ public class EditController {
             return "fail with message: " + input;
         } else {
             // TODO: figure out how this works
-            return "";
+            return "empty string";
         }
     }
     

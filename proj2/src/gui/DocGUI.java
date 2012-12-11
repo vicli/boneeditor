@@ -697,14 +697,19 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             StringBuilder message = new StringBuilder();
             String keyChar = String.valueOf(e.getKeyChar());
             
-            if(keyChar.equals(" ") || keyChar.equals("\n")){
+            if(keyChar.equals(" ")){
                System.out.println("youre at vkspace");
+              
                 //new ServerMessage(clientName + " " + docName + " Insert space " + caretPosition).execute();
                 message.append(clientName + " " + docName + " SpaceEntered space " + caretPosition);
                 
             }
-            else if(e.equals(KeyEvent.VK_BACK_SPACE)){
-                message.append(clientName + " " + docName + " Remove " + keyChar + " " + caretPosition);
+            else if(keyChar.equals("\n")){
+                message.append(clientName + " " + docName + " SpaceEntered enter " + (caretPosition-1));
+            }
+            else if(keyChar.matches("[\b]")){
+                
+                message.append(clientName + " " + docName + " Remove " + caretPosition + " " + caretEnd);
             }
             else if (keyChar.matches("\\S")){
                 System.out.println("caret position is " + caretPosition);
@@ -873,6 +878,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
          *
          */
         private int caretPosition;
+        private int caretEnd;
         protected class CaretListenerLabel extends JLabel implements CaretListener {
             public CaretListenerLabel(String label) {
                 super(label);
@@ -882,6 +888,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             public void caretUpdate(CaretEvent e) {
                 displaySelectionInfo(e.getDot(), e.getMark());
                 caretPosition = e.getDot();
+                caretEnd = e.getMark();
+                System.out.println("carete pos is" + caretPosition + "caret end is" + caretEnd);
                 System.out.println("youre at caretupdate");
             }
 
@@ -1020,8 +1028,11 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
 
         @Override
         public void windowClosing(WindowEvent e) { 
-//            if(documentList.is)
-//            documentList.removeAllItems();
+            if(documentList != null){
+                documentList.removeAllItems();
+            } 
+            docNameList.clear();
+
             save();   
         }
 
@@ -1185,11 +1196,13 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                docName = fileName;
                dispose();
                docWindow = new DocumentWindow();
+               docNameList.clear();
                documentList.removeAllItems();
                // take care of setting text 
            }
            if(e.getSource() == fileCancel){
                dispose();
+               docNameList.clear();
                documentList.removeAllItems();
            }
             

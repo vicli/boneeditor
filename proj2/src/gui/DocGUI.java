@@ -586,7 +586,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      * This is window 5, as described above.
      *
      */
-    private String GUIcontent;
+    
     private JTextPane docpane; 
     public class DocumentWindow extends JFrame implements ActionListener, DocumentListener,KeyListener, WindowListener{
         //write get cursor position
@@ -604,7 +604,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
 //            System.out.println("docname is " + docName);
 //            System.out.println("doc content is" + loadDoc.getDocContent());
 //            displayedDoc = loadDoc;
-            docpane.setText(GUIcontent);
+            //docpane.setText(GUIcontent.toString());
             documentPanel = new JPanel();
             documentPanel.add(docpane);
             //JPanel stacked = new JPanel(new CardLayout());
@@ -697,8 +697,11 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             StringBuilder message = new StringBuilder();
             String keyChar = String.valueOf(e.getKeyChar());
             
-            if(e.equals(KeyEvent.VK_SPACE) || e.equals(KeyEvent.VK_ENTER)){
-                message.append(clientName + " " + docName + " SpaceEntered");
+            if(keyChar.equals(" ") || keyChar.equals("\n")){
+               System.out.println("youre at vkspace");
+                //new ServerMessage(clientName + " " + docName + " Insert space " + caretPosition).execute();
+                message.append(clientName + " " + docName + " SpaceEntered space " + caretPosition);
+                
             }
             else if(e.equals(KeyEvent.VK_BACK_SPACE)){
                 message.append(clientName + " " + docName + " Remove " + keyChar + " " + caretPosition);
@@ -1002,6 +1005,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
          */
         private void save(){
             new ServerMessage(clientName + " " + docName + " Save").execute();
+            docpane.setText("");
+            GUIcontent.setLength(0);
         }
         
         /**
@@ -1014,7 +1019,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         public void windowClosed(WindowEvent e) {}
 
         @Override
-        public void windowClosing(WindowEvent e) {
+        public void windowClosing(WindowEvent e) {          
             save();   
         }
 
@@ -1096,10 +1101,11 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      * @author vicli
      *
      */
+    private  JComboBox documentList;
     public class FileWindow extends JFrame implements ActionListener{
         private JFrame fileWindow = new JFrame ("Files");
         private JLabel fileLabel = new JLabel("Please select a file:");
-        private  JComboBox documentList;
+        
         private JButton fileOpen;
         private JButton fileCancel;
         private String fileName;
@@ -1124,9 +1130,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             System.out.println(mess.isDone());
             System.out.print("doclist in files is" + docNameList);
             documentList = new JComboBox();
-            for (String i: docNameList){
-                documentList.addItem(i);
-            }
+            
             //documentList.setSelectedIndex(0);
             documentList.setName("documentList");
             documentList.setLocation(130, 20);
@@ -1221,6 +1225,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private String fromServer;
     private ArrayList<String> docNameList = new ArrayList<String>();
     private BufferedReader in;
+    private StringBuilder GUIcontent = new StringBuilder("");
     private class ServerMessage extends SwingWorker<String, String>{
         public ServerMessage(String message){
             serverMessage = message;
@@ -1263,9 +1268,16 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 String[] messageList = fromServer.split(" ");
                 System.out.println(fromServer);
                 System.out.println("youve read from server");  
-                if(messageList[0].equals("open")){
-                    GUIcontent = messageList[1];
-                    //docpane.setText(content);
+                if(messageList[0].equals("open") && messageList[1].equals("success")){
+                    System.out.println("youre at open sucess!");
+                    for(int i= 3; i < messageList.length; i++){                 
+                        GUIcontent.append(messageList[i]);
+                        GUIcontent.append(" ");
+                        
+                        System.out.println("gui contnet is now" + GUIcontent);
+                    }
+                    
+                    docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
                 }
                 if(messageList[0].equals("new") && messageList[1].equals("success")){
                     nameWindow.dispose();
@@ -1274,11 +1286,19 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 if(messageList[0].equals("docNames")){
                     for(int i = 1; i < messageList.length; i++){
                         System.out.println("youve reached docnames!");
+                        System.out.println(messageList[i]);
                         docNameList.add(messageList[i]);
+                        
+                    }
+                    for (String i: docNameList){
+                        System.out.println(i);
+                        documentList.addItem(i);
                     }
                 }
                 if(messageList[0].equals("update")){
-                    GUIcontent = messageList[2];
+                    for(int i= 3; i < messageList.length; i++){
+                        GUIcontent.append(messageList[i]);
+                    }
                 }
                 if(messageList.length == 1){
                     if(messageList[0].equals("success")){
@@ -1295,7 +1315,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         }
         private void updateGUI(){
             new ServerMessage("update " + docName).execute();
-            docpane.setText(GUIcontent);
+            docpane.setText(GUIcontent.toString());
             System.out.println("youve updated gui");
         }
     }

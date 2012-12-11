@@ -110,7 +110,9 @@ public class ServerDocument extends DefaultStyledDocument{
         // Check if the location isn't the beginning or end, and that the location isn't 
         // in between two edits belonging to someone else, aka in a locked location
         
-        int loc = Integer.getInteger(location);
+        System.out.println("location: "+location);
+        int loc = Integer.valueOf(location);
+        System.out.println("loc: "+loc);
         
         if (loc > 0 && loc < content.size() - 1) {
             if (!content.get(loc - 1).getOwner().equals(client) && !content.get(loc + 1).getOwner().equals(DOC_NAME)) {
@@ -163,6 +165,6 @@ public class ServerDocument extends DefaultStyledDocument{
                 content.get(i).changeOwner();
             }
         }
-        return "Done";
+        return "EndEditDone";
     }
 }

@@ -39,6 +39,7 @@ public class EditController {
         String[] tokens = input.split(" ");
         ServerDocument doc = docList.get(tokens[1]);
         Edit edit = new Edit(tokens[3], tokens[0]);
+        System.out.println("token[4]: "+tokens[4]);
         return doc.insertContent(edit, tokens[4], tokens[0]);
     }
     
@@ -74,11 +75,11 @@ public class EditController {
             return "fail with message: " + input;
         } else {
             // TODO: figure out how this works
-            return "empty string";
+            return takeFromQueue();
         }
     }
     
-    public String takeFromQueue() {
+    public synchronized String takeFromQueue() {
         // Create a caret and a key listener, and listen to client.
         // sent client input as an EDIT message, to Edit queue
         // edit queue will handle processing 
@@ -98,11 +99,54 @@ public class EditController {
         
         String next = "";
         if (!queue.isEmpty()) {
-            next = (String) queue.remove();
+            next = queue.remove();
+        } else {
+            return "emptyQueue";
         }
-        
+
         String[] tokens = next.split(" ");
-        if (tokens[2].equals("Save")) {
+
+        if (tokens.length > 1 && tokens[1].equals("NewDoc")) { 
+            System.out.println("made it to new doc");
+            // If creating a new document
+            String title = tokens[2];
+            System.out.println("current keys: "+docList.keySet());
+            if (docList.containsKey(title)) {
+                return "new fail";
+            } else {
+                docList.put(title, new ServerDocument(title));
+                return "new success";
+            }
+        } else if (tokens.length > 0 && tokens[0].equals("open")) {
+            System.out.println("made it to open");
+            ServerDocument doc = docList.get(tokens[2]);
+            if (doc == null) {
+                System.out.println("doc is null");
+                return "open fail";
+            } else {
+                String contents = doc.getDocContent();
+                System.out.println("contents: "+contents);
+                return "open success " + tokens[1] + " " + contents;
+            }
+        } else if (tokens.length > 0 && tokens[0].equals("getDocNames")) {
+            System.out.println("getdocnames");
+            // If asking for list of document names
+            String names = "";
+            for (String key: docList.keySet()) {
+                names += key;
+                names += " ";
+            }
+            return names.substring(0, names.length() - 1);
+        } else if (tokens.length > 0 && tokens[0].equals("update")) {
+            System.out.println("update");
+            ServerDocument doc = docList.get(tokens[1]);
+            if (doc == null) {
+                return "update fail";
+            } else {
+                String contents = doc.getDocContent();
+                return "update " + tokens[1] + " " + contents;
+            }
+        } else if (tokens[2].equals("Save")) {
             return endEdit(next);
         } else if (tokens[2].equals("Insert")) {
             return insert(next);

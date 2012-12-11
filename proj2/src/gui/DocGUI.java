@@ -544,8 +544,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 }
                 else{
                     new ServerMessage(clientName + " NewDoc " + docName).execute();
-                    nameWindow.dispose();
-                    docWindow = new DocumentWindow();
+                    
                 }
                 
             }
@@ -1117,8 +1116,10 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             
             JPanel choicePanel = new JPanel();
             choicePanel.setSize(300,20);
-            new ServerMessage("getDocNames").execute();
-            System.out.print(docNameList);
+            ServerMessage mess = new ServerMessage("getDocNames");
+            mess.execute();
+            System.out.println(mess.isDone());
+            System.out.print("doclist in files is" + docNameList);
             documentList = new JComboBox();
             for (String i: docNameList){
                 documentList.addItem(i);
@@ -1216,6 +1217,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private String serverMessage;
     private String fromServer;
     private ArrayList<String> docNameList = new ArrayList<String>();
+    private BufferedReader in;
     private class ServerMessage extends SwingWorker<String, String>{
         public ServerMessage(String message){
             serverMessage = message;
@@ -1233,25 +1235,38 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 newSocket = new Socket(IPAddress, 4444);
                 System.out.println("yovue created a new socket");
                 out = new PrintWriter(newSocket.getOutputStream(), true);
-                in = new BufferedReader(new InputStreamReader(newSocket.getInputStream()));
                 out.println(serverMessage);
-                System.out.println("youve wrote your message");
                 out.flush();
+                in = new BufferedReader(new InputStreamReader(newSocket.getInputStream()));
+                
+                System.out.println("youve wrote your message");
+                
             }
             catch(IOException e){
                 System.out.println("Exception writing to server: " + e);
             }
+//            
+//            fromServer = in.readLine();
+//            System.out.println("from server is" + fromServer);
             
             fromServer = in.readLine();
             return fromServer;
         }
+        @Override
         public void done(){
-            while(fromServer != null){
+            System.out.println("youre done");
+            System.out.println("the input is" + fromServer);
+            if(fromServer != null){
                 String[] messageList = fromServer.split(" ");
                 System.out.println(fromServer);
                 System.out.println("youve read from server");  
                 if(messageList[0].equals("open")){
                     content = messageList[1];
+                    docpane.setText(content);
+                }
+                if(messageList[0].equals("new") && messageList[1].equals("success")){
+                    nameWindow.dispose();
+                    docWindow = new DocumentWindow();
                 }
                 if(messageList[0].equals("docNames")){
                     for(int i = 1; i < messageList.length; i++){

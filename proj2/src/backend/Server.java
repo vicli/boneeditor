@@ -95,7 +95,7 @@ public class Server {
                         System.out.println("2");
                         String output = editCont.putOnQueue(line);
                         System.out.println("3");
-                        System.out.println("output: "+output);
+                        System.out.println("output is: "+output);
                         if(output != null) {
                             out.println(output);
                             out.flush();

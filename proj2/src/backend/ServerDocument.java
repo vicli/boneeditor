@@ -112,15 +112,14 @@ public class ServerDocument extends DefaultStyledDocument{
         
         System.out.println("location: "+location);
         int loc = Integer.valueOf(location);
-        System.out.println("loc: "+loc);
         
-        if (loc > 0 && loc < content.size() - 1) {
-            if (!content.get(loc - 1).getOwner().equals(client) && !content.get(loc + 1).getOwner().equals(DOC_NAME)) {
-                if (content.get(loc - 1).getOwner().equals(content.get(loc + 1).getOwner())) {
-                    return "Locked edit";
-                }
-            }
-        }
+//        if (loc > 0 && loc < content.size() - 1) {
+//            if (!content.get(loc - 1).getOwner().equals(client) && !content.get(loc + 1).getOwner().equals(DOC_NAME)) {
+//                if (content.get(loc - 1).getOwner().equals(content.get(loc + 1).getOwner())) {
+//                    return "Locked edit";
+//                }
+//            }
+//        }
         content.add(loc, edit);
         return "Done";
     }

@@ -128,15 +128,15 @@ public class Server {
                             System.out.println("new doc");
                             // If creating a new document
                             String title = tokens[2];
-                            if (docList.containsKey(title)) {
-                                System.out.println("6");
-                                return "new invalid";
-                            } else {
+//                            if (docList.containsKey(title)) {
+//                                System.out.println("6");
+//                                return "new invalid";
+//                            } else {
                                 docList.put(title, new ServerDocument(title));
                                 
-                                System.out.println("7");
+                                System.out.println("doc list is now " + docList.toString());
                                 return "new success";
-                            }
+                            //}
                         }
                         
                     } else if (tokens.length > 0 && tokens[0].equals("getDocNames")) {
@@ -144,6 +144,7 @@ public class Server {
                         // If asking for list of document names
                         String names = "";
                         for (String key: docList.keySet()) {
+                            System.out.println("key is" + key);
                             names += key;
                             names += " ";
                         }

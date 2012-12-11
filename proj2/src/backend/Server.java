@@ -35,6 +35,7 @@ public class Server {
     private static Map<String, ServerDocument> docList  = new HashMap<String, ServerDocument>();
     private final int CAPACITY = 500;
     private ArrayList<Socket> socketList;
+    // TODO: implement things like flooding the socketList with all messages
 
     /**
      * Makes Server that listens for connections on port.
@@ -89,6 +90,7 @@ public class Server {
                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                     try {
                         System.out.println("1");
+                        // TODO: think about this for loop and how it is making none of the threads end
                         for (String line =in.readLine(); line!=null; line=in.readLine()) {
                             System.out.println(line);
                             System.out.println("2");
@@ -96,11 +98,14 @@ public class Server {
                             System.out.println("3");
                             System.out.println("output: "+output);
                             if(output != null) {
-                                out.println(output);
-                                out.flush();
-                                if (output.equals("Exit")) {
-                                    return;
-                                } 
+                                for (int i = 0; i < socketList.size(); i++) {
+                                    out.println(output);
+                                    out.flush();
+                                    // TODO: make this return for more cases than just save.
+                                    if (output.equals("save EndEditDone")) {
+                                        return;
+                                    } 
+                                }
                             } 
                         }
                     } finally {   

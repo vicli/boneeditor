@@ -158,7 +158,7 @@ public class EditController {
                 return "update " + tokens[1] + " " + contents;
             }
         } else if (tokens.length > 2 && tokens[2].equals("Save")) {
-            return endEdit(next);
+            return "save " + endEdit(next);
         } else if (tokens.length > 2 && tokens[2].equals("Insert")) {
             return insert(next);
         } else if (tokens.length > 2 && tokens[2].equals("Remove")) {

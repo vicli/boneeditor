@@ -807,9 +807,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         private JMenu createFileMenu(){
             JMenu fileMenu = new JMenu("File");
             newAction = new NewAction();
-            saveAction = new SaveAction();
+            //saveAction = new SaveAction();
             fileMenu.add(newAction);
-            fileMenu.add(saveAction);
+            //fileMenu.add(saveAction);
             openAction = new OpenAction();
             fileMenu.add(openAction);
             //fileMenu.add(renameAction);
@@ -1019,7 +1019,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         public void windowClosed(WindowEvent e) {}
 
         @Override
-        public void windowClosing(WindowEvent e) {          
+        public void windowClosing(WindowEvent e) { 
+//            if(documentList.is)
+//            documentList.removeAllItems();
             save();   
         }
 
@@ -1183,10 +1185,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                docName = fileName;
                dispose();
                docWindow = new DocumentWindow();
+               documentList.removeAllItems();
                // take care of setting text 
            }
            if(e.getSource() == fileCancel){
                dispose();
+               documentList.removeAllItems();
            }
             
         }
@@ -1302,16 +1306,15 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                         documentList.addItem(i);
                     }
                 }
-                if(messageList[0].equals("update")){
+                if(messageList[0].equals("update") && messageList[1].equals(docName)){                    
                     for(int i= 3; i < messageList.length; i++){
                         GUIcontent.append(messageList[i]);
                     }
+                    docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
+                    GUIcontent.setLength(0);
+                    //updateGUI();
                 }
-                if(messageList.length == 1){
-                    if(messageList[0].equals("success")){
-                        updateGUI();  
-                    }
-                }
+
                 if(messageList.length == 2){
                     
                 }
@@ -1322,7 +1325,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         }
         private void updateGUI(){
             new ServerMessage("update " + docName).execute();
-            docpane.setText(GUIcontent.toString());
+            docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
+            GUIcontent.setLength(0);
             System.out.println("youve updated gui");
         }
     }

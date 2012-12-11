@@ -18,6 +18,7 @@ public class EditController {
     private ArrayBlockingQueue<String> queue;
     private Map<String, ServerDocument> docList;
     
+    
     /**
      * Empty EditController constructor
      */

@@ -27,7 +27,6 @@ import java.util.concurrent.ArrayBlockingQueue;
  * client until that client moves the Cursor or presses space or newline.
  * This helps narrow down the case where clients will try to edit right on
  * top of each other. They still type right next to each other,
- *
  */
 public class Server {
     private ServerSocket serverSocket = null;

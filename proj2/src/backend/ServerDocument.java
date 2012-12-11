@@ -121,7 +121,7 @@ public class ServerDocument extends DefaultStyledDocument{
 //            }
 //        }
         content.add(loc, edit);
-        return "Done";
+        return "InsertDone";
     }
     
     /**
@@ -149,7 +149,7 @@ public class ServerDocument extends DefaultStyledDocument{
                 removeLoc++;
             }
         }
-        return "Done";
+        return "RemoveDone";
     }
     
     /**

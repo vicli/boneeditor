@@ -34,6 +34,7 @@ public class Server {
     private final EditController editCont;
     private static Map<String, ServerDocument> docList  = new HashMap<String, ServerDocument>();
     private final int CAPACITY = 500;
+    private ArrayList<Socket> socketList;
 
     /**
      * Makes Server that listens for connections on port.
@@ -43,6 +44,7 @@ public class Server {
     public Server (int port) throws IOException {
         serverSocket = new ServerSocket(port);
         editCont = new EditController(new ArrayBlockingQueue<String>(CAPACITY), docList);
+        socketList = new ArrayList<Socket>();
     }
 
     /**
@@ -58,6 +60,7 @@ public class Server {
             // block until a client connects
             System.out.println(serverSocket.toString());
             socket = serverSocket.accept();
+            socketList.add(socket);
             System.out.println("youve accepted the socket");
             // makes threads
             Thread clientThread = new Thread(new Runnable() {
@@ -93,7 +96,7 @@ public class Server {
                             System.out.println("3");
                             System.out.println(output);
                             if(output != null) {
-                                out.print(output);
+                                out.println(output);
                                 out.flush();
                                 if (output.equals("Exit")) {
                                     return;

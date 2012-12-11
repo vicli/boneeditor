@@ -544,8 +544,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 }
                 else{
                     new ServerMessage(clientName + " NewDoc " + docName).execute();
-                    nameWindow.dispose();
-                    docWindow = new DocumentWindow();
+                    
                 }
                 
             }
@@ -1219,12 +1218,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private String fromServer;
     private ArrayList<String> docNameList = new ArrayList<String>();
     private BufferedReader in;
-    private class ServerMessage extends SwingWorker<BufferedReader, String>{
+    private class ServerMessage extends SwingWorker<String, String>{
         public ServerMessage(String message){
             serverMessage = message;
         }            
         @Override
-        protected BufferedReader doInBackground() throws Exception {
+        protected String doInBackground() throws Exception {
             System.out.println("youre at server message");
             Socket newSocket = null;
             PrintWriter out = null;
@@ -1249,24 +1248,25 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
 //            
 //            fromServer = in.readLine();
 //            System.out.println("from server is" + fromServer);
-            System.out.println("the input is" + in);
-            return in;
+            
+            fromServer = in.readLine();
+            return fromServer;
         }
         @Override
         public void done(){
             System.out.println("youre done");
-            try {
-                fromServer = in.readLine();
-            } catch (IOException e) {
-                System.out.println("fromserver can't be read:" + e);
-            }
-            System.out.println("from server is" + fromServer);
-            while(fromServer != null){
+            System.out.println("the input is" + fromServer);
+            if(fromServer != null){
                 String[] messageList = fromServer.split(" ");
                 System.out.println(fromServer);
                 System.out.println("youve read from server");  
                 if(messageList[0].equals("open")){
                     content = messageList[1];
+                    docpane.setText(content);
+                }
+                if(messageList[0].equals("new") && messageList[1].equals("success")){
+                    nameWindow.dispose();
+                    docWindow = new DocumentWindow();
                 }
                 if(messageList[0].equals("docNames")){
                     for(int i = 1; i < messageList.length; i++){

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * Server for the realtime collaborative editor.
@@ -26,13 +27,13 @@ import java.util.Set;
  * client until that client moves the Cursor or presses space or newline.
  * This helps narrow down the case where clients will try to edit right on
  * top of each other. They still type right next to each other,
- *
  */
 public class Server {
     private ServerSocket serverSocket = null;
-    private int numUsers;
+//    private int numUsers;
     private final EditController editCont;
     private static Map<String, ServerDocument> docList  = new HashMap<String, ServerDocument>();
+    private final int CAPACITY = 500;
 
     /**
      * Makes Server that listens for connections on port.
@@ -41,8 +42,7 @@ public class Server {
      */
     public Server (int port) throws IOException {
         serverSocket = new ServerSocket(port);
-        numUsers = 0;
-        editCont = new EditController(new EditQueue(), docList);
+        editCont = new EditController(new ArrayBlockingQueue<String>(CAPACITY), docList);
     }
 
     /**
@@ -81,25 +81,21 @@ public class Server {
                  * @param socket socket where the client is connected
                  * @throws IOException if connection has an error or terminates unexpectedly
                  */
-                private void handleConnection(Socket socket) throws IOException {                    
-                    numUsers++;                   
+                private void handleConnection(Socket socket) throws IOException {
                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                    //out.println("Welcome! There are currently "+numUsers+" other clients connected.");
-                    //out.flush();
                     try {
                         System.out.println("1");
                         for (String line =in.readLine(); line!=null; line=in.readLine()) {
                             System.out.println(line);
                             System.out.println("2");
-                            String output = handleRequest(line);
+                            String output = editCont.putOnQueue(line);
                             System.out.println("3");
                             System.out.println(output);
                             if(output != null) {
                                 out.print(output);
                                 out.flush();
                                 if (output.equals("Exit")) {
-                                    numUsers--;
                                     return;
                                 } 
                             } 
@@ -112,80 +108,84 @@ public class Server {
                     }
                 }
 
-                /**
-                 * Handler for client input
-                 * 
-                 * make requested mutations on game state if applicable, then return
-                 * appropriate message to user
-                 * @param input
-                 *
-                 */
-                private String handleRequest(String input) {
-                    String[] tokens = input.split(" ");
-                    System.out.println("5");
-                    if (tokens.length > 1 && tokens[1].equals("NewDoc")) { 
-                        synchronized (this) {
-                            System.out.println("new doc");
-                            // If creating a new document
-                            String title = tokens[2];
+
+
+//                /**
+//                 * Handler for client input
+//                 * 
+//                 * make requested mutations on game state if applicable, then return
+//                 * appropriate message to user
+//                 * @param input
+//                 *
+//                 */
+//                private String handleRequest(String input) {
+//                    String[] tokens = input.split(" ");
+//                    System.out.println("5");
+//                    if (tokens.length > 1 && tokens[1].equals("NewDoc")) { 
+//                        synchronized (this) {
+//                            System.out.println("new doc");
+//                            // If creating a new document
+//                            String title = tokens[2];
 //                            if (docList.containsKey(title)) {
 //                                System.out.println("6");
 //                                return "new invalid";
 //                            } else {
-                                docList.put(title, new ServerDocument(title));
-                                
-                                System.out.println("doc list is now " + docList.toString());
-                                return "new success";
-                            //}
-                        }
-                        
-                    } else if (tokens.length > 0 && tokens[0].equals("getDocNames")) {
-                        System.out.println("getdocnames");
-                        // If asking for list of document names
-                        String names = "";
-                        for (String key: docList.keySet()) {
-                            System.out.println("key is" + key);
-                            names += key;
-                            names += " ";
-                        }
-                        return names.substring(0, names.length() - 1);
-                    } else if (tokens.length > 0 && tokens[0].equals("update")) {
-                        System.out.println("update");
-                        ServerDocument doc = docList.get(tokens[1]);
-                        if (doc == null) {
-                            return "update fail";
-                        } else {
-                            String contents = doc.getDocContent();
-                            return "update " + tokens[1] + " " + contents;
-                        }
-                    } else if (tokens.length > 0 && tokens[0].equals("open")) {
-                        synchronized (this) {
-                        System.out.println("open");
-                        ServerDocument doc = docList.get(tokens[2]);
-                        if (doc == null) {
-                            return "open fail";
-                        } else {
-                            String contents = doc.getDocContent();
-                            return "open " + tokens[1] + " " + contents;
-                        }
-                        }
-                    } else {
-                        System.out.println("edit msg");
-                        // Gives all the edit messages to the edit controller to deal with, including:
-                        // save, insert, remove, space entered, cursor moved
-                        if (editCont.putOnQueue(input)) {
-                            return "success";
-                        } else { 
-                            ServerDocument doc = docList.get(tokens[1]);
-                            if (doc == null) {
-                                return tokens[2] + " " + "fail";
-                            } else {
-                                String contents = doc.getDocContent();
-                                return tokens[2] + " fail " + contents;
-                            }
-                        }
-                    }
-                }
+//                                docList.put(title, new ServerDocument(title));
+//                                
+//                                System.out.println("7");
+//                                return "new success";
+//                            }
+//                        }
+//                        
+//                    } else if (tokens.length > 0 && tokens[0].equals("getDocNames")) {
+//                        System.out.println("getdocnames");
+//                        // If asking for list of document names
+//                        String names = "";
+//                        for (String key: docList.keySet()) {
+//                            names += key;
+//                            names += " ";
+//                        }
+//                        return names.substring(0, names.length() - 1);
+//                    } else if (tokens.length > 0 && tokens[0].equals("update")) {
+//                        System.out.println("update");
+//                        ServerDocument doc = docList.get(tokens[1]);
+//                        if (doc == null) {
+//                            return "update fail";
+//                        } else {
+//                            String contents = doc.getDocContent();
+//                            return "update " + tokens[1] + " " + contents;
+//                        }
+//                    } else if (tokens.length > 0 && tokens[0].equals("open")) {
+//                        synchronized (this) {
+//                        System.out.println("made it to open");
+//                        ServerDocument doc = docList.get(tokens[2]);
+//                        if (doc == null) {
+//                            System.out.println("doc is null");
+//                            return "open fail";
+//                        } else {
+//                            
+//                            String contents = doc.getDocContent();
+//                            System.out.println("contents: "+contents);
+//                            return "open " + tokens[1] + " " + contents;
+//                        }
+//                        }
+//                    } else {
+//                        System.out.println("edit msg");
+//                        // Gives all the edit messages to the edit controller to deal with, including:
+//                        // save, insert, remove, space entered, cursor moved
+//                        if (editCont.putOnQueue(input)) {
+//                            return "success";
+//                        } else { 
+//                            ServerDocument doc = docList.get(tokens[1]);
+//                            if (doc == null) {
+//                                return tokens[2] + " " + "fail";
+//                            } else {
+//                                String contents = doc.getDocContent();
+//                                return tokens[2] + " fail " + contents;
+//                            }
+//                        }
+//                    }
+//                }
 
             });
             clientThread.start();
@@ -196,8 +196,11 @@ public class Server {
     /**
      * Start a Server running on the default port (4444).
      * 
-     // TODO: state and explain creation of server here
-     * 
+     * The server runs. It waits for clients to connect to the correct port using
+     * sockets. It calls handleConnection to deal with the sockets, and 
+     * handleConnection gives the input to the editController to put on the 
+     * EditQueue. The EditQueue deals with messages in order so that everything is 
+     * threadsafe.
      */
     public static void main(String[] args) {
         // Always uses the same port. Clients connect their GUIs

@@ -586,7 +586,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      * This is window 5, as described above.
      *
      */
-    private String content;
+    private String GUIcontent;
     private JTextPane docpane; 
     public class DocumentWindow extends JFrame implements ActionListener, DocumentListener,KeyListener, WindowListener{
         //write get cursor position
@@ -604,7 +604,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
 //            System.out.println("docname is " + docName);
 //            System.out.println("doc content is" + loadDoc.getDocContent());
 //            displayedDoc = loadDoc;
-            docpane.setText(content);
+            docpane.setText(GUIcontent);
             documentPanel = new JPanel();
             documentPanel.add(docpane);
             //JPanel stacked = new JPanel(new CardLayout());
@@ -701,10 +701,11 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 message.append(clientName + " " + docName + " SpaceEntered");
             }
             else if(e.equals(KeyEvent.VK_BACK_SPACE)){
-                message.append(clientName + " " + docName + " Remove " + keyChar);
+                message.append(clientName + " " + docName + " Remove " + keyChar + " " + caretPosition);
             }
             else if (keyChar.matches("\\S")){
-                message.append(clientName + " " + docName + " Insert " + keyChar);
+                System.out.println("caret position is " + caretPosition);
+                message.append(clientName + " " + docName + " Insert " + keyChar + " " + caretPosition);
             }
             System.out.println(message);
            new ServerMessage(message.toString()).execute();
@@ -868,6 +869,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
          * @author vicli
          *
          */
+        private int caretPosition;
         protected class CaretListenerLabel extends JLabel implements CaretListener {
             public CaretListenerLabel(String label) {
                 super(label);
@@ -876,7 +878,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             //Might not be invoked from the event dispatch thread.
             public void caretUpdate(CaretEvent e) {
                 displaySelectionInfo(e.getDot(), e.getMark());
-                
+                caretPosition = e.getDot();
+                System.out.println("youre at caretupdate");
             }
 
             //This method can be invoked from any thread.  It 
@@ -1261,8 +1264,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 System.out.println(fromServer);
                 System.out.println("youve read from server");  
                 if(messageList[0].equals("open")){
-                    content = messageList[1];
-                    docpane.setText(content);
+                    GUIcontent = messageList[1];
+                    //docpane.setText(content);
                 }
                 if(messageList[0].equals("new") && messageList[1].equals("success")){
                     nameWindow.dispose();
@@ -1275,7 +1278,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                     }
                 }
                 if(messageList[0].equals("update")){
-                    content = messageList[2];
+                    GUIcontent = messageList[2];
                 }
                 if(messageList.length == 1){
                     if(messageList[0].equals("success")){
@@ -1292,7 +1295,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         }
         private void updateGUI(){
             new ServerMessage("update " + docName).execute();
-            docpane.setText(content);
+            docpane.setText(GUIcontent);
             System.out.println("youve updated gui");
         }
     }

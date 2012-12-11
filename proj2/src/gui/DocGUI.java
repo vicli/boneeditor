@@ -121,6 +121,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      *       
      *
      * >>> TESTING STRATEGY <<<<
+     * (See Testing.pdf for a more thorough breakdown of our testing strategy; listed below are just
+     * the main parts of it)
      * Currently: Manual Testing        (If time allows, figure out how to do it via JUnit)
      * 
      * GUI LOOK TESTING
@@ -220,7 +222,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         
         
         // We create a third panel for the thirdRow of the window, which contains the
-        // the color JLabel, colorField JTextField, and the okay button 
+        // the color JLabel, colorField JTextField
         JPanel thirdRow = new JPanel();
         thirdRow.setLayout(null);
         thirdRow.setSize(600,20);
@@ -248,7 +250,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
 //            
 //        }
         
-        
+        // We create the last panel  which contains the okay button
         JPanel lastRow = new JPanel();
         lastRow.setLayout(null);
         lastRow.setSize(600,20);
@@ -699,7 +701,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 message.append(clientName + " " + docName + " SpaceEntered space " + caretPosition);
                 
             }
-            else if(keyChar.equals("\n")){
+            else if(keyChar.equals(System.getProperty("line.separator"))){
                 message.append(clientName + " " + docName + " SpaceEntered enter " + (caretPosition-1));
             }
             else if(keyChar.matches("[\b]")){
@@ -1264,9 +1266,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             catch(IOException e){
                 System.out.println("Exception writing to server: " + e);
             }
-
-            
-            fromServer = in.readLine();
+    
+            fromServer = in.readLine();  
             return fromServer;
         }
         @Override
@@ -1306,8 +1307,6 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                         System.out.println(messageList[i]);
                         docNameList.add(messageList[i]);                        
                     }
-                    
-                    
                     
                     for (String i: docNameList){
                         System.out.println(i);

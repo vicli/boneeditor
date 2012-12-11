@@ -158,16 +158,17 @@ public class EditController {
                 return "update " + tokens[1] + " " + contents;
             }
         } else if (tokens.length > 2 && tokens[2].equals("Save")) {
-            return "save " + endEdit(next);
+            endEdit(next);
+            return "save " + tokens[1];
         } else if (tokens.length > 2 && tokens[2].equals("Insert")) {
-            return insert(next);
+            return insert(next) + " " + tokens[1];
         } else if (tokens.length > 2 && tokens[2].equals("Remove")) {
-            return remove(next);
+            return remove(next) + " "  + tokens[1];
         } else if (tokens.length > 2 && tokens[2].equals("SpaceEntered")) {
             insert("addOneSpace "+ next);
-            return endEdit(next);
+            return endEdit(next) + " " + tokens[1];
         } else if (tokens.length > 2 && tokens[2].equals("CursorMoved")) {
-            return endEdit(next);
+            return endEdit(next) + " "  + tokens[1];
         } else {
             return "Invalid input";
         }

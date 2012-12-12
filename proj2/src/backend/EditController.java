@@ -55,12 +55,7 @@ public class EditController {
         }
         ServerDocument doc = docList.get(tokens[1]);
         Edit edit;
-        System.out.println("tokens[13]: "+tokens[1]);
-        //if (tokens[3].equals("space")) {
-        //    edit = new Edit(" ", tokens[0]);
-        //} else {
-            edit = new Edit(tokens[3], tokens[0]);
-        //}
+        edit = new Edit(tokens[3], tokens[0]);
         return doc.insertContent(edit, tokens[4], tokens[0]);
     }
     

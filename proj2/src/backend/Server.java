@@ -140,21 +140,24 @@ public class Server {
                              * that client only.
                              */
 
-                            out.println(output);
-                            out.flush();
+                            //out.println(output);
+                            //out.flush();
                             
                             if (outTokens[0].equals("InvalidInput")) {
                                 // do nothing, skip this loop for indexing's sake
                             } 
                             else {
+                                System.out.println("FLOODING:");
                                 for (Socket soc : socketMap.keySet()) {
                                     if (!soc.equals(socket)) {
                                           PrintWriter tempOut = new PrintWriter(soc.getOutputStream(), true);
                                           tempOut.println(output);
                                           tempOut.flush();
+                                          System.out.println("sent: "+output+" ...to "+socketMap.get(soc));
                                   } else {
                                           out.println(output);
                                           out.flush();
+                                          System.out.println("sent: "+output+" ...to "+socketMap.get(socket));
                                   }
                                 }
                             }

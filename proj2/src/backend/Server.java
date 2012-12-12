@@ -34,7 +34,7 @@ public class Server {
     private final EditController editCont;
     private static Map<String, ServerDocument> docList  = new HashMap<String, ServerDocument>();
     private final int CAPACITY = 500;
-    private ArrayList<Socket> socketList;
+    //private ArrayList<Socket> socketList;
     // TODO: implement things like flooding the socketList with all messages
 
     /**
@@ -45,7 +45,7 @@ public class Server {
     public Server (int port) throws IOException {
         serverSocket = new ServerSocket(port);
         editCont = new EditController(new ArrayBlockingQueue<String>(CAPACITY), docList);
-        socketList = new ArrayList<Socket>();
+        //socketList = new ArrayList<Socket>();
     }
 
     /**
@@ -61,7 +61,7 @@ public class Server {
             // block until a client connects
             System.out.println(serverSocket.toString());
             socket = serverSocket.accept();
-            socketList.add(socket);
+            //socketList.add(socket);
             System.out.println("youve accepted the socket");
             // makes threads
             Thread clientThread = new Thread(new Runnable() {
@@ -72,7 +72,9 @@ public class Server {
                             e.printStackTrace();
                         } finally {
                             try {
+                                System.out.println("preclose");
                                 socket.close();
+                                System.out.println("postclose");
                                 //serverSocket.close();
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -127,7 +129,7 @@ public class Server {
                         in.close();
                         System.out.println("closed");
                         //this line, check it if multithreading is wrong
-                        socketList.remove(socket);
+                        //socketList.remove(socket);
                     }
                 }
             });

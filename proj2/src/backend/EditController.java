@@ -170,6 +170,7 @@ public class EditController {
                 names += " ";
                 names += key;
             }
+            System.out.println(tokens[0] + " " + tokens[1] + names);
             return tokens[0] + " " + tokens[1] + names;
         } else if (tokens.length > 2 && tokens[2].equals("checkNames")) {
             // For check names messages

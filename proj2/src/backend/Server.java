@@ -66,6 +66,7 @@ public class Server {
             // makes threads
             Thread clientThread = new Thread(new Runnable() {
                 public void run() {
+                    
                         try {
                             handleConnection(socket);
                         } catch (IOException e) {

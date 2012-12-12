@@ -52,7 +52,7 @@ public class Edit {
      * Changes the owner to the doc
      */
     public void changeOwner() {
-        this.owner = "doc";
+        this.owner = "document";
     }
     
     /**

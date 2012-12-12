@@ -31,10 +31,9 @@ public class Server {
     private ServerSocket serverSocket = null;
 //    private int numUsers;
     private final EditController editCont;
-    private static Map<String, ServerDocument> docList  = new HashMap<String, ServerDocument>();
+    private static Map<String, ServerDocument> docList = new HashMap<String, ServerDocument>();
     private final int CAPACITY = 500;
     private ArrayList<Socket> socketList;
-    // TODO: implement things like flooding the socketList with all messages
 
     /**
      * Makes a Server that listens for connections on port.
@@ -50,137 +49,182 @@ public class Server {
     /**
      * Runs the server, listening for client connections and handling them.
      */
-    private Socket socket;
     public void serve() throws IOException {
-        while (true) {
-            System.out.println("youre before socket");
-            // block until a client connects
-            System.out.println(serverSocket.toString());
-            socket = serverSocket.accept();
-            socketList.add(socket);
-            System.out.println("youve accepted the socket");
-            // makes threads
-            Thread clientThread = new Thread(new Runnable() {
-                public void run() {
+        //adding in another thread
+        Thread receiverThread = new Thread(new Runnable() {
+            public void run() {
+                while (true) {
+                    System.out.println("youre before socket");
+                    // block until a client connects
+                    System.out.println(serverSocket.toString());
+                    Socket socket;
                     try {
-                        handleConnection(socket);
+                        socket = serverSocket.accept();
+                        socketList.add(socket);
+                        System.out.println("youve accepted the socket");
+                        // makes threads
+                        Runnable handler = new Handler(socket);
+                        Thread clientThread = new Thread(handler);
+                        clientThread.start();
                     } catch (IOException e) {
                         e.printStackTrace();
-                    } finally {
-                        try {
-                            System.out.println("preclose");
-                            socket.close();
-                            //check the following line
-                            socketList.remove(socket);
-                            System.out.println("postclose");
-                            // not sure if needed:
-                            //serverSocket.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
                     }
                 }
-                
-                /**
-                 * Handles a single client connection. Returns when client disconnects.
-                 * @param socket socket where the client is connected
-                 * @throws IOException if connection has an error or terminates unexpectedly
-                 */
-                private void handleConnection(Socket socket) throws IOException {
-                    BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                    try {
-                        for (String line =in.readLine(); line!=null; line=in.readLine()) {
-                            System.out.println("beginning of handleConnection for loop");
-                            System.out.println("input from GUI: " + line);
-                            String output = editCont.putOnQueue(line);
-                            System.out.println("output from server: " + output);
-                            if(output != null) {
-                                //out.println(output);
-                                //out.flush();
-
-                                String[] outTokens = output.split(" ");
-                                
-                                /**
-                                 * Floods update messages to the sockets with messages according to the following:
-                                 * If something was successful: send the original client the success message and send
-                                 * the rest of the clients an update message.
-                                 * If something was unsuccessful: update messages to all of the clients including the 
-                                 * original one.
-                                 * If something is a message that only the original client cares about, send the message to
-                                 * that client only.
-                                 */
-                                
-                                if (outTokens[0].equals("InvalidInput")) {
-                                    // do nothing, skip this loop for indexing's sake
-                                } else if (outTokens[2].equals("new") || outTokens[2].equals("getDocNames") || 
-                                        outTokens[2].equals("checkNames") || outTokens[2].equals("save") || 
-                                        outTokens[2].equals("open") || outTokens[2].equals("cursorMoved")) {
-                                    // These are outgoing messages that only the original client cares about
-                                    out.println(output);
-                                    out.flush();
-                                } else if (outTokens[3].equals("success")) {
-                                    // These are for successful inserts, removes, and spaceEntereds
-                                    out.println(output);
-                                    out.flush();
-
-                                    // The following is an update message
-                                    // Output: clientName docName update lines content
-                                    String linesAndContent = docList.get(outTokens[1]).getDocContent();
-                                    String update = outTokens[0] + " " + outTokens[1] + " update " + linesAndContent;
-
-                                    for (int i = 0; i < socketList.size(); i++) {
-                                        Socket s = socketList.get(i);
-                                        if (!s.equals(socket)) {
-                                            PrintWriter tempOut = new PrintWriter(s.getOutputStream(), true);
-                                            tempOut.println(update);
-                                            tempOut.flush();
-                                            tempOut.close();
-                                        }
-                                    }
-                                    
-                                } else if (outTokens[3].equals("fail")) {
-                                    // These are for unsuccessful inserts, removes, and spaceEntereds
-                                    
-                                    // The following is an update message
-                                    // Output: clientName docName update lines content
-                                    String linesAndContent = docList.get(outTokens[1]).getDocContent();
-                                    String update = outTokens[0] + " " + outTokens[1] + " update " + linesAndContent;
-                                    
-                                    for (int i = 0; i < socketList.size(); i++) {
-                                        Socket s = socketList.get(i);
-                                        if (!s.equals(socket)) {
-                                            PrintWriter tempOut = new PrintWriter(s.getOutputStream(), true);
-                                            tempOut.println(update);
-                                            tempOut.flush();
-                                            tempOut.close();
-                                        } else {
-                                            out.println(update);
-                                            out.flush();
-                                        }
-                                    }
-                                }
-                                
-                                
-                              // TODO: make this return for more cases than just save.
-//                                if (output.equals("save EndEditDone")) {
-//                                    return;
-//                                } 
-                            }
-                        } 
-                    } finally { 
-                        out.close();
-                        in.close();
-                        System.out.println("closed");
-                        // check this line if multithreading is wrong
-                        //socketList.remove(socket);
-                    }
-                }
-            });
-            clientThread.start();
-        }
+            }
+        });
+        receiverThread.start();
     }
     
+    private class Handler implements Runnable {
+        private final Socket socket;
+        private Handler (Socket s) {
+            socket = s;
+            System.out.println("closed? 5: "+socket.isClosed());
+        }
+
+        @Override
+        public void run() {
+            try {
+                System.out.println("closed? 4: "+socket.isClosed());
+                handleConnection();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } finally {
+                try {
+                    System.out.println("preclose");
+                    socket.close();
+                    //check the following line
+                    System.out.println("postclose");
+                    // not sure if needed:
+                    //serverSocket.close();
+                    } catch (IOException e) {
+                      e.printStackTrace();
+                } finally {}
+            }
+        }
+
+        /**
+         * Handles a single client connection. Returns when client disconnects.
+         * @throws IOException if connection has an error or terminates unexpectedly
+         * @throws InterruptedException 
+         */
+        private void handleConnection() throws IOException, InterruptedException {
+            System.out.println("closed? 1: "+socket.isClosed());
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            System.out.println("closed? 2: "+socket.isClosed());
+            try {
+                System.out.println("closed? 3: "+socket.isClosed());
+                
+                for (String line = in.readLine(); line!=null; line=in.readLine()) {
+                    System.out.println("closed? for loop: "+socket.isClosed());
+                    System.out.println("beginning of handleConnection for loop");
+                    System.out.println("input from GUI: " + line);
+                    //String output = editCont.putOnQueue(line);
+                    editCont.putOnQueue(line);
+                    //System.out.println("output from server: " + output);
+                    
+                    while (!editCont.getQueue().isEmpty()) {
+                        String output = editCont.takeFromQueue();
+                        if(output != null) {
+                            String[] outTokens = output.split(" ");
+
+                            /**
+                             * Floods update messages to the sockets with messages according to the following:
+                             * If something was successful: send the original client the success message and send
+                             * the rest of the clients an update message.
+                             * If something was unsuccessful: update messages to all of the clients including the 
+                             * original one.
+                             * If something is a message that only the original client cares about, send the message to
+                             * that client only.
+                             */
+
+                            
+                            if (outTokens[0].equals("InvalidInput")) {
+                                // do nothing, skip this loop for indexing's sake
+                            } else if (outTokens[2].equals("new") || outTokens[2].equals("getDocNames") || 
+                                    outTokens[2].equals("checkNames") || outTokens[2].equals("save") || 
+                                    outTokens[2].equals("open") || outTokens[2].equals("cursorMoved")) {
+                                // These are outgoing messages that only the original client cares about
+                                
+                                for (int i = 0; i < socketList.size(); i++) {
+                                    Socket s = socketList.get(i);
+                                    if (!s.equals(socket)) {
+                                        PrintWriter tempOut = new PrintWriter(s.getOutputStream(), true);
+                                        tempOut.println(output);
+                                        tempOut.flush();
+                                        //tempOut.close();
+                                    } else {
+                                        out.println(output);
+                                        out.flush();
+                                    }
+                                }
+                            } else if (outTokens[3].equals("success")) {
+                                // These are for successful inserts, removes, and spaceEntereds
+                                
+
+                                // The following is an update message
+                                // Output: clientName docName update lines content
+                                String linesAndContent = docList.get(outTokens[1]).getDocContent();
+                                String update = outTokens[0] + " " + outTokens[1] + " update " + linesAndContent;
+
+                                for (int i = 0; i < socketList.size(); i++) {
+                                    Socket s = socketList.get(i);
+                                    if (!s.equals(socket)) {
+                                        PrintWriter tempOut = new PrintWriter(s.getOutputStream(), true);
+                                        tempOut.println(update);
+                                        tempOut.flush();
+                                        //tempOut.close();
+                                    } else {
+                                        out.println(update);
+                                        out.flush();
+                                    }
+                                }
+
+                            } else if (outTokens[3].equals("fail")) {
+                                // These are for unsuccessful inserts, removes, and spaceEntereds
+
+                                // The following is an update message
+                                // Output: clientName docName update lines content
+                                String linesAndContent = docList.get(outTokens[1]).getDocContent();
+                                String update = outTokens[0] + " " + outTokens[1] + " update " + linesAndContent;
+
+                                for (int i = 0; i < socketList.size(); i++) {
+                                    Socket s = socketList.get(i);
+                                    System.out.println(s);
+                                    System.out.println(s.isConnected());
+                                    if (!s.equals(socket)) {
+                                        PrintWriter tempOut = new PrintWriter(s.getOutputStream(), true);
+                                        tempOut.println(update);
+                                        tempOut.flush();
+                                        //tempOut.close();
+                                    } else {
+                                        out.println(update);
+                                        out.flush();
+                                    }
+                                }
+                            }
+
+
+                            // TODO: make it not crash when a GUI exits
+                        }
+                    }
+                    
+                    
+                } 
+            } finally { 
+                out.close();
+                in.close();
+                System.out.println("closed");
+                // check this line if multithreading is wrong
+                socketList.remove(socket);
+            }
+        }
+    }
+        
     
     /**
      * Start a Server running on the default port (4444).

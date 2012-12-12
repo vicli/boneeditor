@@ -159,7 +159,7 @@ public class ServerDocument extends DefaultStyledDocument{
                 System.out.println(listToString(content));
                 return "Done";
             } else {
-                return "Locked";
+                return "SingleLock";
             }
             
         }
@@ -178,7 +178,7 @@ public class ServerDocument extends DefaultStyledDocument{
         }
         
         if (conflicts) {
-            return "Locked";
+            return "SomeLocked";
         } else {
             return "Done";
         }

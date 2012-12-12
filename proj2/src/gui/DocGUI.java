@@ -80,6 +80,7 @@ import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
@@ -363,6 +364,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private static Socket newSocket;
     private static PrintWriter out;
     private static BufferedReader in;
+    private static int docLength = 0;
     private static void createAndShowGUI() throws IOException{
         
         startframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -404,6 +406,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                             System.out.println(docpane == null);
                             docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
                         }
+                        docLength = GUIcontent.length();
                     }
                     
                     if(messageList[0].equals(clientName)){               
@@ -800,6 +803,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             docpane.setBounds(20, 20, 560, 800);
             docpane.setVisible(true);
             
+            DefaultCaret testCaret = (DefaultCaret) docpane.getCaret();
+            testCaret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
             
             JScrollPane scroll = new JScrollPane(docpane);
             scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -829,7 +834,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             addBindings();
             
             //Initial text is empty, set caret position
-            docpane.setCaretPosition(docpane.getDocument().getLength());
+           // docpane.setCaretPosition(docLength);
+            
+            //docpane.getCaret().
             
             //docpane.setCaretColor(Color.BLUE);
             

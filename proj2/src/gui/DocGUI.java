@@ -617,35 +617,34 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             super(docName);
             docpane = new JTextPane();
             new ServerMessage(clientName + " " + docName + " open").execute();
-            try {
-                if (in != null){
-                    String s = new String(in.readLine());
-                    System.out.println("s is" + s);
-                    StringBuilder updateContent = new StringBuilder("");
-                    String[] updateList = s.split(" ");
-                  if(s != null && updateList[2].equals("update") && updateList[1].equals(docName)){ 
-                  System.out.println("youre in update");
-                  for(int i= 4; i < updateList.length; i++){                 
-                      updateContent.append(updateList[i]);
-                      updateContent.append(" ");
-                      
-                      System.out.println("gui contnet is now" + updateContent);
-                  }
-                  System.out.println("mur gui" + updateContent + updateContent.length());
-                  if(updateContent.length() == 0){
-                      System.out.println("woo true");
-                      docpane.setText(updateContent.toString());
-                  }
-                  else{
-                      System.out.println("mur bad");
-                      docpane.setText(updateContent.toString().substring(0, updateContent.length()-1));
-                  }
-                }
-          }
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+//            try {
+//                if (in != null){
+//                    String s = new String(in.readLine());
+//                    StringBuilder updateContent = new StringBuilder("");
+//                    String[] updateList = s.split(" ");
+//                  if(s != null && updateList[2].equals("update") && updateList[1].equals(docName)){ 
+//                  System.out.println("youre in update");
+//                  for(int i= 4; i < updateList.length; i++){                 
+//                      updateContent.append(updateList[i]);
+//                      updateContent.append(" ");
+//                      
+//                      System.out.println("gui contnet is now" + updateContent);
+//                  }
+//                  System.out.println("mur gui" + updateContent + updateContent.length());
+//                  if(updateContent.length() == 0){
+//                      System.out.println("woo true");
+//                      docpane.setText(updateContent.toString());
+//                  }
+//                  else{
+//                      System.out.println("mur bad");
+//                      docpane.setText(updateContent.toString().substring(0, updateContent.length()-1));
+//                  }
+//                }
+//          }
+//            } catch (IOException e) {
+//                // TODO Auto-generated catch block
+//                e.printStackTrace();
+//            }
             //String content = loadDoc.getDocContent().toString();
 //            System.out.println("docname is " + docName);
 //            System.out.println("doc content is" + loadDoc.getDocContent());
@@ -1410,9 +1409,10 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
 //            System.out.println("youve updated gui");
 //        }
     }
+    private String s;
     private void listen() throws IOException {
-        if (in != null){
-            String s = new String(in.readLine());
+        while ( in !=null && (s = in.readLine())!=null){
+//            String s = new String(in.readLine());
             StringBuilder updateContent = new StringBuilder("");
             String[] updateList = s.split(" ");
           if(s != null && updateList[2].equals("update") && updateList[1].equals(docName)){ 

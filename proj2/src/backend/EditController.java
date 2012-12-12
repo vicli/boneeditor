@@ -98,7 +98,7 @@ public class EditController {
      * @param input The input from the GUI to the server
      * @return The result of taking the head message from the queue and dealing with it
      */
-    public String putOnQueue(String input) {
+    public synchronized String putOnQueue(String input) {
         if (!queue.add(input)) {
             return "fail with message: " + input;
         } else {

@@ -176,7 +176,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     
     private String clientColor;
     private String clientName;
-    private String docName;
+    private String docName = "";
     
     private Document displayedDoc;
     protected UndoAction undoAction;
@@ -1269,6 +1269,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     
     private ArrayList<String> docNameList = new ArrayList<String>();
     private boolean exist; 
+    
     private class ServerMessage extends SwingWorker<String, String>{
         private StringBuilder fromServer = new StringBuilder("");
         public ServerMessage(String message){
@@ -1305,11 +1306,21 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             String[] messageList = fromServer.toString().split(" ");
             
             if(fromServer != null && messageList[2].equals("update") && messageList[1].equals(docName)){                    
-                for(int i= 4; i < messageList.length; i++){
+                for(int i= 4; i < messageList.length; i++){                 
                     GUIcontent.append(messageList[i]);
+                    GUIcontent.append(" ");
+                    
+                    System.out.println("gui contnet is now" + GUIcontent);
                 }
-                docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
-                //GUIcontent.setLength(0);
+                System.out.println("mur gui" + GUIcontent + GUIcontent.length());
+                if(GUIcontent.length() == 0){
+                    System.out.println("woo true");
+                    docpane.setText(GUIcontent.toString());
+                }
+                else{
+                    System.out.println("mur bad");
+                    docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
+                }
             }
             
             if(fromServer != null && messageList[0].equals(clientName)){               

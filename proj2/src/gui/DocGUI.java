@@ -176,7 +176,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     
     private String clientColor;
     private String clientName;
-    private String docName = "";
+    private String docName;
     
     private Document displayedDoc;
     protected UndoAction undoAction;
@@ -1305,7 +1305,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             StringBuilder GUIcontent = new StringBuilder("");
             String[] messageList = fromServer.toString().split(" ");
             
-            if(fromServer != null && messageList[2].equals("update") && messageList[1].equals(docName)){                    
+            if(fromServer != null && messageList[2].equals("update") && messageList[1].equals(docName)){ 
+                System.out.println("youre in update");
                 for(int i= 4; i < messageList.length; i++){                 
                     GUIcontent.append(messageList[i]);
                     GUIcontent.append(" ");
@@ -1323,7 +1324,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 }
             }
             
-            if(fromServer != null && messageList[0].equals(clientName)){               
+            else if(fromServer != null && messageList[0].equals(clientName)){               
                 System.out.println(fromServer);
                 System.out.println("youve read from server");  
                 if(messageList[2].equals("open")){

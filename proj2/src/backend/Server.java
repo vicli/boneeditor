@@ -148,16 +148,29 @@ public class Server {
                             } 
                             else {
                                 System.out.println("FLOODING:");
+                                String lineAndContent;
+                                if (docList.get(outTokens[1]) != null && docList.get(outTokens[1]).getDocContent() != null) {
+                                    lineAndContent = " " + docList.get(outTokens[1]).getDocContent();
+                                } else {
+                                    lineAndContent = "";
+                                }
+                                String update = outTokens[0] + " " + outTokens[1] + " update" + lineAndContent;
                                 for (Socket soc : socketMap.keySet()) {
                                     if (!soc.equals(socket)) {
                                           PrintWriter tempOut = new PrintWriter(soc.getOutputStream(), true);
                                           tempOut.println(output);
                                           tempOut.flush();
+                                          tempOut.println(update);
+                                          tempOut.flush();
                                           System.out.println("sent: "+output+" ...to "+socketMap.get(soc));
+                                          System.out.println("update: "+update+" ...to "+socketMap.get(soc));
                                   } else {
                                           out.println(output);
                                           out.flush();
+                                          out.println(update);
+                                          out.flush();
                                           System.out.println("sent: "+output+" ...to "+socketMap.get(socket));
+                                          System.out.println("update: "+update+" ...to "+socketMap.get(soc));
                                   }
                                 }
                             }

@@ -84,10 +84,17 @@ public class ServerDocument extends DefaultStyledDocument{
      */
     private String listToString(ArrayList<Edit> e){
         StringBuilder string = new StringBuilder("");
+        int lines = 1;
         for (int i=0; i< e.size(); i++){
-            string.append(e.get(i).toString());
+            if (e.get(i).equals("\n")) {
+                string.append(System.getProperty("line.separator"));
+                lines++;
+            } else {
+                string.append(e.get(i).toString());
+            }
         }
-        return string.toString();
+        String numLines = Integer.toString(lines);
+        return numLines + " " + string.toString();
     }
     
     /**
@@ -121,6 +128,7 @@ public class ServerDocument extends DefaultStyledDocument{
 //            }
 //        }
         content.add(loc, edit);
+        System.out.println("currently storing: "+listToString(content));
         return "InsertDone";
     }
     

@@ -1304,7 +1304,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             StringBuilder GUIcontent = new StringBuilder("");
             String[] messageList = fromServer.toString().split(" ");
             
-            if(messageList[2].equals("update") && messageList[1].equals(docName)){                    
+            if(fromServer != null && messageList[2].equals("update") && messageList[1].equals(docName)){                    
                 for(int i= 4; i < messageList.length; i++){
                     GUIcontent.append(messageList[i]);
                 }

@@ -34,6 +34,7 @@ import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -251,6 +252,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         ipField.addActionListener(this);
         thirdRow.add(ip);
         thirdRow.add(ipField);
+        thirdRow.add(port);
+        thirdRow.add(portField);
      
 //        JColorChooser clientColor = new JColorChooser();
 //        clientColor.getSelectionModel().addChangeListener(this);
@@ -359,6 +362,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      * Runs the GUI
      * 
      */
+    private static Socket newSocket;
+    private static PrintWriter out;
+    private static BufferedReader in;
     public static void main(final String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -366,6 +372,18 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 if (args.length == 1){
                     IPAddress = args[0];
                     createAndShowGUI();
+                    try {
+                        newSocket = new Socket(IPAddress, 4444);
+                        out = new PrintWriter(newSocket.getOutputStream(), true);
+                        in =  new BufferedReader(new InputStreamReader(newSocket.getInputStream()));
+                    } catch (UnknownHostException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    
                   }
                   else{
                     throw new IllegalArgumentException();
@@ -712,10 +730,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                System.out.println("youre at vkspace");
               
                 //new ServerMessage(clientName + " " + docName + " Insert space " + caretPosition).execute();
-                message.append(clientName + " " + docName + " SpaceEntered space " + caretPosition);
-                
+                message.append(clientName + " " + docName + " SpaceEntered space " + caretPosition);                
             }
-            else if(keyChar.equals(System.getProperty("line.separator"))){
+            else if(keyChar.matches("\\n")){
                 message.append(clientName + " " + docName + " SpaceEntered enter " + (caretPosition-1));
             }
             else if(keyChar.matches("[\b]")){
@@ -1251,7 +1268,6 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private String serverMessage;
     
     private ArrayList<String> docNameList = new ArrayList<String>();
-    private BufferedReader in;
     private boolean exist; 
     private class ServerMessage extends SwingWorker<String, String>{
         private StringBuilder fromServer = new StringBuilder("");
@@ -1261,26 +1277,10 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         @Override
         protected String doInBackground() throws Exception {
             System.out.println("youre at server message");
-            Socket newSocket = null;
-            PrintWriter out = null;
-            BufferedReader in = null;
-                    
-            try{
-                System.out.println("youre at the first try catch");
-                System.out.println(IPAddress);
-                newSocket = new Socket(IPAddress, portNum);
-                System.out.println("yovue created a new socket");
-                out = new PrintWriter(newSocket.getOutputStream(), true);
-                out.println(serverMessage);
-                out.flush();
-                in = new BufferedReader(new InputStreamReader(newSocket.getInputStream()));
-                
-                System.out.println("youve wrote your message");
-                
-            }
-            catch(IOException e){
-                System.out.println("Exception writing to server: " + e);
-            }
+
+            out.println(serverMessage);
+            out.flush();                
+            System.out.println("youve wrote your message");
             
             String firstLine = in.readLine();
             System.out.println("first line is" + firstLine);
@@ -1370,12 +1370,6 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                     //GUIcontent.setLength(0);
                 }
 
-                if(messageList.length == 2){
-                    
-                }
-                if (messageList.length == 3){
-                    
-                }
             }
         }
 //        private void updateGUI(){

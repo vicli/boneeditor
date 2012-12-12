@@ -25,6 +25,11 @@ public class EditController {
         this.queue = queue;
         this.docList = docList;
     }
+    
+    //returns the queue
+    public ArrayBlockingQueue<String> getQueue() {
+        return queue;
+    }
 
     /**
      * Deals with inserts. Interacts with the EditQueue to make sure that 
@@ -97,7 +102,8 @@ public class EditController {
         if (!queue.add(input)) {
             return "fail with message: " + input;
         } else {
-            return takeFromQueue();
+            //return takeFromQueue();
+            return "";
         }
     }
     
@@ -105,14 +111,15 @@ public class EditController {
      * Takes the message that is at the head of the queue and deals with it appropriately
      * @return A message to send back to the server; the server will send a corresponding
      *    message to the GUI
+     * @throws InterruptedException 
      */
-    public synchronized String takeFromQueue() {
+    public synchronized String takeFromQueue() throws InterruptedException {
         // A regex is unnecessary here since the messages are hardcoded into the GUI
         // and will never be wrong, assuming that the GUI has been thoroughly tested.
         
         String next = "";
         if (!queue.isEmpty()) {
-            next = queue.remove();
+            next = queue.take();
         } else {
             return "emptyQueue";
         }

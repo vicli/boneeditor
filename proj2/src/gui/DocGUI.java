@@ -409,7 +409,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                         docLength = GUIcontent.length();
                     }
                     
-                    if(messageList[0].equals(clientName)){               
+                    if(messageList.length > 0 && messageList[0].equals(clientName)){               
                         System.out.println(fromServer);
                         System.out.println("youve read from server");  
                         System.out.println("message 2 is" + messageList[2].toString());

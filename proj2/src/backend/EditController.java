@@ -52,7 +52,7 @@ public class EditController {
         }
         ServerDocument doc = docList.get(tokens[1]);
         Edit edit;
-        System.out.println("tokens[3]: "+tokens[3]);
+        System.out.println("tokens[13]: "+tokens[1]);
         //if (tokens[3].equals("space")) {
         //    edit = new Edit(" ", tokens[0]);
         //} else {
@@ -171,7 +171,7 @@ public class EditController {
                 return "update fail";
             } else {
                 String contents = doc.getDocContent();
-                return "update " + tokens[1] + " " + contents;
+                return "update success " + tokens[1] + " " + contents;
             }
         } else if (tokens.length > 2 && tokens[2].equals("Save")) {
             endEdit(next);

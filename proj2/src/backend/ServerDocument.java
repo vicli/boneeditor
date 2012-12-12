@@ -86,14 +86,16 @@ public class ServerDocument extends DefaultStyledDocument{
         StringBuilder string = new StringBuilder("");
         int lines = 1;
         for (int i=0; i< e.size(); i++){
-            if (e.get(i).equals("\n")) {
+            if (e.get(i).getValue().equals("\n")) {
                 string.append(System.getProperty("line.separator"));
                 lines++;
+                System.out.println("line counter is at: "+lines);
             } else {
                 string.append(e.get(i).toString());
             }
         }
         String numLines = Integer.toString(lines);
+        System.out.println("line counter is at: "+numLines);
         return numLines + " " + string.toString();
     }
     

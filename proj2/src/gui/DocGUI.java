@@ -14,6 +14,7 @@ import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Rectangle;
@@ -89,6 +90,7 @@ import javax.swing.undo.UndoManager;
 
 import backend.Server;
 import backend.ServerDocument;
+
 
 public class DocGUI extends JFrame implements ActionListener, KeyListener{
     
@@ -175,8 +177,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private static JPanel entirePanel;
     
     private String clientColor;
-    private String clientName;
-    private String docName;
+    private static String clientName;
+    private static String docName;
     
     private Document displayedDoc;
     protected UndoAction undoAction;
@@ -352,19 +354,125 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private static BufferedReader in;
     private static void createAndShowGUI() throws IOException{
         final DocGUI startframe = new DocGUI();
-        startframe.listen();
         startframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         try {
             newSocket = new Socket(IPAddress, 4444);
             out = new PrintWriter(newSocket.getOutputStream(), true);
             in =  new BufferedReader(new InputStreamReader(newSocket.getInputStream()));
             
-        } catch (UnknownHostException e) {
-           System.out.println("UnknownHost Exception thrown: "+  e);
-        } catch (IOException e) {
-            System.out.println("IO Exception thrown: " + e);
-        }
-    }
+            Thread inputThread = new Thread(new Runnable() {
+                public void run() {
+                    String line;
+            try {
+                while ((line = in.readLine()) != null){
+                    System.out.println("youre done");
+                    
+                    StringBuilder GUIcontent = new StringBuilder("");
+                    fromServer.append(line);
+                    System.out.println("the input is" + fromServer);
+                    String[] messageList = fromServer.toString().split(" ");
+                    System.out.println("the messageLIst is" + messageList.toString());
+                    if(messageList[2].equals("update") && messageList[1].equals(docName)){ 
+                        System.out.println("youre in update");
+                        for(int i= 4; i < messageList.length; i++){                 
+                            GUIcontent.append(messageList[i]);
+                            GUIcontent.append(" ");
+                            
+                            System.out.println("gui contnet is now" + GUIcontent);
+                        }
+                        System.out.println("mur gui" + GUIcontent + GUIcontent.length());
+                        if(GUIcontent.length() == 0){
+                            System.out.println("woo true");
+                            docpane.setText(GUIcontent.toString());
+                        }
+                        else{
+                            System.out.println("mur bad");
+                            docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
+                        }
+                        fromServer.setLength(0);
+                    }
+                    
+                    else if(messageList[0].equals(clientName)){               
+                        System.out.println(fromServer);
+                        System.out.println("youve read from server");  
+                        System.out.println("message 2 is" + messageList[2].toString());
+                        if(messageList[2].equals("open")){
+                            System.out.println("youre at open sucess!");
+                            for(int i= 4; i < messageList.length; i++){                 
+                                GUIcontent.append(messageList[i]);
+                                GUIcontent.append(" ");
+                                
+                                System.out.println("gui contnet is now" + GUIcontent);
+                            }
+                            System.out.println("mur gui" + GUIcontent + GUIcontent.length());
+                            if(GUIcontent.length() == 0){
+                                System.out.println("woo true");
+                                docpane.setText(GUIcontent.toString());
+                            }
+                            else{
+                                System.out.println("mur bad");
+                                docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
+                            }
+                        }
+                        if(messageList[2].equals("new")){
+                            docWindow = startframe.new DocumentWindow();
+                            nameWindow.dispose();
+                        }
+                        if(messageList[2].equals("getDocNames")){                    
+                            for(int i = 3; i < messageList.length; i++){
+                                System.out.println("youve reached docnames!");
+                                System.out.println(messageList[i]);
+                                docNameList.add(messageList[i]);                        
+                            }
+                            
+                            for (String i: docNameList){
+                                System.out.println(i);
+                                documentList.addItem(i);
+                            }
+                            
+                        }
+                        if(messageList[2].equals("checkNames")){
+                            ArrayList<String> list = new ArrayList<String>();
+                            for(int i = 3; i < messageList.length; i++){
+                                System.out.println("youve reached docnames!");
+                                System.out.println(messageList[i]);
+                                list.add(messageList[i]);                        
+                            }
+                            System.out.println(list.toString());
+                            if(list.contains(docName)){
+                                exist = true;
+                            }
+                            if (exist){
+                                JOptionPane.showMessageDialog(nameWindow, "Name taken already.");
+                                exist = false;
+                            }
+                            else{
+                                System.out.println("youre at new server message");
+                                //new ServerMessage(clientName + " " + docName + " new").execute();
+                                Runnable serverMessage2 = startframe.new ServerMessage(clientName + " " + docName + " new");
+                                Thread serverThread2 = new Thread(serverMessage2);
+                                serverThread2.start();
+                            }
+                        }
+   
+                        fromServer.setLength(0);
+                    }
+                }
+            } catch (HeadlessException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+            }});
+            inputThread.start();}
+            finally{
+                fromServer.setLength(0);
+            }
+        } 
+
     
 
     /**
@@ -560,7 +668,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             if(e.getSource() == nameOkay){           
                 docName = nameField.getText();
                 System.out.println("docname is now" + docName);
-                new ServerMessage(clientName + " " + docName + " checkNames").execute();
+                Runnable serverMessage = new ServerMessage(clientName + " " + docName + " checkNames");
+                Thread serverThread = new Thread(serverMessage);
+                serverThread.start();
                 System.out.println(exist);
                 
                 
@@ -604,7 +714,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      *
      */
     
-    private JTextPane docpane; 
+    private static JTextPane docpane; 
     public class DocumentWindow extends JFrame implements ActionListener, DocumentListener,KeyListener, WindowListener{
         //write get cursor position
         
@@ -616,7 +726,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         public DocumentWindow(){
             super(docName);
             docpane = new JTextPane();
-            new ServerMessage(clientName + " " + docName + " open").execute();
+            //new ServerMessage(clientName + " " + docName + " open").execute();
+            Runnable serverMessage = new ServerMessage(clientName + " " + docName + " open");
+            Thread serverThread = new Thread(serverMessage);
+            serverThread.start();
+           
+
 //            try {
 //                if (in != null){
 //                    String s = new String(in.readLine());
@@ -760,7 +875,10 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 message.append(clientName + " " + docName + " insert " + keyChar + " " + caretPosition);
             }
             System.out.println(message);
-           new ServerMessage(message.toString()).execute();
+            Runnable serverMessage = new ServerMessage(message.toString());
+            Thread serverThread = new Thread(serverMessage);
+            serverThread.start();
+           //new ServerMessage(message.toString()).execute();
             
             
         }
@@ -1056,7 +1174,10 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
          * 
          */
         private void save(){
-            new ServerMessage(clientName + " " + docName + " save").execute();
+            Runnable serverMessage = new ServerMessage(clientName + " " + docName + " save");
+            Thread serverThread = new Thread(serverMessage);
+            serverThread.start();
+           // new ServerMessage(clientName + " " + docName + " save").execute();
             docpane.setText("");
             //GUIcontent.setLength(0);
         }
@@ -1158,7 +1279,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      * @author vicli
      *
      */
-    private  JComboBox documentList = new JComboBox();
+    private static  JComboBox documentList = new JComboBox();
     public class FileWindow extends JFrame implements ActionListener{
         private JFrame fileWindow = new JFrame ("Files");
         private JLabel fileLabel = new JLabel("Please select a file:");
@@ -1182,7 +1303,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             
             JPanel choicePanel = new JPanel();
             choicePanel.setSize(300,20);
-            new ServerMessage(clientName + " " + docName + " getDocNames").execute();
+            new ServerMessage(clientName + " " + docName + " getDocNames");
 
             System.out.print("doclist in files is" + docNameList);
 
@@ -1282,125 +1403,141 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private ObjectOutputStream outputStream;
     private String serverMessage;
     
-    private ArrayList<String> docNameList = new ArrayList<String>();
-    private boolean exist; 
-
-    private class ServerMessage extends SwingWorker<String, String>{
-        private StringBuilder fromServer = new StringBuilder("");
+    private static ArrayList<String> docNameList = new ArrayList<String>();
+    private static boolean exist; 
+    private static StringBuilder fromServer = new StringBuilder("");
+    private class ServerMessage implements Runnable{
+        
         public ServerMessage(String message){
-            serverMessage = message;
-        }            
+          serverMessage = message;
+      }   
         @Override
-        protected String doInBackground() throws Exception {
+        public void run() {
             System.out.println("youre at server message");
 
             out.println(serverMessage);
-            out.flush();                
+            out.flush();
             System.out.println("youve wrote your message");
             
-            String firstLine = in.readLine();
-            System.out.println("first line is" + firstLine);
-            fromServer.append(firstLine);
-            System.out.println("frome server after first line is" + fromServer.toString());
-            String [] numLines = firstLine.split(" ");
-            System.out.println("num of lines equal to 1 is " + numLines[3].equals("1"));
-            if ((numLines[2].equals("open") || numLines[2].equals("update")) && !numLines[3].equals("1")){
-                System.out.println("oure in the forloop");
-                for (int i = 1; i < Integer.valueOf(numLines[3]); i++)
-                    fromServer.append("\n" + in.readLine());
-                    System.out.println("from server now is" + fromServer.toString());
-            }
-            
-            return fromServer.toString();
         }
-        @Override
-        public void done(){
-            System.out.println("youre done");
-            System.out.println("the input is" + fromServer);
-            StringBuilder GUIcontent = new StringBuilder("");
-            String[] messageList = fromServer.toString().split(" ");
-            
-//            if(fromServer != null && messageList[2].equals("update") && messageList[1].equals(docName)){ 
-//                System.out.println("youre in update");
-//                for(int i= 4; i < messageList.length; i++){                 
-//                    GUIcontent.append(messageList[i]);
-//                    GUIcontent.append(" ");
-//                    
-//                    System.out.println("gui contnet is now" + GUIcontent);
-//                }
-//                System.out.println("mur gui" + GUIcontent + GUIcontent.length());
-//                if(GUIcontent.length() == 0){
-//                    System.out.println("woo true");
-//                    docpane.setText(GUIcontent.toString());
-//                }
-//                else{
-//                    System.out.println("mur bad");
-//                    docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
-//                }
+    }
+    
+//    private class ServerMessage extends SwingWorker<String, String>{
+//        private StringBuilder fromServer = new StringBuilder("");
+//        public ServerMessage(String message){
+//            serverMessage = message;
+//        }            
+//        @Override
+//        protected String doInBackground() throws Exception {
+//            System.out.println("youre at server message");
+//
+//            out.println(serverMessage);
+//            out.flush();                
+//            System.out.println("youve wrote your message");
+//            
+//            String firstLine = in.readLine();
+//            System.out.println("first line is" + firstLine);
+//            fromServer.append(firstLine);
+//            System.out.println("frome server after first line is" + fromServer.toString());
+//            String [] numLines = firstLine.split(" ");
+//            System.out.println("num of lines equal to 1 is " + numLines[3].equals("1"));
+//            if ((numLines[2].equals("open") || numLines[2].equals("update")) && !numLines[3].equals("1")){
+//                System.out.println("oure in the forloop");
+//                for (int i = 1; i < Integer.valueOf(numLines[3]); i++)
+//                    fromServer.append("\n" + in.readLine());
+//                    System.out.println("from server now is" + fromServer.toString());
 //            }
-            
-            if(fromServer != null && messageList[0].equals(clientName)){               
-                System.out.println(fromServer);
-                System.out.println("youve read from server");  
-                if(messageList[2].equals("open")){
-                    System.out.println("youre at open sucess!");
-                    for(int i= 4; i < messageList.length; i++){                 
-                        GUIcontent.append(messageList[i]);
-                        GUIcontent.append(" ");
-                        
-                        System.out.println("gui contnet is now" + GUIcontent);
-                    }
-                    System.out.println("mur gui" + GUIcontent + GUIcontent.length());
-                    if(GUIcontent.length() == 0){
-                        System.out.println("woo true");
-                        docpane.setText(GUIcontent.toString());
-                    }
-                    else{
-                        System.out.println("mur bad");
-                        docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
-                    }
-                }
-                if(messageList[2].equals("new")){
-                    docWindow = new DocumentWindow();
-                    nameWindow.dispose();
-                }
-                if(messageList[2].equals("getDocNames")){                    
-                    for(int i = 3; i < messageList.length; i++){
-                        System.out.println("youve reached docnames!");
-                        System.out.println(messageList[i]);
-                        docNameList.add(messageList[i]);                        
-                    }
-                    
-                    for (String i: docNameList){
-                        System.out.println(i);
-                        documentList.addItem(i);
-                    }
-                    
-                }
-                if(messageList[2].equals("checkNames")){
-                    ArrayList<String> list = new ArrayList<String>();
-                    for(int i = 3; i < messageList.length; i++){
-                        System.out.println("youve reached docnames!");
-                        System.out.println(messageList[i]);
-                        list.add(messageList[i]);                        
-                    }
-                    System.out.println(list.toString());
-                    if(list.contains(docName)){
-                        exist = true;
-                    }
-                    if (exist){
-                        JOptionPane.showMessageDialog(nameWindow, "Name taken already.");
-                        exist = false;
-                    }
-                    else{
-                        System.out.println("youre at new server message");
-                        new ServerMessage(clientName + " " + docName + " new").execute();
-                    }
-                }
-
-
-            }
-        }
+//            
+//            return fromServer.toString();
+//        }
+//        @Override
+//        public void done(){
+//            System.out.println("youre done");
+//            System.out.println("the input is" + fromServer);
+//            StringBuilder GUIcontent = new StringBuilder("");
+//            String[] messageList = fromServer.toString().split(" ");
+//            
+////            if(fromServer != null && messageList[2].equals("update") && messageList[1].equals(docName)){ 
+////                System.out.println("youre in update");
+////                for(int i= 4; i < messageList.length; i++){                 
+////                    GUIcontent.append(messageList[i]);
+////                    GUIcontent.append(" ");
+////                    
+////                    System.out.println("gui contnet is now" + GUIcontent);
+////                }
+////                System.out.println("mur gui" + GUIcontent + GUIcontent.length());
+////                if(GUIcontent.length() == 0){
+////                    System.out.println("woo true");
+////                    docpane.setText(GUIcontent.toString());
+////                }
+////                else{
+////                    System.out.println("mur bad");
+////                    docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
+////                }
+////            }
+//            
+//            if(fromServer != null && messageList[0].equals(clientName)){               
+//                System.out.println(fromServer);
+//                System.out.println("youve read from server");  
+//                if(messageList[2].equals("open")){
+//                    System.out.println("youre at open sucess!");
+//                    for(int i= 4; i < messageList.length; i++){                 
+//                        GUIcontent.append(messageList[i]);
+//                        GUIcontent.append(" ");
+//                        
+//                        System.out.println("gui contnet is now" + GUIcontent);
+//                    }
+//                    System.out.println("mur gui" + GUIcontent + GUIcontent.length());
+//                    if(GUIcontent.length() == 0){
+//                        System.out.println("woo true");
+//                        docpane.setText(GUIcontent.toString());
+//                    }
+//                    else{
+//                        System.out.println("mur bad");
+//                        docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
+//                    }
+//                }
+//                if(messageList[2].equals("new")){
+//                    docWindow = new DocumentWindow();
+//                    nameWindow.dispose();
+//                }
+//                if(messageList[2].equals("getDocNames")){                    
+//                    for(int i = 3; i < messageList.length; i++){
+//                        System.out.println("youve reached docnames!");
+//                        System.out.println(messageList[i]);
+//                        docNameList.add(messageList[i]);                        
+//                    }
+//                    
+//                    for (String i: docNameList){
+//                        System.out.println(i);
+//                        documentList.addItem(i);
+//                    }
+//                    
+//                }
+//                if(messageList[2].equals("checkNames")){
+//                    ArrayList<String> list = new ArrayList<String>();
+//                    for(int i = 3; i < messageList.length; i++){
+//                        System.out.println("youve reached docnames!");
+//                        System.out.println(messageList[i]);
+//                        list.add(messageList[i]);                        
+//                    }
+//                    System.out.println(list.toString());
+//                    if(list.contains(docName)){
+//                        exist = true;
+//                    }
+//                    if (exist){
+//                        JOptionPane.showMessageDialog(nameWindow, "Name taken already.");
+//                        exist = false;
+//                    }
+//                    else{
+//                        System.out.println("youre at new server message");
+//                        new ServerMessage(clientName + " " + docName + " new").execute();
+//                    }
+//                }
+//
+//
+//            }
+//        }
         
 //        private void updateGUI(){
 //            new ServerMessage("update " + docName).execute();
@@ -1408,7 +1545,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
 //            GUIcontent.setLength(0);
 //            System.out.println("youve updated gui");
 //        }
-    }
+    
     private String s;
     private void listen() throws IOException {
         while ( in !=null && (s = in.readLine())!=null){

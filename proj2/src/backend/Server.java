@@ -174,43 +174,6 @@ public class Server {
                                   }
                                 }
                             }
-//                            else if (outTokens[2].equals("new") || outTokens[2].equals("getDocNames") || 
-//                                    outTokens[2].equals("checkNames") || outTokens[2].equals("save") || 
-//                                    outTokens[2].equals("open") || outTokens[2].equals("cursorMoved")) {
-//                                // These are outgoing messages that only the original client cares about
-//                                
-//                                
-//                                for (Socket soc : socketMap.keySet()) {
-//                                    if (!soc.equals(socket)) {
-//                                        if (socketMap.get(soc).equals(outTokens[0])) {
-//                                            PrintWriter tempOut = new PrintWriter(soc.getOutputStream(), true);
-//                                            tempOut.println(output);
-//                                            tempOut.flush();
-//                                        }
-//                                    } else {
-//                                        if (socketMap.get(socket).equals(outTokens[1])) {
-//                                            out.println(output);
-//                                            out.flush();
-//                                        }
-//                                    }
-//                                }
-//                            } else {
-//                                String linesAndContent = docList.get(outTokens[1]).getDocContent();
-//                                String update = outTokens[0] + " " + outTokens[1] + " update " + linesAndContent;
-//                                
-//                                for (Socket soc : socketMap.keySet()) {
-//                                    if (!soc.equals(socket)) {
-//                                            PrintWriter tempOut = new PrintWriter(soc.getOutputStream(), true);
-//                                            tempOut.println(update);
-//                                            tempOut.flush();
-//                                    } else {
-//                                        if (socketMap.get(socket).equals(outTokens[1])) {
-//                                            out.println(update);
-//                                            out.flush();
-//                                        }
-//                                    }
-//                                }
-//                            }
                             
                             // TODO: make it not crash when a GUI exits
                         }

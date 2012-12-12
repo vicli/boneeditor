@@ -203,7 +203,7 @@ public class EditController {
             if (result.equals("LockedEdit")) {
                 return tokens[0] + " " + tokens[1] + " insert fail";
             } else {
-                return tokens[0] + " " + tokens[1] + " insert success";
+                return tokens[0] + " " + tokens[1] + " insert " + tokens[4];
             }
         } else if (tokens.length > 2 && tokens[2].equals("remove")) {
             // For remove messages
@@ -215,7 +215,7 @@ public class EditController {
             if (result.equals("SingleLock") || result.equals("SomeLocked")) {
                 return tokens[0] + " "  + tokens[1] + " remove fail";
             } else {
-                return tokens[0] + " "  + tokens[1] + " remove success";
+                return tokens[0] + " "  + tokens[1] + " remove " + tokens[3] + " " + tokens[4];
             }
             
         } else if (tokens.length > 2 && tokens[2].equals("spaceEntered")) {

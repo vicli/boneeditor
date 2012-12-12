@@ -209,7 +209,7 @@ public class EditController {
             // Unsuccessful output: clientName docName remove fail
             
             String result = remove(next);
-            if (result.equals("Locked")) {
+            if (result.equals("SingleLock") || result.equals("SomeLocked")) {
                 return tokens[0] + " "  + tokens[1] + " remove fail";
             } else {
                 return tokens[0] + " "  + tokens[1] + " remove success";

@@ -179,7 +179,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     
     private String clientColor;
     private static String clientName;
-    private static String docName;
+    private static String docName = new String("???");
     
     private Document displayedDoc;
     protected UndoAction undoAction;

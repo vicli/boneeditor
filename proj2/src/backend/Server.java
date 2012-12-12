@@ -70,6 +70,8 @@ public class Server {
                         try {
                             System.out.println("preclose");
                             socket.close();
+                            //check the following line
+                            socketList.remove(socket);
                             System.out.println("postclose");
                             // not sure if needed:
                             //serverSocket.close();
@@ -171,7 +173,7 @@ public class Server {
                         in.close();
                         System.out.println("closed");
                         // check this line if multithreading is wrong
-                        socketList.remove(socket);
+                        //socketList.remove(socket);
                     }
                 }
             });

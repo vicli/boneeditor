@@ -1235,11 +1235,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     // To write on Socket
     private ObjectOutputStream outputStream;
     private String serverMessage;
-    private String fromServer;
+    
     private ArrayList<String> docNameList = new ArrayList<String>();
     private BufferedReader in;
     private boolean exist; 
     private class ServerMessage extends SwingWorker<String, String>{
+        private StringBuilder fromServer = new StringBuilder("");
         public ServerMessage(String message){
             serverMessage = message;
         }            
@@ -1266,9 +1267,21 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             catch(IOException e){
                 System.out.println("Exception writing to server: " + e);
             }
-    
-            fromServer = in.readLine();  
-            return fromServer;
+            
+            String firstLine = in.readLine();
+            System.out.println("first line is" + firstLine);
+            fromServer.append(firstLine);
+            System.out.println("frome server after first line is" + fromServer.toString());
+            String [] numLines = firstLine.split(" ");
+            System.out.println("num of lines equal to 1 is " + numLines[3].equals("1"));
+            if ((numLines[0].equals("open") || numLines[0].equals("update")) && !numLines[3].equals("1")){
+                System.out.println("oure in the forloop");
+                for (int i = 1; i < Integer.valueOf(numLines[3]); i++)
+                    fromServer.append("\n" + in.readLine());
+                    System.out.println("from server now is" + fromServer.toString());
+            }
+            
+            return fromServer.toString();
         }
         @Override
         public void done(){
@@ -1277,12 +1290,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             StringBuilder GUIcontent = new StringBuilder("");
 
             if(fromServer != null){
-                String[] messageList = fromServer.split(" ");
+                String[] messageList = fromServer.toString().split(" ");
                 System.out.println(fromServer);
                 System.out.println("youve read from server");  
                 if(messageList[0].equals("open") && messageList[1].equals("success")){
                     System.out.println("youre at open sucess!");
-                    for(int i= 3; i < messageList.length; i++){                 
+                    for(int i= 4; i < messageList.length; i++){                 
                         GUIcontent.append(messageList[i]);
                         GUIcontent.append(" ");
                         
@@ -1299,7 +1312,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                     }
                 }
                 if(messageList[0].equals("new") && messageList[1].equals("success")){
-                    
+                    docWindow = new DocumentWindow();
+                    nameWindow.dispose();
                 }
                 if(messageList[0].equals("docNames")){                    
                     for(int i = 1; i < messageList.length; i++){
@@ -1330,15 +1344,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                         exist = false;
                     }
                     else{
-                        
+                        System.out.println("youre at new server message");
                         new ServerMessage(clientName + " NewDoc " + docName).execute();
-                        docWindow = new DocumentWindow();
-                        nameWindow.dispose();
-
                     }
                 }
                 if(messageList[0].equals("update") && messageList[1].equals(docName)){                    
-                    for(int i= 3; i < messageList.length; i++){
+                    for(int i= 4; i < messageList.length; i++){
                         GUIcontent.append(messageList[i]);
                     }
                     docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));

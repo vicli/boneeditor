@@ -65,6 +65,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.GroupLayout.Alignment;
@@ -194,6 +195,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private boolean isNew;
     private static String IPAddress;
     private static int portNum;
+    private static boolean docExist;
     
     public DocGUI(){
 
@@ -378,10 +380,11 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                     System.out.println("youre done");                    
                     StringBuilder GUIcontent = new StringBuilder("");
                     fromServer.append(line);
-                    System.out.println("the input is" + fromServer);
+                    System.out.println("the input is " + fromServer);
                     String[] messageList = fromServer.toString().split(" ");
                     fromServer.setLength(0);
                     System.out.println("the messageLIst is" + messageList.toString());
+                    
                     if(messageList.length > 3 && messageList[2].equals("update") && messageList[1].equals(docName)){ 
                         System.out.println("youre in update");
                         for(int i= 4; i < messageList.length; i++){                 
@@ -405,6 +408,25 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                         System.out.println(fromServer);
                         System.out.println("youve read from server");  
                         System.out.println("message 2 is" + messageList[2].toString());
+                        if(messageList[2].equals("checkNames")){
+                            ArrayList<String> list = new ArrayList<String>();
+                            for(int i = 3; i < messageList.length; i++){
+                                System.out.println("youve reached docnames!");
+                                System.out.println(messageList[i]);
+                                list.add(messageList[i]);                        
+                            }
+                            System.out.println(list.toString());
+                            if(list.contains(docName)){
+                                JOptionPane.showMessageDialog(nameWindow, "Name taken. Opening up existing document.");
+                                docExist = true;
+                            }
+
+                            else{
+                                docExist = false;
+                                System.out.println("youre at new server message");
+                            }
+                        }
+                        
                         if(messageList[2].equals("open")){
                             System.out.println("youre at open sucess!");
                             for(int i= 4; i < messageList.length; i++){                 
@@ -421,15 +443,22 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                             }
                             else{
                                 System.out.println("mur bad");
+                                System.out.println("content in mur bad is" + GUIcontent.toString());
+                                System.out.println("sbstring is" + GUIcontent.toString().substring(0, GUIcontent.length()-1));
+                                
                                 docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
                             }
                         }
                         if(messageList[2].equals("new") && !messageList[3].equals("fail")){
-                            docWindow = startframe.new DocumentWindow();
+                            //docWindow = startframe.createDoc();
+                            System.out.println("youve created a new document!");
                             nameWindow.dispose();
                         }
-                        if(messageList[2].equals("getDocNames")){                    
+                        if(messageList[2].equals("getDocNames")){ 
+                            docNameList.clear();
+                            documentList.removeAllItems();
                             for(int i = 3; i < messageList.length; i++){
+                                
                                 System.out.println("youve reached getdocnames!");
                                 System.out.println(messageList[i]);
                                 docNameList.add(messageList[i]);                        
@@ -438,31 +467,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                             for (String i: docNameList){
                                 System.out.println(i);
                                 documentList.addItem(i);
-                            }
-                            docNameList.clear();
-                            
+                            }                       
                         }
-                        if(messageList[2].equals("checkNames")){
-                            ArrayList<String> list = new ArrayList<String>();
-                            for(int i = 3; i < messageList.length; i++){
-                                System.out.println("youve reached docnames!");
-                                System.out.println(messageList[i]);
-                                list.add(messageList[i]);                        
-                            }
-                            System.out.println(list.toString());
-                            if(list.contains(docName)){
-                                JOptionPane.showMessageDialog(nameWindow, "Name taken already.");
-                            }
-
-                            else{
-                                System.out.println("youre at new server message");
-                                //new ServerMessage(clientName + " " + docName + " new").execute();
-                                Runnable serverMessage2 = startframe.new ServerMessage(clientName + " " + docName + " new");
-                                Thread serverThread2 = new Thread(serverMessage2);
-                                serverThread2.start();
-                            }
-                        }
-
                     }
                 }
             } catch (HeadlessException e) {
@@ -482,6 +488,11 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
 
     
 
+    private void sendNewMessage(String string) {
+        Runnable newMessage = new ServerMessage(string);
+        Thread newThread = new Thread(newMessage);
+        newThread.start();
+    }
     /**
      * The main method starts the GUI. 
      * 
@@ -570,9 +581,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             }
             // When the open button is pressed, we create a new instance of the fileWindow
             if(e.getSource() == openButton){
-                Runnable serverMessage = new ServerMessage(clientName + " " + docName + " getDocNames");
-                Thread serverThread = new Thread(serverMessage);
-                serverThread.start();
+                Runnable openMessage = new ServerMessage(clientName + " " + docName + " getDocNames");
+                Thread openThread = new Thread(openMessage);
+                openThread.start();
                 //new ServerMessage(clientName + " " + docName + " getDocNames");
                 fileWindow = new FileWindow();
             }            
@@ -675,15 +686,24 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         // This actionListener allows us to save the name of the document and close the name window
         // when the "okay" button is clicked, and allows us to dispose of the name window and return
         // to window 1 when the "cancel" buttons pressed.
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             if(e.getSource() == nameOkay){           
                 docName = nameField.getText();
-                System.out.println("docname is now" + docName);
-                Runnable serverMessage = new ServerMessage(clientName + " " + docName + " checkNames");
-                Thread serverThread = new Thread(serverMessage);
-                serverThread.start();
+                System.out.println("nameokay pressed");
+                Runnable checkMessage = new ServerMessage(clientName + " " + docName + " checkNames");
+                Thread checkThread = new Thread(checkMessage);
+                checkThread.start();
                 System.out.println(exist);
+                if (docExist){
+                    createDoc(false);
+                }
+                else{
+                    createDoc(true);
+                }
+               
+                nameWindow.dispose();
                 
                 
             }
@@ -723,9 +743,19 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     /**
      * Main window that displays the Document 
      * This is window 5, as described above.
+     * @return 
      *
      */
-    
+    private DocumentWindow createDoc(Boolean s){
+        if (s){
+            startframe.sendNewMessage(clientName + " " + docName + " new");
+            return new DocumentWindow();
+        }
+        else{
+            
+            return new DocumentWindow();
+        }
+    }
     private static JTextPane docpane; 
     public class DocumentWindow extends JFrame implements ActionListener, DocumentListener,KeyListener, WindowListener{
         //write get cursor position
@@ -739,9 +769,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             super(docName);
             docpane = new JTextPane();
             //new ServerMessage(clientName + " " + docName + " open").execute();
-            Runnable serverMessage = new ServerMessage(clientName + " " + docName + " open");
-            Thread serverThread = new Thread(serverMessage);
-            serverThread.start();
+            Runnable openMessage = new ServerMessage(clientName + " " + docName + " open");
+            Thread openThread = new Thread(openMessage);
+            openThread.start();
 
             //docpane.setText(GUIcontent.toString());
             documentPanel = new JPanel();
@@ -758,7 +788,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             FlowLayout layout = new FlowLayout();
             docpane.setLayout(layout);
             docpane.setName("docpane");
-            docpane.setCaretPosition(0);
+            
+            docpane.setText("");
             //docpane.setCaretColor(Color.decode(clientColor));
             //docBorder = BorderFactory.createLineBorder(Color.LIGHT_GRAY, 50);
             //docpane.setBorder(docBorder);
@@ -769,7 +800,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             
             
             JScrollPane scroll = new JScrollPane(docpane);
-            setPreferredSize(new Dimension(450, 500));
+            scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+            scroll.setPreferredSize(new Dimension(200, 20));
             //scroll.setPreferredScrollableViewportSize(docpane.getPreferredScrollableViewportSize());
 
             
@@ -795,7 +827,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             addBindings();
             
             //Initial text is empty, set caret position
-            docpane.setCaretPosition(0);
+            docpane.setCaretPosition(docpane.getDocument().getLength());
+            
+            //docpane.setCaretColor(Color.BLUE);
             
             // Listener for undoable edits and for caret changes
             //displayedDoc.addUndoableEditListener(new UndoEditListener());
@@ -807,12 +841,14 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             
             add(grayPanel);
             add(docpane);
-            add(scroll, BorderLayout.CENTER);
+            add(scroll);
             addWindowListener(this);
             
-            setSize(600, 800);
+            setSize(600, 600);
             setLocationRelativeTo(null);
             setVisible(true);
+            setMinimumSize(new Dimension(600, 800));
+            setResizable(false);
         }
         
         /**
@@ -854,9 +890,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 message.append(clientName + " " + docName + " insert " + keyChar + " " + caretPosition);
             }
             System.out.println(message);
-            Runnable serverMessage = new ServerMessage(message.toString());
-            Thread serverThread = new Thread(serverMessage);
-            serverThread.start();
+            Runnable editMessage = new ServerMessage(message.toString());
+            Thread editThread = new Thread(editMessage);
+            editThread.start();
            //new ServerMessage(message.toString()).execute();
             
             
@@ -1027,7 +1063,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
 
             //Might not be invoked from the event dispatch thread.
             public void caretUpdate(CaretEvent e) {
-                displaySelectionInfo(e.getDot(), e.getMark());
+                //displaySelectionInfo(e.getDot(), e.getMark());
                 caretPosition = e.getDot();
                 caretEnd = e.getMark();
                 System.out.println("carete pos is" + caretPosition + "caret end is" + caretEnd);
@@ -1153,9 +1189,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
          * 
          */
         private void save(){
-            Runnable serverMessage = new ServerMessage(clientName + " " + docName + " save");
-            Thread serverThread = new Thread(serverMessage);
-            serverThread.start();
+            Runnable saveMessage = new ServerMessage(clientName + " " + docName + " save");
+            Thread saveThread = new Thread(saveMessage);
+            saveThread.start();
            // new ServerMessage(clientName + " " + docName + " save").execute();
             docpane.setText("");
             //GUIcontent.setLength(0);
@@ -1335,9 +1371,9 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                System.out.println(fileName);
                docName = fileName;
                dispose();
-               Runnable serverMessage = new ServerMessage(clientName + " " + docName + " open");
-               Thread serverThread = new Thread(serverMessage);
-               serverThread.start();
+               Runnable fileOpenMessage = new ServerMessage(clientName + " " + docName + " open");
+               Thread fileOpenThread = new Thread(fileOpenMessage);
+               fileOpenThread.start();
                //docWindow = new DocumentWindow();
                docWindow = new DocumentWindow();
                docNameList.clear();
@@ -1383,13 +1419,13 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      */
     // To write on Socket
     private ObjectOutputStream outputStream;
-    private String serverMessage;
+    
     
     private static ArrayList<String> docNameList = new ArrayList<String>();
     private static boolean exist; 
     private static StringBuilder fromServer = new StringBuilder("");
     private class ServerMessage implements Runnable{
-        
+        private String serverMessage;  
         public ServerMessage(String message){
           serverMessage = message;
       }   

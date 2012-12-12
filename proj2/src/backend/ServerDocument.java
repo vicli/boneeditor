@@ -119,7 +119,6 @@ public class ServerDocument extends DefaultStyledDocument{
         // Check if the location isn't the beginning or end, and that the location isn't 
         // in between two edits belonging to someone else, aka in a locked location
         
-        System.out.println("location: "+location);
         int loc = Integer.valueOf(location);
         
 //        if (loc > 0 && loc < content.size() - 1) {
@@ -143,19 +142,31 @@ public class ServerDocument extends DefaultStyledDocument{
      * @return Success message
      */
     public synchronized String removeContent(String b, String e, String client) {
-        int begin = Integer.getInteger(b);
-        int end = Integer.getInteger(e);
-        
-        if (begin == end && begin >=0 && begin < content.size() && (content.get(begin).getOwner().equals(client) || 
-                content.get(begin).getOwner().equals(DOC_NAME))) {
-            content.remove(begin);
-            return "Done";
+        int begin = Integer.parseInt(b);
+        int end = Integer.parseInt(e);
+
+        System.out.println("begin location: "+begin);
+        System.out.println("end location: "+end);
+        System.out.println("a: "+content.get(begin));
+        System.out.println("b: "+content.get(begin).getOwner());
+        if (begin == end && begin >=0 && begin < content.size()) {
+            if (content.get(begin).getOwner().equals(client) || 
+                content.get(begin).getOwner().equals(DOC_NAME)) {
+
+                System.out.println("reaches 1");
+                content.remove(begin);
+                System.out.println(listToString(content));
+                return "Done";
+            }
         }
         int removeLoc = begin;
+        System.out.println("reaches 2");
         for (int i = begin; i < end; i++) {
             if (content.get(i).getOwner().equals(DOC_NAME) || content.get(i).getOwner().equals(client)) {
                 content.remove(removeLoc);
+                System.out.println("reaches 3");
             } else {
+                System.out.println("reaches 4");
                 removeLoc++;
             }
         }

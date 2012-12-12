@@ -220,8 +220,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         nameField.setName("nameField");
         secondRow.add(name);
         secondRow.add(nameField);
-        nameField.setLocation(300, 10);
-        nameField.setSize(100, 20);
+        nameField.setLocation(200, 10);
+        nameField.setSize(150, 20);
         
         
         // We create a third panel for the thirdRow of the window, which contains the
@@ -236,15 +236,16 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         ip.setBounds(50, 5, 150, 20);
         ipField = new JTextField();
         ipField.setName("colorField");
-        ipField.setLocation(100, 5);
-        ipField.setSize(100, 20);
+        ipField.setLocation(130, 5);
+        ipField.setSize(150, 20);
         
         JLabel port = new JLabel("Port:");
         port.setName("port");
-        port.setBounds(150, 5, 30, 30);
+        port.setLocation(320, 5);
+        port.setSize(100,20);
         portField = new JTextField();
         portField.setName("portField");
-        portField.setLocation(400, 5);
+        portField.setLocation(360, 5);
         portField.setSize(100,20);
         
         portField.addActionListener(this);
@@ -572,7 +573,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             if(e.getSource() == nameOkay){           
                 docName = nameField.getText();
                 System.out.println("docname is now" + docName);
-                new ServerMessage("checkNames").execute();
+                new ServerMessage(clientName + " " + docName + " checkNames").execute();
                 System.out.println(exist);
                 
                 
@@ -628,7 +629,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         public DocumentWindow(){
             super(docName);
             docpane = new JTextPane();
-            new ServerMessage("open " + clientName + " " + docName).execute();
+            new ServerMessage(clientName + " " + docName + " open").execute();
             //String content = loadDoc.getDocContent().toString();
 //            System.out.println("docname is " + docName);
 //            System.out.println("doc content is" + loadDoc.getDocContent());
@@ -641,7 +642,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             JPanel grayPanel = new JPanel();
             grayPanel.setVisible(true);
             grayPanel.setBackground(Color.LIGHT_GRAY);
-            grayPanel.setSize(600, 600);
+            grayPanel.setSize(600, 800);
             
             grayPanel.setLocation(0, 0);
             
@@ -654,7 +655,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             //docpane.setBorder(docBorder);
             
             docpane.setMargin(new Insets(100,100,100,100));
-            docpane.setBounds(20, 20, 560, 580);
+            docpane.setBounds(20, 20, 560, 800);
             docpane.setVisible(true);
             
             
@@ -700,7 +701,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             add(scroll, BorderLayout.CENTER);
             addWindowListener(this);
             
-            setSize(600, 600);
+            setSize(600, 800);
             setLocationRelativeTo(null);
             setVisible(true);
         }
@@ -730,18 +731,18 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                System.out.println("youre at vkspace");
               
                 //new ServerMessage(clientName + " " + docName + " Insert space " + caretPosition).execute();
-                message.append(clientName + " " + docName + " SpaceEntered space " + caretPosition);                
+                message.append(clientName + " " + docName + " spaceEntered space " + caretPosition);                
             }
             else if(keyChar.matches("\\n")){
-                message.append(clientName + " " + docName + " SpaceEntered enter " + (caretPosition-1));
+                message.append(clientName + " " + docName + " spaceEntered enter " + (caretPosition-1));
             }
             else if(keyChar.matches("[\b]")){
                 
-                message.append(clientName + " " + docName + " Remove " + caretPosition + " " + caretEnd);
+                message.append(clientName + " " + docName + " remove " + caretPosition + " " + caretEnd);
             }
             else if (keyChar.matches("\\S")){
                 System.out.println("caret position is " + caretPosition);
-                message.append(clientName + " " + docName + " Insert " + keyChar + " " + caretPosition);
+                message.append(clientName + " " + docName + " insert " + keyChar + " " + caretPosition);
             }
             System.out.println(message);
            new ServerMessage(message.toString()).execute();
@@ -1040,7 +1041,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
          * 
          */
         private void save(){
-            new ServerMessage(clientName + " " + docName + " Save").execute();
+            new ServerMessage(clientName + " " + docName + " save").execute();
             docpane.setText("");
             //GUIcontent.setLength(0);
         }
@@ -1166,9 +1167,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             
             JPanel choicePanel = new JPanel();
             choicePanel.setSize(300,20);
-            ServerMessage mess = new ServerMessage("getDocNames");
-            mess.execute();
-            System.out.println(mess.isDone());
+            new ServerMessage(clientName + " " + docName + " getDocNames").execute();
+
             System.out.print("doclist in files is" + docNameList);
 
             //documentList.setSelectedIndex(0);
@@ -1288,7 +1288,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             System.out.println("frome server after first line is" + fromServer.toString());
             String [] numLines = firstLine.split(" ");
             System.out.println("num of lines equal to 1 is " + numLines[3].equals("1"));
-            if ((numLines[0].equals("open") || numLines[0].equals("update")) && !numLines[3].equals("1")){
+            if ((numLines[2].equals("open") || numLines[2].equals("update")) && !numLines[3].equals("1")){
                 System.out.println("oure in the forloop");
                 for (int i = 1; i < Integer.valueOf(numLines[3]); i++)
                     fromServer.append("\n" + in.readLine());
@@ -1302,12 +1302,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             System.out.println("youre done");
             System.out.println("the input is" + fromServer);
             StringBuilder GUIcontent = new StringBuilder("");
-
-            if(fromServer != null){
-                String[] messageList = fromServer.toString().split(" ");
+            String[] messageList = fromServer.toString().split(" ");
+            
+            if(fromServer != null && messageList[0].equals(clientName)){               
                 System.out.println(fromServer);
                 System.out.println("youve read from server");  
-                if(messageList[0].equals("open") && messageList[1].equals("success")){
+                if(messageList[2].equals("open")){
                     System.out.println("youre at open sucess!");
                     for(int i= 4; i < messageList.length; i++){                 
                         GUIcontent.append(messageList[i]);
@@ -1325,12 +1325,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                         docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
                     }
                 }
-                if(messageList[0].equals("new") && messageList[1].equals("success")){
+                if(messageList[2].equals("new")){
                     docWindow = new DocumentWindow();
                     nameWindow.dispose();
                 }
-                if(messageList[0].equals("docNames")){                    
-                    for(int i = 1; i < messageList.length; i++){
+                if(messageList[2].equals("getDocNames")){                    
+                    for(int i = 3; i < messageList.length; i++){
                         System.out.println("youve reached docnames!");
                         System.out.println(messageList[i]);
                         docNameList.add(messageList[i]);                        
@@ -1342,14 +1342,14 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                     }
                     
                 }
-                if(messageList[0].equals("checkNames")){
+                if(messageList[2].equals("checkNames")){
                     ArrayList<String> list = new ArrayList<String>();
-                    for(int i = 1; i < messageList.length; i++){
+                    for(int i = 3; i < messageList.length; i++){
                         System.out.println("youve reached docnames!");
                         System.out.println(messageList[i]);
                         list.add(messageList[i]);                        
                     }
-                    
+                    System.out.println(list.toString());
                     if(list.contains(docName)){
                         exist = true;
                     }
@@ -1359,10 +1359,10 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                     }
                     else{
                         System.out.println("youre at new server message");
-                        new ServerMessage(clientName + " NewDoc " + docName).execute();
+                        new ServerMessage(clientName + " " + docName + " new").execute();
                     }
                 }
-                if(messageList[0].equals("update") && messageList[1].equals(docName)){                    
+                if(messageList[2].equals("update") && messageList[1].equals(docName)){                    
                     for(int i= 4; i < messageList.length; i++){
                         GUIcontent.append(messageList[i]);
                     }

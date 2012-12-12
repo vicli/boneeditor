@@ -109,7 +109,9 @@ public class Server {
                                  * that client only.
                                  */
                                 
-                                if (outTokens[2].equals("new") || outTokens[2].equals("getDocNames") || 
+                                if (outTokens[0].equals("InvalidInput")) {
+                                    // do nothing, skip this loop for indexing's sake
+                                } else if (outTokens[2].equals("new") || outTokens[2].equals("getDocNames") || 
                                         outTokens[2].equals("checkNames") || outTokens[2].equals("save") || 
                                         outTokens[2].equals("open") || outTokens[2].equals("cursorMoved")) {
                                     // These are outgoing messages that only the original client cares about

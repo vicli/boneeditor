@@ -247,7 +247,7 @@ public class EditController {
         } else {
             // If a message somehow makes it all the way through the if/else.
             // Shouldn't reach here. Is here for debugging.
-            return "Invalid input";
+            return "InvalidInput";
         }
     }
 }

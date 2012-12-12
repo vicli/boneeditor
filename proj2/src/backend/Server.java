@@ -9,7 +9,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
 /**
@@ -34,25 +33,22 @@ public class Server {
     private final EditController editCont;
     private static Map<String, ServerDocument> docList  = new HashMap<String, ServerDocument>();
     private final int CAPACITY = 500;
-    //private ArrayList<Socket> socketList;
+    private ArrayList<Socket> socketList;
     // TODO: implement things like flooding the socketList with all messages
 
     /**
-     * Makes Server that listens for connections on port.
-     * @param port port number, requires 0 <= port <= 65535
+     * Makes a Server that listens for connections on port.
+     * @param port The port number, requires 0 <= port <= 65535
      * @throws IOException 
      */
     public Server (int port) throws IOException {
         serverSocket = new ServerSocket(port);
         editCont = new EditController(new ArrayBlockingQueue<String>(CAPACITY), docList);
-        //socketList = new ArrayList<Socket>();
+        socketList = new ArrayList<Socket>();
     }
 
     /**
-     * Run the server, listening for client connections and handling them.
-     * Never returns 
-     * @author User
-     *
+     * Runs the server, listening for client connections and handling them.
      */
     private Socket socket;
     public void serve() throws IOException {
@@ -61,28 +57,28 @@ public class Server {
             // block until a client connects
             System.out.println(serverSocket.toString());
             socket = serverSocket.accept();
-            //socketList.add(socket);
+            socketList.add(socket);
             System.out.println("youve accepted the socket");
             // makes threads
             Thread clientThread = new Thread(new Runnable() {
                 public void run() {
-                    
+                    try {
+                        handleConnection(socket);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
                         try {
-                            handleConnection(socket);
+                            System.out.println("preclose");
+                            socket.close();
+                            System.out.println("postclose");
+                            // not sure if needed:
+                            //serverSocket.close();
                         } catch (IOException e) {
                             e.printStackTrace();
-                        } finally {
-                            try {
-                                System.out.println("preclose");
-                                socket.close();
-                                System.out.println("postclose");
-                                //serverSocket.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
                         }
-                    
+                    }
                 }
+                
                 /**
                  * Handles a single client connection. Returns when client disconnects.
                  * @param socket socket where the client is connected
@@ -92,58 +88,53 @@ public class Server {
                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                     try {
-                        System.out.println("1");
-                        String line = in.readLine();
-                        System.out.println(line);
-                        System.out.println("2");
-                        String output = editCont.putOnQueue(line);
-                        System.out.println("3");
-                        System.out.println("output is: "+output);
-                        if(output != null) {
-                            out.println(output);
-                            out.flush();
-                            
-//                            String[] outTokens = output.split(" ");
-//                            
-//                            if (outTokens[0].equals("EndEditDone") || outTokens[0].equals("InsertDone") || 
-//                                    outTokens[0].equals("RemoveDone") || outTokens[0].equals("save")) {
-//                                for (int i = 0; i < socketList.size(); i++) {
-//                                    String content = docList.get(outTokens[1]).getDocContent();
-//                                    String update = "update " + outTokens[1] + content;
-//                                    if (socketList.get(i) != socket) {
-//                                        PrintWriter newOut = new PrintWriter(socketList.get(i).getOutputStream(), true);
-//                                        System.out.println(update);
-//                                        newOut.println(update);
-//                                        newOut.flush();
-//                                        newOut.close();
-//                                    }
-//                                }
-//                            }
-                            // TODO: make this return for more cases than just save.
-                                    if (output.equals("save EndEditDone")) {
-                                        return;
-                                    } 
+                        for (String line =in.readLine(); line!=null; line=in.readLine()) {
+                            System.out.println("beginning of handleConnection for loop");
+                            System.out.println("input from GUI: " + line);
+                            String output = editCont.putOnQueue(line);
+                            System.out.println("output from server: " + output);
+                            if(output != null) {
+                                out.println(output);
+                                out.flush();
+
+                                String[] outTokens = output.split(" ");
+                                if (outTokens[0].equals("EndEditDone") || outTokens[0].equals("InsertDone") || 
+                                      outTokens[0].equals("RemoveDone") || outTokens[0].equals("save")) {
+                                    for (int i = 0; i < socketList.size(); i++) {
+                                        Socket s = socketList.get(i);
+                                        if (!s.equals(socket)) {
+                                            PrintWriter tempOut = new PrintWriter(s.getOutputStream(), true);
+                                            tempOut.println(output);
+                                            tempOut.flush();
+                                        }
+                                    }
+                                }
+                                
+                              // TODO: make this return for more cases than just save.
+//                                if (output.equals("save EndEditDone")) {
+//                                    return;
+//                                } 
+                            }
                         } 
-                    } finally {   
-                        System.out.println("4");
+                    } finally { 
                         out.close();
                         in.close();
                         System.out.println("closed");
-                        //this line, check it if multithreading is wrong
-                        //socketList.remove(socket);
+                        // check this line if multithreading is wrong
+                        socketList.remove(socket);
                     }
                 }
             });
             clientThread.start();
         }
     }
-
+    
     
     /**
      * Start a Server running on the default port (4444).
      * 
      * The server runs. It waits for clients to connect to the correct port using
-     * sockets. It calls handleConnection to deal with the sockets, and 
+     * sockets. It calls handleConnection to deal with the socket of each client, and 
      * handleConnection gives the input to the editController to put on the 
      * EditQueue. The EditQueue deals with messages in order so that everything is 
      * threadsafe.
@@ -158,37 +149,5 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-    
-    /**
-     * Returns the titles of all the documents
-     * @return The titles of the documents
-     */
-    public static ArrayList<String> getDocs() { 
-        ArrayList<String> titleList = new ArrayList<String>();
-        Set<String> keys = docList.keySet();
-        if (!keys.isEmpty()){
-            titleList = new ArrayList<String>(keys);
-        }
-        return titleList; 
-    }
-    
-    public static boolean docListEmptyCheck(){
-        if (docList == null){
-            return true;
-        }
-        return false;
-    }
-    
-    public static void addDocument(String title){
-        docList.put(title, new ServerDocument(title));
-        System.out.println("doclist after adding" + docList.toString());
-    }
-    /**
-     * Returns the document with the given title or null if there is nothing with that title.
-     * @param title The title
-     */
-    public static ServerDocument getDocument(String title) {
-        return docList.get(title);
     }
 }

@@ -239,7 +239,7 @@ public class EditController {
         } else if (tokens.length > 2 && tokens[2].equals("cursorMoved")) {
             // For cursor moved messages
             // Input: clientName docName cursorMoved
-            // Output: clientName docName cursorMoved
+            // Output: clientName docName cursorMoved success
             // There is no output failure
             
             endEdit(next);

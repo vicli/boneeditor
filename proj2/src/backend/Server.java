@@ -94,22 +94,69 @@ public class Server {
                             String output = editCont.putOnQueue(line);
                             System.out.println("output from server: " + output);
                             if(output != null) {
-                                out.println(output);
-                                out.flush();
+                                //out.println(output);
+                                //out.flush();
 
                                 String[] outTokens = output.split(" ");
-                                if (outTokens[0].equals("EndEditDone") || outTokens[0].equals("InsertDone") || 
-                                      outTokens[0].equals("RemoveDone") || outTokens[0].equals("save")) {
+                                
+                                /**
+                                 * Floods update messages to the sockets with messages according to the following:
+                                 * If something was successful: send the original client the success message and send
+                                 * the rest of the clients an update message.
+                                 * If something was unsuccessful: update messages to all of the clients including the 
+                                 * original one.
+                                 * If something is a message that only the original client cares about, send the message to
+                                 * that client only.
+                                 */
+                                
+                                if (outTokens[2].equals("new") || outTokens[2].equals("getDocNames") || 
+                                        outTokens[2].equals("checkNames") || outTokens[2].equals("save") || 
+                                        outTokens[2].equals("open") || outTokens[2].equals("cursorMoved")) {
+                                    // These are outgoing messages that only the original client cares about
+                                    out.println(output);
+                                    out.flush();
+                                } else if (outTokens[3].equals("success")) {
+                                    // These are for successful inserts, removes, and spaceEntereds
+                                    out.println(output);
+                                    out.flush();
+
+                                    // The following is an update message
+                                    // Output: clientName docName update lines content
+                                    String linesAndContent = docList.get(outTokens[1]).getDocContent();
+                                    String update = outTokens[0] + " " + outTokens[1] + " update " + linesAndContent;
+
                                     for (int i = 0; i < socketList.size(); i++) {
                                         Socket s = socketList.get(i);
                                         if (!s.equals(socket)) {
                                             PrintWriter tempOut = new PrintWriter(s.getOutputStream(), true);
-                                            tempOut.println(output);
+                                            tempOut.println(update);
                                             tempOut.flush();
                                             tempOut.close();
                                         }
                                     }
+                                    
+                                } else if (outTokens[3].equals("fail")) {
+                                    // These are for unsuccessful inserts, removes, and spaceEntereds
+                                    
+                                    // The following is an update message
+                                    // Output: clientName docName update lines content
+                                    String linesAndContent = docList.get(outTokens[1]).getDocContent();
+                                    String update = outTokens[0] + " " + outTokens[1] + " update " + linesAndContent;
+                                    
+                                    for (int i = 0; i < socketList.size(); i++) {
+                                        Socket s = socketList.get(i);
+                                        if (!s.equals(socket)) {
+                                            PrintWriter tempOut = new PrintWriter(s.getOutputStream(), true);
+                                            tempOut.println(update);
+                                            tempOut.flush();
+                                            tempOut.close();
+                                        } else {
+                                            out.println(update);
+                                            out.flush();
+                                        }
+                                    }
                                 }
+                                
                                 
                               // TODO: make this return for more cases than just save.
 //                                if (output.equals("save EndEditDone")) {

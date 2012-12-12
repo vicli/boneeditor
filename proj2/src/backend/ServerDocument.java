@@ -121,13 +121,14 @@ public class ServerDocument extends DefaultStyledDocument{
         
         int loc = Integer.valueOf(location);
         
-//        if (loc > 0 && loc < content.size() - 1) {
-//            if (!content.get(loc - 1).getOwner().equals(client) && !content.get(loc + 1).getOwner().equals(DOC_NAME)) {
-//                if (content.get(loc - 1).getOwner().equals(content.get(loc + 1).getOwner())) {
-//                    return "Locked edit";
-//                }
-//            }
-//        }
+        // lols this isn't working
+        if (loc > 0 && loc < content.size() - 1) {
+            if (!content.get(loc - 1).getOwner().equals(client) && !content.get(loc + 1).getOwner().equals(DOC_NAME)) {
+                if (content.get(loc - 1).getOwner().equals(content.get(loc + 1).getOwner())) {
+                    return "LockedEdit";
+                }
+            }
+        }
         content.add(loc, edit);
         System.out.println("currently storing: "+listToString(content));
         return "InsertDone";
@@ -157,10 +158,14 @@ public class ServerDocument extends DefaultStyledDocument{
                 content.remove(begin);
                 System.out.println(listToString(content));
                 return "Done";
+            } else {
+                return "Locked";
             }
+            
         }
         int removeLoc = begin;
         System.out.println("reaches 2");
+        boolean conflicts = false;
         for (int i = begin; i < end; i++) {
             if (content.get(i).getOwner().equals(DOC_NAME) || content.get(i).getOwner().equals(client)) {
                 content.remove(removeLoc);
@@ -168,9 +173,15 @@ public class ServerDocument extends DefaultStyledDocument{
             } else {
                 System.out.println("reaches 4");
                 removeLoc++;
+                conflicts = true;
             }
         }
-        return "RemoveDone";
+        
+        if (conflicts) {
+            return "Locked";
+        } else {
+            return "Done";
+        }
     }
     
     /**

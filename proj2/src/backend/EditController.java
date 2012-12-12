@@ -18,7 +18,6 @@ public class EditController {
     private ArrayBlockingQueue<String> queue;
     private Map<String, ServerDocument> docList;
     
-    
     /**
      * Empty EditController constructor
      */
@@ -43,7 +42,6 @@ public class EditController {
             System.out.println("new input: "+input);
             return doc1.insertContent(new Edit(" ", tokens[1]), tokens[5], tokens[1]);
         } else if (tokens[0].equals("addOneEnter")) {
-            
             ServerDocument doc1 = docList.get(tokens[2]);
             System.out.println("new input: "+input);
             String str = doc1.insertContent(new Edit("\n", tokens[1]), tokens[5], tokens[1]);
@@ -88,32 +86,29 @@ public class EditController {
         return doc.endEdit(tokens[0]);
     }
     
+    /**
+     * Puts the received message on the queue and looks at the message at the head of the queue.
+     * This ensures that there are always messages being put on the queue at the same rate as ones
+     * being taken off of the queue.
+     * @param input The input from the GUI to the server
+     * @return The result of taking the head message from the queue and dealing with it
+     */
     public String putOnQueue(String input) {
         if (!queue.add(input)) {
             return "fail with message: " + input;
         } else {
-            // TODO: figure out how this works
             return takeFromQueue();
         }
     }
     
+    /**
+     * Takes the message that is at the head of the queue and deals with it appropriately
+     * @return A message to send back to the server; the server will send a corresponding
+     *    message to the GUI
+     */
     public synchronized String takeFromQueue() {
-        // Create a caret and a key listener, and listen to client.
-        // sent client input as an EDIT message, to Edit queue
-        // edit queue will handle processing 
-        
-//        // TODO: define regex of protocol from user to server, decide if necessary
-//        String regex = "()|" + //insert
-//                "()|" + //remove
-//                "()|" + //spaceEntered
-//                "()|" + //cursorMoved
-//                "()|" + //save
-//                "()|" + //disconnect
-//                "()"; //newDoc
-//        if(!input.matches(regex)) {
-//            //invalid input
-//            return null;
-//        }
+        // A regex is unnecessary here since the messages are hardcoded into the GUI
+        // and will never be wrong, assuming that the GUI has been thoroughly tested.
         
         String next = "";
         if (!queue.isEmpty()) {
@@ -124,72 +119,134 @@ public class EditController {
 
         String[] tokens = next.split(" ");
 
-        if (tokens.length > 1 && tokens[1].equals("NewDoc")) { 
+        // Enormous if/else statement that handles the messages from the GUI, calls 
+        // the relevant methods on the message based on the message, and returns 
+        // the message to be sent from the server to the GUI.
+        
+        if (tokens.length > 2 && tokens[2].equals("new")) { 
+            // For new document messages
+            // Input: clientName docName new
+            // Successful output: clientName docName new success
+            // Unsuccessful output: clientName docName new fail
+            
             System.out.println("made it to new doc");
-            // If creating a new document
-            String title = tokens[2];
-            System.out.println("current keys: "+docList.keySet());
+            String title = tokens[1];
             if (docList.containsKey(title)) {
-                return "new fail";
+                return tokens[0] + " " + tokens[1] + " new fail";
             } else {
                 docList.put(title, new ServerDocument(title));
-                return "new success";
+                return tokens[0] + " " + tokens[1] + " new success";
             }
-        } else if (tokens.length > 0 && tokens[0].equals("open")) {
+        } else if (tokens.length > 2 && tokens[2].equals("open")) {
+            // For open document messages
+            // Input: clientName docName open
+            // Successful output: clientName docName open success lines content
+            // Unsuccessful output: clientName docName open fail
+            
             System.out.println("made it to open");
-            ServerDocument doc = docList.get(tokens[2]);
-            if (doc == null) {
-                System.out.println("doc is null");
-                return "open fail";
-            } else {
-                String contents = doc.getDocContent();
-                System.out.println("contents: "+contents);
-                return "open success " + tokens[1] + " " + contents;
-            }
-        } else if (tokens.length > 0 && tokens[0].equals("getDocNames")) {
-            System.out.println("reached getdocnames");
-            // If asking for list of document names
-            String names = "docNames";
-            for (String key: docList.keySet()) {
-                names += " ";
-                names += key;
-            }
-            return names;
-        } else if (tokens.length > 0 && tokens[0].equals("checkNames")) {
-            System.out.println("reached checknames");
-            // If asking for list of document names
-            String names = "checkNames";
-            for (String key: docList.keySet()) {
-                names += " ";
-                names += key;
-            }
-            return names;
-        } else if (tokens.length > 0 && tokens[0].equals("update")) {
-            System.out.println("update");
             ServerDocument doc = docList.get(tokens[1]);
             if (doc == null) {
-                return "update fail";
+                return tokens[0] + " " + tokens[1] + " open fail";
             } else {
-                String contents = doc.getDocContent();
-                return "update success " + tokens[1] + " " + contents;
+                String lineAndContents = doc.getDocContent();
+                return tokens[0] + " " + tokens[1] + " open " + lineAndContents;
             }
-        } else if (tokens.length > 2 && tokens[2].equals("Save")) {
+        } else if (tokens.length > 2 && tokens[2].equals("getDocNames")) {
+            // For get doc names messages
+            // Input: clientName docName getDocNames
+            // Output: clientName docName getDocNames names
+            // There can be no unsuccessful output
+            
+            System.out.println("reached getdocnames");
+            String names = " getDocNames";
+            for (String key: docList.keySet()) {
+                names += " ";
+                names += key;
+            }
+            return tokens[0] + " " + tokens[1] + names;
+        } else if (tokens.length > 2 && tokens[2].equals("checkNames")) {
+            // For check names messages
+            // Input: clientName docName checkNames
+            // Output: clientName docName checkNames names
+            // There can be no unsuccessful output
+            
+            System.out.println("reached checknames");
+            String names = " checkNames";
+            for (String key: docList.keySet()) {
+                names += " ";
+                names += key;
+            }
+            return tokens[0] + " " + tokens[1] + names;
+        } 
+        
+        // There's no longer an update message here because the GUI never asks for an update,
+        // the server just sends one. It makes the update message in the server itself.
+        
+        else if (tokens.length > 2 && tokens[2].equals("save")) {
+            // For save messages
+            // Input: clientName docName save
+            // Output: clientName docName save
+            // There can be no unsuccessful output
+            
             endEdit(next);
-            return "save " + tokens[1];
-        } else if (tokens.length > 2 && tokens[2].equals("Insert")) {
-            return insert(next) + " " + tokens[1];
-        } else if (tokens.length > 2 && tokens[2].equals("Remove")) {
-            return remove(next) + " "  + tokens[1];
-        } else if (tokens.length > 2 && tokens[2].equals("SpaceEntered")) {
-            if (tokens[3].equals("space")) {
-                insert("addOneSpace "+ next);
-            } else if (tokens[3].equals("enter")) {
-                insert("addOneEnter "+next);
+            return tokens[0] + " " + tokens[1] + " save";
+        } else if (tokens.length > 2 && tokens[2].equals("insert")) {
+            // For input messages
+            // Input: clientName docName insert keyChar index
+            // Successful output: clientName docName insert success
+            // Unsuccessful output: clientName docName insert fail
+            
+            String result = insert(next);
+            if (result.equals("LockedEdit")) {
+                return tokens[0] + " " + tokens[1] + " insert fail";
+            } else {
+                return tokens[0] + " " + tokens[1] + " insert success";
             }
-            return endEdit(next) + " " + tokens[1];
-        } else if (tokens.length > 2 && tokens[2].equals("CursorMoved")) {
-            return endEdit(next) + " "  + tokens[1];
+        } else if (tokens.length > 2 && tokens[2].equals("remove")) {
+            // For remove messages
+            // Input: clientName docName remove keyChar indexBegin indexEnd
+            // Successful output: clientName docName remove success
+            // Unsuccessful output: clientName docName remove fail
+            
+            String result = remove(next);
+            if (result.equals("Locked")) {
+                return tokens[0] + " "  + tokens[1] + " remove fail";
+            } else {
+                return tokens[0] + " "  + tokens[1] + " remove success";
+            }
+            
+        } else if (tokens.length > 2 && tokens[2].equals("spaceEntered")) {
+            // TODO: clean this up later with a better protocol, add in other whitespace chars
+            // For whitespace entered messages
+            // Input for enter: clientName docName spaceEntered enter index
+            // Input for space: clientName docName spaceEntered space index
+            // Successful output: clientName docName spaceEntered success
+            // Unsuccessful output: clientName docName spaceEntered fail
+            
+            String result = "";
+            if (tokens[3].equals("space")) {
+                result = insert("addOneSpace "+ next);
+            } else if (tokens[3].equals("enter")) {
+                result = insert("addOneEnter "+next);
+            }
+            
+            endEdit(next);
+            if (result.equals("LockedEdit")) {
+                return tokens[0] + " " + tokens[1] + " spaceEntered fail";
+            } else {
+                return tokens[0] + " " + tokens[1] + " spaceEntered success";
+            }
+        } else if (tokens.length > 2 && tokens[2].equals("cursorMoved")) {
+            // For cursor moved messages
+            // Input: clientName docName cursorMoved
+            // Output: clientName docName cursorMoved
+            // There is no output failure
+            
+            endEdit(next);
+            return tokens[0] + " "  + tokens[1] + " cursorMoved";
         } else {
+            // If a message somehow makes it all the way through the if/else.
+            // Shouldn't reach here. Is here for debugging.
             return "Invalid input";
         }
     }

@@ -1304,6 +1304,14 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             StringBuilder GUIcontent = new StringBuilder("");
             String[] messageList = fromServer.toString().split(" ");
             
+            if(messageList[2].equals("update") && messageList[1].equals(docName)){                    
+                for(int i= 4; i < messageList.length; i++){
+                    GUIcontent.append(messageList[i]);
+                }
+                docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
+                //GUIcontent.setLength(0);
+            }
+            
             if(fromServer != null && messageList[0].equals(clientName)){               
                 System.out.println(fromServer);
                 System.out.println("youve read from server");  
@@ -1362,13 +1370,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                         new ServerMessage(clientName + " " + docName + " new").execute();
                     }
                 }
-                if(messageList[2].equals("update") && messageList[1].equals(docName)){                    
-                    for(int i= 4; i < messageList.length; i++){
-                        GUIcontent.append(messageList[i]);
-                    }
-                    docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
-                    //GUIcontent.setLength(0);
-                }
+
 
             }
         }

@@ -106,6 +106,7 @@ public class Server {
                                             PrintWriter tempOut = new PrintWriter(s.getOutputStream(), true);
                                             tempOut.println(output);
                                             tempOut.flush();
+                                            tempOut.close();
                                         }
                                     }
                                 }

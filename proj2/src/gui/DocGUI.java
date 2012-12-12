@@ -364,7 +364,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private static Socket newSocket;
     private static PrintWriter out;
     private static BufferedReader in;
-    private static int docLength = 0;
+    private static int finalCaretPlace = 0;
     private static void createAndShowGUI() throws IOException{
         
         startframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -406,13 +406,37 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                             System.out.println(docpane == null);
                             docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
                         }
-                        docLength = GUIcontent.length();
+
                     }
                     
                     if(messageList.length > 0 && messageList[0].equals(clientName)){               
                         System.out.println(fromServer);
                         System.out.println("youve read from server");  
                         System.out.println("message 2 is" + messageList[2].toString());
+                        if(messageList[2].equals("insert")){
+                            if(finalCaretPlace <= Integer.valueOf(messageList[3])){
+                                docpane.setCaretPosition(finalCaretPlace);
+                            }
+                            else if(finalCaretPlace > Integer.valueOf(messageList[3])){
+                                docpane.setCaretPosition(finalCaretPlace + 1);
+                            }
+                        }
+                        /**
+                         * 1) if the cursor’s current position is before the begin index of the update, the cursor is reset to its current position
+2) if the cursor’s current position is inclusively between the begin and end indexes of the update, the cursor is reset to the begin index
+3) if the cursor’s current position is after the end index, the cursor is reset to its current position minus (end - begin)
+                         */
+                        if(messageList[2].equals("remove")){
+                            if(finalCaretPlace < Integer.valueOf(messageList[3])){
+                                docpane.setCaretPosition(finalCaretPlace);
+                            }
+                            else if(finalCaretPlace >= Integer.valueOf(messageList[3])&& finalCaretPlace <= Integer.valueOf(messageList[4])){
+                                docpane.setCaretPosition(Integer.valueOf(messageList[3]));
+                            }
+                            else if (finalCaretPlace > Integer.valueOf(messageList[4])){
+                                docpane.setCaretPosition(finalCaretPlace - (Integer.valueOf(messageList[4]) - Integer.valueOf(messageList[3])));
+                            }
+                        }
                         if(messageList[2].equals("checkNames")){
                             ArrayList<String> list = new ArrayList<String>();
                             for(int i = 3; i < messageList.length; i++){
@@ -803,8 +827,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             docpane.setBounds(20, 20, 560, 800);
             docpane.setVisible(true);
             
-            DefaultCaret testCaret = (DefaultCaret) docpane.getCaret();
-            testCaret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+//            DefaultCaret testCaret = (DefaultCaret) docpane.getCaret();
+//            testCaret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
             
             JScrollPane scroll = new JScrollPane(docpane);
             scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -834,7 +858,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             addBindings();
             
             //Initial text is empty, set caret position
-           // docpane.setCaretPosition(docLength);
+            docpane.setCaretPosition(0);
             
             //docpane.getCaret().
             
@@ -1074,6 +1098,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             public void caretUpdate(CaretEvent e) {
                 //displaySelectionInfo(e.getDot(), e.getMark());
                 caretPosition = e.getDot();
+                finalCaretPlace = e.getDot();
                 caretEnd = e.getMark();
                 System.out.println("carete pos is" + caretPosition + "caret end is" + caretEnd);
                 System.out.println("youre at caretupdate");

@@ -163,7 +163,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private static JFrame welcomeWindow = new JFrame("Welcome");
     private static JButton okay;
     private static JTextField nameField;
-    private static JTextField colorField;
+    private static JTextField ipField;
+    private static JTextField portField;
     private static WindowOne dialog1;
     private static DocumentWindow docWindow;
     private static FileWindow fileWindow;
@@ -189,6 +190,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private Border docBorder;
     private boolean isNew;
     private static String IPAddress;
+    private static int portNum;
     
     public DocGUI(){
 
@@ -228,18 +230,27 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         thirdRow.setSize(600,20);
         thirdRow.setLocation(0, 20);
         
-        JLabel color = new JLabel("Color:");
-        color.setName("color");
-        color.setBounds(50, 5, 150, 20);
-        colorField = new JTextField();
-        colorField.setName("colorField");
-        colorField.setLocation(300, 5);
-        colorField.setSize(100, 20);
+        JLabel ip = new JLabel("IP Address:");
+        ip.setName("ip");
+        ip.setBounds(50, 5, 150, 20);
+        ipField = new JTextField();
+        ipField.setName("colorField");
+        ipField.setLocation(100, 5);
+        ipField.setSize(100, 20);
         
+        JLabel port = new JLabel("Port:");
+        port.setName("port");
+        port.setBounds(150, 5, 30, 30);
+        portField = new JTextField();
+        portField.setName("portField");
+        portField.setLocation(400, 5);
+        portField.setSize(100,20);
+        
+        portField.addActionListener(this);
         nameField.addKeyListener(this);
-        colorField.addActionListener(this);
-        thirdRow.add(color);
-        thirdRow.add(colorField);
+        ipField.addActionListener(this);
+        thirdRow.add(ip);
+        thirdRow.add(ipField);
      
 //        JColorChooser clientColor = new JColorChooser();
 //        clientColor.getSelectionModel().addChangeListener(this);
@@ -328,8 +339,11 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         //if(e.getSource() == nameField){
             //clientName = nameField.getText();
         //}
-        if(e.getSource() == colorField){
-            clientColor = colorField.getText();
+        if(e.getSource() == ipField){
+            IPAddress = ipField.getText();
+        }
+        if(e.getSource() == portField){
+            portNum = Integer.valueOf(portField.getText());
         }
     }
     /**
@@ -1254,7 +1268,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             try{
                 System.out.println("youre at the first try catch");
                 System.out.println(IPAddress);
-                newSocket = new Socket(IPAddress, 4444);
+                newSocket = new Socket(IPAddress, portNum);
                 System.out.println("yovue created a new socket");
                 out = new PrintWriter(newSocket.getOutputStream(), true);
                 out.println(serverMessage);

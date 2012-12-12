@@ -382,6 +382,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                     fromServer.append(line);
                     System.out.println("the input is " + fromServer);
                     String[] messageList = fromServer.toString().split(" ");
+                    
                     fromServer.setLength(0);
                     System.out.println("the messageLIst is" + messageList.toString());
                     
@@ -400,6 +401,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                         }
                         else{
                             System.out.println("mur bad");
+                            System.out.println(docpane == null);
                             docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
                         }
                     }
@@ -756,7 +758,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             return new DocumentWindow();
         }
     }
-    private static JTextPane docpane; 
+    private static JTextPane docpane = new JTextPane(); 
     public class DocumentWindow extends JFrame implements ActionListener, DocumentListener,KeyListener, WindowListener{
         //write get cursor position
         
@@ -767,7 +769,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         
         public DocumentWindow(){
             super(docName);
-            docpane = new JTextPane();
+            //docpane = new JTextPane();
             //new ServerMessage(clientName + " " + docName + " open").execute();
             Runnable openMessage = new ServerMessage(clientName + " " + docName + " open");
             Thread openThread = new Thread(openMessage);
@@ -841,7 +843,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             
             add(grayPanel);
             add(docpane);
-            add(scroll);
+            getContentPane().add(scroll);
             addWindowListener(this);
             
             setSize(600, 600);

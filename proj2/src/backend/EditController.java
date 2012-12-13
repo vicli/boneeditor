@@ -226,6 +226,9 @@ public class EditController {
             // Successful output: clientName docName spaceEntered success
             // Unsuccessful output: clientName docName spaceEntered fail
             
+            System.out.println("reaches");
+            
+            
             String result = "";
             if (tokens[3].equals("space")) {
                 result = insert("addOneSpace "+ next);

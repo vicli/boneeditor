@@ -109,6 +109,7 @@ public class Server {
         private void handleConnection() throws IOException, InterruptedException {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            String prev = "";
             try {
                 System.out.println("closed? 3: "+socket.isClosed());
                 
@@ -121,7 +122,13 @@ public class Server {
                     }
                     System.out.println("INPUT FROM GUI: " + line);
                     //String output = editCont.putOnQueue(line);
-                    editCont.putOnQueue(line);
+                    //if (line.equals(prev)) {
+                    //    prev = line;
+                    //} else {
+                        editCont.putOnQueue(line);
+                    //    prev = line;
+                    //}
+                    
                     //System.out.println("output from server: " + output);
                     
                     while (!editCont.getQueue().isEmpty()) {

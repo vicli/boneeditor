@@ -439,7 +439,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                             else if(finalCaretPlace > (Integer.valueOf(messageList[3]))){
                                 System.out.println("3 final caretplace is:" + finalCaretPlace +
                                         "index is " + Integer.valueOf(messageList[3]));
-                                testCaret.setDot(finalCaretPlace +1);                                
+                                testCaret.setDot(finalCaretPlace);                                
                             }
                             
                         }
@@ -465,7 +465,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                             else if(finalCaretPlace >= (Integer.valueOf(messageList[3]))){
                                 System.out.println("3 final caretplace is:" + finalCaretPlace +
                                         "index is " + Integer.valueOf(messageList[3]));
-                                testCaret.setDot(finalCaretPlace +1);                                
+                                testCaret.setDot(finalCaretPlace);                                
                             }
                         }
                     

@@ -32,6 +32,7 @@ public class Server {
     private static Map<String, ServerDocument> docList = new HashMap<String, ServerDocument>();
     private final int CAPACITY = 10;
     private static Map<Socket, String> socketMap = new HashMap<Socket, String>();
+    private final String SPLIT_CHAR = Character.toString((char) 0x2605);
 
     /**
      * Makes a Server that listens for connections on port.
@@ -108,6 +109,7 @@ public class Server {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             try {
+                synchronized (this) {
                 for (String line = in.readLine(); line!=null; line=in.readLine()) {
                     System.out.println("beginning of handleConnection for loop");
                     if (!socketMap.containsKey(socket)) {
@@ -118,58 +120,60 @@ public class Server {
                     editCont.putOnQueue(line);
                     
                     while (!editCont.getQueue().isEmpty()) {
-                        String output = editCont.takeFromQueue();
-                        System.out.println("output from server: "+output);
-                        if(output != null) {
-                            String[] outTokens = output.split(" ");
+                        //synchronized (this) {
+                            String output = editCont.takeFromQueue();
+                            System.out.println("output from server: "+output);
+                            if(output != null) {
+                                String[] outTokens = output.split(SPLIT_CHAR);
 
-                            /**
-                             * Floods update messages to the sockets with messages according to the following:
-                             * If something was successful: send the original client the success message and send
-                             * the rest of the clients an update message.
-                             * If something was unsuccessful: update messages to all of the clients including the 
-                             * original one.
-                             * If something is a message that only the original client cares about, send the message to
-                             * that client only.
-                             */                            
-                            if (outTokens[0].equals("InvalidInput")) {
-                                // do nothing, skip this loop for indexing's sake
-                            } 
-                            else {
-                                System.out.println("FLOODING:");
-                                String lineAndContent;
-                                if (docList.get(outTokens[1]) != null && docList.get(outTokens[1]).getDocContent() != null) {
-                                    lineAndContent = " " + docList.get(outTokens[1]).getDocContent();
-                                } else {
-                                    lineAndContent = "";
+                                /**
+                                 * Floods update messages to the sockets with messages according to the following:
+                                 * If something was successful: send the original client the success message and send
+                                 * the rest of the clients an update message.
+                                 * If something was unsuccessful: update messages to all of the clients including the 
+                                 * original one.
+                                 * If something is a message that only the original client cares about, send the message to
+                                 * that client only.
+                                 */                            
+                                if (outTokens[0].equals("InvalidInput")) {
+                                    // do nothing, skip this loop for indexing's sake
+                                } 
+                                else {
+                                    System.out.println("FLOODING:");
+                                    String lineAndContent;
+                                    if (outTokens.length > 1 && docList.get(outTokens[1]) != null && docList.get(outTokens[1]).getDocContent() != null) {
+                                        lineAndContent = " " + docList.get(outTokens[1]).getDocContent();
+                                    } else {
+                                        lineAndContent = "";
+                                    }
+                                    String update = outTokens[0] + " " + outTokens[1] + " update" + lineAndContent;
+                                    for (Socket soc : socketMap.keySet()) {
+                                        if (!soc.equals(socket)) {
+                                            PrintWriter tempOut = new PrintWriter(soc.getOutputStream(), true);
+                                            tempOut.println(output);
+                                            tempOut.flush();
+                                            tempOut.println(update);
+                                            tempOut.flush();
+                                            System.out.println("sent: "+output+" ...to "+socketMap.get(soc));
+                                            System.out.println("update: "+update+" ...to "+socketMap.get(soc));
+                                        } else {
+                                            out.println(output);
+                                            out.flush();
+                                            out.println(update);
+                                            out.flush();
+                                            System.out.println("sent: "+output+" ...to "+socketMap.get(socket));
+                                            System.out.println("update: "+update+" ...to "+socketMap.get(soc));
+                                        }
+                                    }
                                 }
-                                String update = outTokens[0] + " " + outTokens[1] + " update" + lineAndContent;
-                                for (Socket soc : socketMap.keySet()) {
-                                    if (!soc.equals(socket)) {
-                                          PrintWriter tempOut = new PrintWriter(soc.getOutputStream(), true);
-                                          tempOut.println(output);
-                                          tempOut.flush();
-                                          tempOut.println(update);
-                                          tempOut.flush();
-                                          System.out.println("sent: "+output+" ...to "+socketMap.get(soc));
-                                          System.out.println("update: "+update+" ...to "+socketMap.get(soc));
-                                  } else {
-                                          out.println(output);
-                                          out.flush();
-                                          out.println(update);
-                                          out.flush();
-                                          System.out.println("sent: "+output+" ...to "+socketMap.get(socket));
-                                          System.out.println("update: "+update+" ...to "+socketMap.get(soc));
-                                  }
-                                }
-                            }
-                            
+                           // }
                             // TODO: make it not crash when a GUI exits
                         }
                     }
                     
                     
-                } 
+                }
+                }
             } finally { 
                 out.close();
                 in.close();

@@ -532,20 +532,35 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                         // in real time as the document is being updated, and can be kept in the same
                         // relative location as other users are editing the document.
                         if(messageList[2].equals("insert") && !messageList[3].equals("fail")){
-
+                            if (!messageList[0].equals(clientName)){
+                                if(finalCaretPlace <= Integer.valueOf(messageList[3])){
+                                    
+                                    System.out.println("2 final caretplace is:" + finalCaretPlace +
+                                            "index is " + Integer.valueOf(messageList[3]));
+                                    System.out.println("testCaret at" + testCaret.getDot());
+                                    testCaret.setDot(finalCaretPlace);
+                                }
+                                else if(finalCaretPlace > (Integer.valueOf(messageList[3]))){
+                                    System.out.println("3 final caretplace is:" + finalCaretPlace +
+                                            "index is " + Integer.valueOf(messageList[3]));
+                                    testCaret.setDot(finalCaretPlace+1);                                
+                                }
+                            }
+                            if(messageList[0].equals(clientName)){
+                                if(finalCaretPlace <= Integer.valueOf(messageList[3])){
+                                    
+                                    System.out.println("2 final caretplace is:" + finalCaretPlace +
+                                            "index is " + Integer.valueOf(messageList[3]));
+                                    System.out.println("testCaret at" + testCaret.getDot());
+                                    testCaret.setDot(finalCaretPlace);
+                                }
+                                else if(finalCaretPlace > (Integer.valueOf(messageList[3]))){
+                                    System.out.println("3 final caretplace is:" + finalCaretPlace +
+                                            "index is " + Integer.valueOf(messageList[3]));
+                                    testCaret.setDot(finalCaretPlace);                                
+                                }
+                            }
                             
-                            if(finalCaretPlace <= Integer.valueOf(messageList[3])){
-                                
-                                System.out.println("2 final caretplace is:" + finalCaretPlace +
-                                        "index is " + Integer.valueOf(messageList[3]));
-                                System.out.println("testCaret at" + testCaret.getDot());
-                                testCaret.setDot(finalCaretPlace);
-                            }
-                            else if(finalCaretPlace > (Integer.valueOf(messageList[3]))){
-                                System.out.println("3 final caretplace is:" + finalCaretPlace +
-                                        "index is " + Integer.valueOf(messageList[3]));
-                                testCaret.setDot(finalCaretPlace+1);                                
-                            }
                             
                         }
                       

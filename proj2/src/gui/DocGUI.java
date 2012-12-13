@@ -198,6 +198,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
     private static int portNum;
     private static boolean docExist;
     
+    
     public DocGUI(){
 
         
@@ -387,16 +388,17 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                     String[] messageList = fromServer.toString().split(" ");
                     
                     fromServer.setLength(0);
-                    
+                    synchronized(this){
                     if(messageList.length > 3 && messageList[2].equals("update") && messageList[1].equals(docName)){ 
                         System.out.println("youre in update");
                         
                         if(messageList[0] != clientName){
                             if(messageList.length > 4){
-                                for(int i= 4; i < messageList.length; i++){  
+                                GUIcontent.append(messageList[4]);
+                                for(int i= 5; i < messageList.length; i++){  
                                     System.out.println("in multi for loop");
-                                    GUIcontent.append(messageList[i]);
                                     GUIcontent.append(" ");
+                                    GUIcontent.append(messageList[i]);
                                     
                                     System.out.println("gui contnet is now" + GUIcontent);
                                 }
@@ -411,7 +413,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                             else{
                                 System.out.println("mur bad");
                                 System.out.println(docpane == null);
-                                docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
+                                docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()));
                             }
                         }
                         
@@ -425,11 +427,6 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                         System.out.println("caret loc is " + finalCaretPlace);
                        // int fcp = finalCaretPlace -1;
                         if(messageList[2].equals("insert")){
-//                            if(Integer.valueOf(messageList[3]) == 0){
-//                                System.out.println("1 final caretplace is:" + fcp +
-//                                        "index is " + Integer.valueOf(messageList[3]));
-//                                docpane.setCaretPosition(1);
-//                            }
                             if(finalCaretPlace < Integer.valueOf(messageList[3])){
                                 System.out.println("2 final caretplace is:" + finalCaretPlace +
                                         "index is " + Integer.valueOf(messageList[3]));
@@ -438,14 +435,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                             else if(finalCaretPlace >= (Integer.valueOf(messageList[3]))){
                                 System.out.println("3 final caretplace is:" + finalCaretPlace +
                                         "index is " + Integer.valueOf(messageList[3]));
-                                testCaret.setDot(finalCaretPlace +1);
-//                                if(finalCaretPlace >= docLength){
-//                                    docpane.setCaretPosition(docLength);
-//                                }
-//                                else if (finalCaretPlace < docLength){
-//                                    docpane.setCaretPosition(finalCaretPlace + 1);
-//                                }
-                                
+                                testCaret.setDot(finalCaretPlace +1);                                
                             }
                             
                         }
@@ -459,6 +449,19 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                             }
                             else if (finalCaretPlace > Integer.valueOf(messageList[4])){
                                 docpane.setCaretPosition(finalCaretPlace - (Integer.valueOf(messageList[4]) - Integer.valueOf(messageList[3])));
+                            }
+                        }
+                        
+                        if(messageList[2].equals("spaceEntered") && !messageList[3].equals("fail")){
+                            if(finalCaretPlace < Integer.valueOf(messageList[3])){
+                                System.out.println("2 final caretplace is:" + finalCaretPlace +
+                                        "index is " + Integer.valueOf(messageList[3]));
+                                testCaret.setDot(finalCaretPlace);
+                            }
+                            else if(finalCaretPlace >= (Integer.valueOf(messageList[3]))){
+                                System.out.println("3 final caretplace is:" + finalCaretPlace +
+                                        "index is " + Integer.valueOf(messageList[3]));
+                                testCaret.setDot(finalCaretPlace +1);                                
                             }
                         }
                         if(messageList[2].equals("checkNames")){
@@ -478,7 +481,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                                 docExist = false;
                                 System.out.println("youre at new server message");
                             }
-                        }
+                        }}
                         
                         if(messageList[2].equals("open")){
                             System.out.println("youre at open sucess!");
@@ -547,6 +550,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         Runnable newMessage = new ServerMessage(string);
         Thread newThread = new Thread(newMessage);
         newThread.start();
+        //.openThreadList.add(newThread);
     }
     /**
      * The main method starts the GUI. 
@@ -639,6 +643,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 Runnable openMessage = new ServerMessage(clientName + " " + docName + " getDocNames");
                 Thread openThread = new Thread(openMessage);
                 openThread.start();
+                //docWindow.openThreadList.add(openThread);
                 //new ServerMessage(clientName + " " + docName + " getDocNames");
                 fileWindow = new FileWindow();
             }            
@@ -750,12 +755,14 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 Runnable checkMessage = new ServerMessage(clientName + " " + docName + " checkNames");
                 Thread checkThread = new Thread(checkMessage);
                 checkThread.start();
+                //docWindow.openThreadList.add(checkThread);
                 System.out.println(exist);
                 if (docExist){
-                    createDoc(false);
+                    docWindow = new DocumentWindow();
                 }
                 else{
-                    createDoc(true);
+                    startframe.sendNewMessage(clientName + " " + docName + " new");
+                    docWindow = new DocumentWindow();
                 }
                
                 nameWindow.dispose();
@@ -801,16 +808,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      * @return 
      *
      */
-    private DocumentWindow createDoc(Boolean s){
-        if (s){
-            startframe.sendNewMessage(clientName + " " + docName + " new");
-            return new DocumentWindow();
-        }
-        else{
-            
-            return new DocumentWindow();
-        }
-    }
+
     private static DefaultCaret testCaret;
     private static JTextPane docpane = new JTextPane(); 
     public class DocumentWindow extends JFrame implements ActionListener, DocumentListener,KeyListener, WindowListener{
@@ -820,7 +818,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         
         private JPanel documentPanel;
         private ServerDocument loadDoc;
-        
+        private ArrayList<Thread> openThreadList = new ArrayList<Thread>(); 
         public DocumentWindow(){
             super(docName);
             //docpane = new JTextPane();
@@ -828,7 +826,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             Runnable openMessage = new ServerMessage(clientName + " " + docName + " open");
             Thread openThread = new Thread(openMessage);
             openThread.start();
-
+            //docWindow.openThreadList.add(openThread);
             //docpane.setText(GUIcontent.toString());
             documentPanel = new JPanel();
             documentPanel.add(docpane);
@@ -918,7 +916,6 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
          */
         @Override
         public void keyPressed(KeyEvent e) {
-            e.getKeyChar();
         }
 
         @Override
@@ -954,6 +951,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             Runnable editMessage = new ServerMessage(message.toString());
             Thread editThread = new Thread(editMessage);
             editThread.start();
+            docWindow.openThreadList.add(editThread);
            //new ServerMessage(message.toString()).execute();
             
             
@@ -1254,6 +1252,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             Runnable saveMessage = new ServerMessage(clientName + " " + docName + " save");
             Thread saveThread = new Thread(saveMessage);
             saveThread.start();
+            docWindow.openThreadList.add(saveThread);
            // new ServerMessage(clientName + " " + docName + " save").execute();
             docpane.setText("");
             //GUIcontent.setLength(0);
@@ -1274,8 +1273,11 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                 documentList.removeAllItems();
             } 
             docNameList.clear();
-
-            save();   
+            save();
+            for(int i = 0; i < openThreadList.size(); i++){
+                openThreadList.get(i).interrupt();
+            }
+            dispose();
         }
 
         @Override
@@ -1436,6 +1438,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                Runnable fileOpenMessage = new ServerMessage(clientName + " " + docName + " open");
                Thread fileOpenThread = new Thread(fileOpenMessage);
                fileOpenThread.start();
+               //docWindow.openThreadList.add(fileOpenThread);
                //docWindow = new DocumentWindow();
                docWindow = new DocumentWindow();
                docNameList.clear();

@@ -207,7 +207,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         topRow.setLayout(null);
         topRow.setLocation(0, 0);
         topRow.setSize(600, 10);
-        JLabel welcomeMessage = new JLabel("Welcome to Bone Editor! Please enter your name and info to get started.");
+        JLabel welcomeMessage = new JLabel("<html> Welcome to <font color = red>Bone</font> Editor! Please enter your name and info to get started.</html>");
         welcomeMessage.setBounds(50, 10, 500, 20);
         topRow.add(welcomeMessage);
        
@@ -224,6 +224,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         name.setBounds(50, 10, 200, 20);
         nameField = new JTextField();
         nameField.setName("nameField");
+        
         secondRow.add(name);
         secondRow.add(nameField);
         nameField.setLocation(200, 10);
@@ -423,17 +424,22 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                         }
                         testCaret.setDot(finalCaretPlace);
 
-                    } //moo
-                    
-                    if(messageList.length > 0 && messageList[0].equals(clientName)){               
+                    }
+                    if(messageList.length> 0){
                         System.out.println(fromServer);
                         System.out.println("youve read from server");  
                         System.out.println("caret loc is " + finalCaretPlace);
                        // int fcp = finalCaretPlace -1;
                         if(messageList[2].equals("insert") && !messageList[3].equals("fail")){
+//                            if (finalCaretPlace == 0 & Integer.valueOf(messageList[3]) == 0){
+//                                finalCaretPlace = 1;
+//                            }
+                            
                             if(finalCaretPlace <= Integer.valueOf(messageList[3])){
+                                
                                 System.out.println("2 final caretplace is:" + finalCaretPlace +
                                         "index is " + Integer.valueOf(messageList[3]));
+                                System.out.println("testCaret at" + testCaret.getDot());
                                 testCaret.setDot(finalCaretPlace);
                             }
                             else if(finalCaretPlace > (Integer.valueOf(messageList[3]))){
@@ -454,6 +460,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                             else if (finalCaretPlace > Integer.valueOf(messageList[4])){
                                 docpane.setCaretPosition(finalCaretPlace - (Integer.valueOf(messageList[4]) - Integer.valueOf(messageList[3])));
                             }
+//                            else if(finalCaretPlace >= Integer.valueOf(messageList[3])&& finalCaretPlace <= Integer.valueOf(messageList[4])){
+//                                docpane.setCaretPosition(Integer.valueOf(messageList[3]));
+//                            }
+//                            else if (finalCaretPlace > Integer.valueOf(messageList[4])){
+//                                docpane.setCaretPosition(finalCaretPlace - (Integer.valueOf(messageList[4]) - Integer.valueOf(messageList[3])));
+//                            }
                         }
                         
                         if(messageList[2].equals("spaceEntered") && !messageList[3].equals("fail")){
@@ -469,7 +481,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                             }
                         }
                     
-                    
+                    }
+                    if(messageList.length > 0 && messageList[0].equals(clientName)){               
                         if(messageList[2].equals("checkNames")){
                             ArrayList<String> list = new ArrayList<String>();
                             for(int i = 3; i < messageList.length; i++){
@@ -887,6 +900,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             //displayedDoc.addUndoableEditListener(new UndoEditListener());
             docpane.addCaretListener(caretLabel);
             docpane.addKeyListener(this);
+           // docpane.setContentType("text/html");
             //displayedDoc.addDocumentListener(this);
             setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             pack();

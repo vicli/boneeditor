@@ -28,7 +28,6 @@ import java.util.concurrent.ArrayBlockingQueue;
  */
 public class Server {
     private ServerSocket serverSocket = null;
-//    private int numUsers;
     private final EditController editCont;
     private static Map<String, ServerDocument> docList = new HashMap<String, ServerDocument>();
     private final int CAPACITY = 10;
@@ -48,7 +47,7 @@ public class Server {
      * Runs the server, listening for client connections and handling them.
      */
     public void serve() throws IOException {
-        //adding in another thread
+        // A thread waiting for new connections
         Thread receiverThread = new Thread(new Runnable() {
             public void run() {
                 while (true) {
@@ -85,7 +84,6 @@ public class Server {
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             } finally {
                 try {
@@ -109,11 +107,7 @@ public class Server {
         private void handleConnection() throws IOException, InterruptedException {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            String prev = "";
             try {
-                System.out.println("closed? 3: "+socket.isClosed());
-                
-                //error happens somewhere in or before the following line
                 for (String line = in.readLine(); line!=null; line=in.readLine()) {
                     System.out.println("beginning of handleConnection for loop");
                     if (!socketMap.containsKey(socket)) {
@@ -121,15 +115,7 @@ public class Server {
                         socketMap.put(socket, name[0]);
                     }
                     System.out.println("INPUT FROM GUI: " + line);
-                    //String output = editCont.putOnQueue(line);
-                    //if (line.equals(prev)) {
-                    //    prev = line;
-                    //} else {
-                        editCont.putOnQueue(line);
-                    //    prev = line;
-                    //}
-                    
-                    //System.out.println("output from server: " + output);
+                    editCont.putOnQueue(line);
                     
                     while (!editCont.getQueue().isEmpty()) {
                         String output = editCont.takeFromQueue();
@@ -145,11 +131,7 @@ public class Server {
                              * original one.
                              * If something is a message that only the original client cares about, send the message to
                              * that client only.
-                             */
-
-                            //out.println(output);
-                            //out.flush();
-                            
+                             */                            
                             if (outTokens[0].equals("InvalidInput")) {
                                 // do nothing, skip this loop for indexing's sake
                             } 
@@ -192,7 +174,6 @@ public class Server {
                 out.close();
                 in.close();
                 System.out.println("at end of handleconnection for "+socketMap.get(socket));
-                // check this line if multithreading is wrong
                 socketMap.remove(socket);
             }
         }

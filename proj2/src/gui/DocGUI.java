@@ -565,18 +565,6 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 startframe = new DocGUI();
-                //createAndShowGUI();
-//                if (args.length == 1){
-//                    IPAddress = args[0];
-//                    try {
-//                        createAndShowGUI();
-//                    } catch (IOException e) {
-//                        System.out.println("IO Exception thrown: " + e);
-//                    }                    
-//                  }
-//                  else{
-//                    throw new IllegalArgumentException();
-//                  }
             }
         });
 }

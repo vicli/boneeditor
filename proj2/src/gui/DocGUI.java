@@ -427,7 +427,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                         System.out.println("youve read from server");  
                         System.out.println("caret loc is " + finalCaretPlace);
                        // int fcp = finalCaretPlace -1;
-                        if(messageList[2].equals("insert")){
+                        if(messageList[2].equals("insert") && !messageList[3].equals("fail")){
                             if(finalCaretPlace < Integer.valueOf(messageList[3])){
                                 System.out.println("2 final caretplace is:" + finalCaretPlace +
                                         "index is " + Integer.valueOf(messageList[3]));
@@ -812,7 +812,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      *
      */
 
-    private static DefaultCaret testCaret;
+    private static DefaultCaret testCaret = new DefaultCaret();
     private static JTextPane docpane = new JTextPane(); 
     public class DocumentWindow extends JFrame implements ActionListener, DocumentListener,KeyListener, WindowListener{
         //write get cursor position

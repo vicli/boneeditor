@@ -1280,6 +1280,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             for(int i = 0; i < openThreadList.size(); i++){
                 openThreadList.get(i).interrupt();
             }
+            docpane.removeKeyListener(this);
             dispose();
         }
 

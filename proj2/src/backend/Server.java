@@ -125,8 +125,9 @@ public class Server {
                             String output = editCont.takeFromQueue();
                             System.out.println("output from server: "+output);
                             if(output != null) {
-                                String[] outTokens = output.split(SPLIT_CHAR);
-
+                                String[] outTokens = output.split("\\|");
+                                System.out.println("clientName: "+outTokens[0]);
+                                System.out.println("docName: "+outTokens[1]);
                                 /**
                                  * Floods update messages to the sockets with messages according to the following:
                                  * If something was successful: send the original client the success message and send
@@ -143,11 +144,11 @@ public class Server {
                                     System.out.println("FLOODING:");
                                     String lineAndContent;
                                     if (outTokens.length > 1 && docList.get(outTokens[1]) != null && docList.get(outTokens[1]).getDocContent() != null) {
-                                        lineAndContent = " " + docList.get(outTokens[1]).getDocContent();
+                                        lineAndContent =  docList.get(outTokens[1]).getDocContent();
                                     } else {
                                         lineAndContent = "";
                                     }
-                                    String update = outTokens[0] + SPLIT_CHAR + outTokens[1] + SPLIT_CHAR + "update" + lineAndContent;
+                                    String update = outTokens[0] + SPLIT_CHAR+outTokens[1]+SPLIT_CHAR+"update"+SPLIT_CHAR+ lineAndContent;
                                     for (Socket soc : socketMap.keySet()) {
                                         if (!soc.equals(socket)) {
                                             PrintWriter tempOut = new PrintWriter(soc.getOutputStream(), true);

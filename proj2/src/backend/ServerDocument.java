@@ -97,6 +97,7 @@ public class ServerDocument extends DefaultStyledDocument{
         }
         String numLines = Integer.toString(lines);
         System.out.println("line counter is at: "+numLines);
+        System.out.println("string: "+string);
         return numLines + SPLIT_CHAR + string.toString();
     }
     
@@ -152,8 +153,7 @@ public class ServerDocument extends DefaultStyledDocument{
         if (begin == end && begin >0 && begin < content.size()) {
             if (content.get(begin).getOwner().equals(client) || 
                 content.get(begin).getOwner().equals(DOC_NAME)) {
-
-                System.out.println("reaches 1");
+                
                 content.remove(begin);
                 System.out.println(listToString(content));
                 return "Done";
@@ -163,14 +163,11 @@ public class ServerDocument extends DefaultStyledDocument{
             
         }
         int removeLoc = begin;
-        System.out.println("reaches 2");
         boolean conflicts = false;
         for (int i = begin; i < end; i++) {
             if (content.get(i).getOwner().equals(DOC_NAME) || content.get(i).getOwner().equals(client)) {
                 content.remove(removeLoc);
-                System.out.println("reaches 3");
             } else {
-                System.out.println("reaches 4");
                 removeLoc++;
                 conflicts = true;
             }

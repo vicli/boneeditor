@@ -153,6 +153,7 @@ public class EditController {
                 return tokens[0] + SPLIT_CHAR + tokens[1] + SPLIT_CHAR+ "open"+SPLIT_CHAR+"fail";
             } else {
                 String lineAndContents = doc.getDocContent();
+                System.out.println("Returns: "+lineAndContents);
                 return tokens[0] + SPLIT_CHAR + tokens[1] + SPLIT_CHAR+"open"+SPLIT_CHAR + lineAndContents;
             }
         } else if (tokens.length > 2 && tokens[2].equals("getDocNames")) {

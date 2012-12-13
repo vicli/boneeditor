@@ -237,8 +237,9 @@ public class EditController {
             if (result.equals("LockedEdit")) {
                 return tokens[0] + " " + tokens[1] + " spaceEntered fail";
             } else {
-                return tokens[0] + " " + tokens[1] + " spaceEntered success";
-            }
+
+                return tokens[0] + " " + tokens[1] + " spaceEntered "+ tokens[4];
+                            }
         } else if (tokens.length > 2 && tokens[2].equals("cursorMoved")) {
             // For cursor moved messages
             // Input: clientName docName cursorMoved

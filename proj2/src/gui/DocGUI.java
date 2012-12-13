@@ -389,20 +389,21 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                     
                     fromServer.setLength(0);
                     synchronized(this){
+                        if(messageList.length > 4){
+                            GUIcontent.append(messageList[4]);
+                            for(int i= 5; i < messageList.length; i++){  
+                                System.out.println("in multi for loop");
+                                GUIcontent.append(" ");
+                                GUIcontent.append(messageList[i]);
+                                
+                                System.out.println("gui contnet is now" + GUIcontent);
+                            }
+                        }
                     if(messageList.length > 3 && messageList[2].equals("update") && messageList[1].equals(docName)){ 
                         System.out.println("youre in update");
                         
                         if(messageList[0] != clientName){
-                            if(messageList.length > 4){
-                                GUIcontent.append(messageList[4]);
-                                for(int i= 5; i < messageList.length; i++){  
-                                    System.out.println("in multi for loop");
-                                    GUIcontent.append(" ");
-                                    GUIcontent.append(messageList[i]);
-                                    
-                                    System.out.println("gui contnet is now" + GUIcontent);
-                                }
-                            }
+                            
                             
                             System.out.println("mur gui" + GUIcontent + "," + GUIcontent.length());
                             docpane.setText("");
@@ -464,6 +465,8 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                                 testCaret.setDot(finalCaretPlace +1);                                
                             }
                         }
+                    }
+                    
                         if(messageList[2].equals("checkNames")){
                             ArrayList<String> list = new ArrayList<String>();
                             for(int i = 3; i < messageList.length; i++){
@@ -527,7 +530,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                         }
                         docLength = GUIcontent.length();
                         
-                    }
+                    
                 }
             } catch (HeadlessException e) {
                 // TODO Auto-generated catch block

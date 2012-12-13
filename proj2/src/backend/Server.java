@@ -32,6 +32,7 @@ public class Server {
     private static Map<String, ServerDocument> docList = new HashMap<String, ServerDocument>();
     private final int CAPACITY = 10;
     private static Map<Socket, String> socketMap = new HashMap<Socket, String>();
+    private final String SPLIT_CHAR = Character.toString((char) 0x2605);
 
     /**
      * Makes a Server that listens for connections on port.
@@ -123,7 +124,7 @@ public class Server {
                             String output = editCont.takeFromQueue();
                             System.out.println("output from server: "+output);
                             if(output != null) {
-                                String[] outTokens = output.split(" ");
+                                String[] outTokens = output.split(SPLIT_CHAR);
 
                                 /**
                                  * Floods update messages to the sockets with messages according to the following:
@@ -140,7 +141,7 @@ public class Server {
                                 else {
                                     System.out.println("FLOODING:");
                                     String lineAndContent;
-                                    if (docList.get(outTokens[1]) != null && docList.get(outTokens[1]).getDocContent() != null) {
+                                    if (outTokens.length > 1 && docList.get(outTokens[1]) != null && docList.get(outTokens[1]).getDocContent() != null) {
                                         lineAndContent = " " + docList.get(outTokens[1]).getDocContent();
                                     } else {
                                         lineAndContent = "";

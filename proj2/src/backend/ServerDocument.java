@@ -87,12 +87,9 @@ public class ServerDocument extends DefaultStyledDocument{
         StringBuilder string = new StringBuilder("");
         int lines = 1;
         for (int i=0; i< e.size(); i++){
+            string.append(SPLIT_CHAR);
             if (e.get(i).getValue().equals("\n")) {
                 string.append(System.getProperty("line.separator"));
-                lines++;
-                System.out.println("line counter is at: "+lines);
-            } else if (e.get(i).getValue().equals(" ")) {
-                string.append(SPLIT_CHAR);
                 lines++;
             } else {
                 string.append(e.get(i).toString());
@@ -100,7 +97,7 @@ public class ServerDocument extends DefaultStyledDocument{
         }
         String numLines = Integer.toString(lines);
         System.out.println("line counter is at: "+numLines);
-        return numLines + SPLIT_CHAR + string.toString();
+        return numLines + string.toString();
     }
     
     /**

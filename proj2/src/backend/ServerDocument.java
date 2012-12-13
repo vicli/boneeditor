@@ -91,7 +91,7 @@ public class ServerDocument extends DefaultStyledDocument{
         for (int i=0; i< e.size(); i++){
             if (!e.get(i).getOwner().equals(DOC_NAME)) {
                 if (!inEdit){
-                    string.append("<font color = red>");
+                    //string.append("<font color = red>");
                     inEdit = true;
                 }
                 
@@ -104,7 +104,7 @@ public class ServerDocument extends DefaultStyledDocument{
                 
             } else {
                 if (inEdit) {
-                  string.append("</font>");
+                  //string.append("</font>");
                   inEdit = false;
                 }
                 
@@ -117,7 +117,7 @@ public class ServerDocument extends DefaultStyledDocument{
             }
         }
         if (inEdit) {
-            string.append("</font>");
+            //string.append("</font>");
         }
         String numLines = Integer.toString(lines);
         System.out.println("line counter is at: "+numLines);

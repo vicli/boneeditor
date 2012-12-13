@@ -17,6 +17,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class EditController {
     private ArrayBlockingQueue<String> queue;
     private Map<String, ServerDocument> docList;
+    private final String SPLIT_CHAR = Character.toString((char) 0x2605);
     
     /**
      * Empty EditController constructor
@@ -134,10 +135,10 @@ public class EditController {
             System.out.println("made it to new doc");
             String title = tokens[1];
             if (docList.containsKey(title)) {
-                return tokens[0] + " " + tokens[1] + " new fail";
+                return tokens[0] + SPLIT_CHAR + tokens[1] + SPLIT_CHAR + "new" + SPLIT_CHAR + "fail";
             } else {
                 docList.put(title, new ServerDocument(title));
-                return tokens[0] + " " + tokens[1] + " new success";
+                return tokens[0] + SPLIT_CHAR + tokens[1] + SPLIT_CHAR+ "new" + SPLIT_CHAR + "success";
             }
         } else if (tokens.length > 2 && tokens[2].equals("open")) {
             // For open document messages
@@ -148,10 +149,10 @@ public class EditController {
             System.out.println("made it to open");
             ServerDocument doc = docList.get(tokens[1]);
             if (doc == null) {
-                return tokens[0] + " " + tokens[1] + " open fail";
+                return tokens[0] + SPLIT_CHAR + tokens[1] + SPLIT_CHAR+ "open"+SPLIT_CHAR+"fail";
             } else {
                 String lineAndContents = doc.getDocContent();
-                return tokens[0] + " " + tokens[1] + " open " + lineAndContents;
+                return tokens[0] + SPLIT_CHAR + tokens[1] + SPLIT_CHAR+"open"+SPLIT_CHAR + lineAndContents;
             }
         } else if (tokens.length > 2 && tokens[2].equals("getDocNames")) {
             // For get doc names messages
@@ -160,13 +161,13 @@ public class EditController {
             // There can be no unsuccessful output
             
             System.out.println("reached getdocnames");
-            String names = " getDocNames";
+            String names = SPLIT_CHAR+"getDocNames";
             for (String key: docList.keySet()) {
-                names += " ";
+                names += SPLIT_CHAR;
                 names += key;
             }
-            System.out.println(tokens[0] + " " + tokens[1] + names);
-            return tokens[0] + " " + tokens[1] + names;
+            System.out.println(tokens[0] + SPLIT_CHAR + tokens[1] + names);
+            return tokens[0] + SPLIT_CHAR + tokens[1] + names;
         } else if (tokens.length > 2 && tokens[2].equals("checkNames")) {
             // For check names messages
             // Input: clientName docName checkNames
@@ -174,12 +175,12 @@ public class EditController {
             // There can be no unsuccessful output
             
             System.out.println("reached checknames");
-            String names = " checkNames";
+            String names = SPLIT_CHAR+"checkNames";
             for (String key: docList.keySet()) {
-                names += " ";
+                names += SPLIT_CHAR;
                 names += key;
             }
-            return tokens[0] + " " + tokens[1] + names;
+            return tokens[0] + SPLIT_CHAR + tokens[1] + names;
         } 
         
         // There's no longer an update message here because the GUI never asks for an update,
@@ -192,7 +193,7 @@ public class EditController {
             // There can be no unsuccessful output
             
             endEdit(next);
-            return tokens[0] + " " + tokens[1] + " save";
+            return tokens[0] + SPLIT_CHAR + tokens[1] + SPLIT_CHAR+"save";
         } else if (tokens.length > 2 && tokens[2].equals("insert")) {
             // For input messages
             // Input: clientName docName insert keyChar index
@@ -201,9 +202,9 @@ public class EditController {
             
             String result = insert(next);
             if (result.equals("LockedEdit")) {
-                return tokens[0] + " " + tokens[1] + " insert fail";
+                return tokens[0] + SPLIT_CHAR + tokens[1] + SPLIT_CHAR+"insert"+SPLIT_CHAR+"fail";
             } else {
-                return tokens[0] + " " + tokens[1] + " insert " + tokens[4];
+                return tokens[0] + SPLIT_CHAR + tokens[1] + SPLIT_CHAR+"insert"+SPLIT_CHAR + tokens[4];
             }
         } else if (tokens.length > 2 && tokens[2].equals("remove")) {
             // For remove messages
@@ -213,9 +214,9 @@ public class EditController {
             
             String result = remove(next);
             if (result.equals("SingleLock") || result.equals("SomeLocked")) {
-                return tokens[0] + " "  + tokens[1] + " remove fail";
+                return tokens[0] + SPLIT_CHAR  + tokens[1] + SPLIT_CHAR+"remove"+SPLIT_CHAR+"fail";
             } else {
-                return tokens[0] + " "  + tokens[1] + " remove " + tokens[3] + " " + tokens[4];
+                return tokens[0] + SPLIT_CHAR  + tokens[1] + SPLIT_CHAR+"remove"+SPLIT_CHAR + tokens[3] + SPLIT_CHAR + tokens[4];
             }
             
         } else if (tokens.length > 2 && tokens[2].equals("spaceEntered")) {
@@ -226,7 +227,7 @@ public class EditController {
             // Successful output: clientName docName spaceEntered success
             // Unsuccessful output: clientName docName spaceEntered fail
             
-            System.out.println("reaches");
+            System.out.println("reaches spaceEntered!!");
             
             
             String result = "";
@@ -238,10 +239,10 @@ public class EditController {
             
             endEdit(next);
             if (result.equals("LockedEdit")) {
-                return tokens[0] + " " + tokens[1] + " spaceEntered fail";
+                return tokens[0] + SPLIT_CHAR + tokens[1] + SPLIT_CHAR+"spaceEntered"+SPLIT_CHAR+"fail";
             } else {
 
-                return tokens[0] + " " + tokens[1] + " spaceEntered "+ tokens[4];
+                return tokens[0] + SPLIT_CHAR + tokens[1] + SPLIT_CHAR+"spaceEntered"+SPLIT_CHAR+ tokens[4];
                             }
         } else if (tokens.length > 2 && tokens[2].equals("cursorMoved")) {
             // For cursor moved messages
@@ -250,7 +251,7 @@ public class EditController {
             // There is no output failure
             
             endEdit(next);
-            return tokens[0] + " "  + tokens[1] + " cursorMoved";
+            return tokens[0] + SPLIT_CHAR  + tokens[1] +SPLIT_CHAR+ "cursorMoved";
         } else {
             // If a message somehow makes it all the way through the if/else.
             // Shouldn't reach here. Is here for debugging.

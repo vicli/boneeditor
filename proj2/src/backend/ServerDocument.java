@@ -23,6 +23,7 @@ public class ServerDocument extends DefaultStyledDocument{
     private String docTitle;
     private ArrayList<Edit> content;
     private final String DOC_NAME = "document";
+    private final String SPLIT_CHAR = Character.toString((char) 0x2605);
     
     /**
      * Constructor
@@ -90,13 +91,16 @@ public class ServerDocument extends DefaultStyledDocument{
                 string.append(System.getProperty("line.separator"));
                 lines++;
                 System.out.println("line counter is at: "+lines);
+            } else if (e.get(i).getValue().equals(" ")) {
+                string.append(SPLIT_CHAR);
+                lines++;
             } else {
                 string.append(e.get(i).toString());
             }
         }
         String numLines = Integer.toString(lines);
         System.out.println("line counter is at: "+numLines);
-        return numLines + " " + string.toString();
+        return numLines + SPLIT_CHAR + string.toString();
     }
     
     /**

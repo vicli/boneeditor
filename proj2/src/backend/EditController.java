@@ -17,7 +17,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class EditController {
     private ArrayBlockingQueue<String> queue;
     private Map<String, ServerDocument> docList;
-    private final String SPLIT_CHAR = Character.toString((char) 0x2605);
+    //private final String SPLIT_CHAR = Character.toString((char) 0x2605);
+    private final String SPLIT_CHAR = "|";
     
     /**
      * Empty EditController constructor

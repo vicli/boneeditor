@@ -32,7 +32,8 @@ public class Server {
     private static Map<String, ServerDocument> docList = new HashMap<String, ServerDocument>();
     private final int CAPACITY = 10;
     private static Map<Socket, String> socketMap = new HashMap<Socket, String>();
-    private final String SPLIT_CHAR = Character.toString((char) 0x2605);
+    //private final String SPLIT_CHAR = Character.toString((char) 0x2605);
+    private final String SPLIT_CHAR = "|";
 
     /**
      * Makes a Server that listens for connections on port.
@@ -146,7 +147,7 @@ public class Server {
                                     } else {
                                         lineAndContent = "";
                                     }
-                                    String update = outTokens[0] + " " + outTokens[1] + " update" + lineAndContent;
+                                    String update = outTokens[0] + SPLIT_CHAR + outTokens[1] + SPLIT_CHAR + "update" + lineAndContent;
                                     for (Socket soc : socketMap.keySet()) {
                                         if (!soc.equals(socket)) {
                                             PrintWriter tempOut = new PrintWriter(soc.getOutputStream(), true);

@@ -23,7 +23,8 @@ public class ServerDocument extends DefaultStyledDocument{
     private String docTitle;
     private ArrayList<Edit> content;
     private final String DOC_NAME = "document";
-    private final String SPLIT_CHAR = Character.toString((char) 0x2605);
+    //private final String SPLIT_CHAR = Character.toString((char) 0x2605);
+    private final String SPLIT_CHAR = "|";
     
     /**
      * Constructor
@@ -87,7 +88,6 @@ public class ServerDocument extends DefaultStyledDocument{
         StringBuilder string = new StringBuilder("");
         int lines = 1;
         for (int i=0; i< e.size(); i++){
-            string.append(SPLIT_CHAR);
             if (e.get(i).getValue().equals("\n")) {
                 string.append(System.getProperty("line.separator"));
                 lines++;
@@ -97,7 +97,7 @@ public class ServerDocument extends DefaultStyledDocument{
         }
         String numLines = Integer.toString(lines);
         System.out.println("line counter is at: "+numLines);
-        return numLines + string.toString();
+        return numLines + SPLIT_CHAR + string.toString();
     }
     
     /**

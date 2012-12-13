@@ -854,6 +854,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             docpane.setMargin(new Insets(100,100,100,100));
             docpane.setBounds(20, 20, 560, 800);
             docpane.setVisible(true);
+            docpane.setBackground(Color.WHITE);
             
             testCaret = (DefaultCaret) docpane.getCaret();
             testCaret.setDot(finalCaretPlace);

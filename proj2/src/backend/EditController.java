@@ -43,22 +43,20 @@ public class EditController {
      */
     public String insert(String input) {
         String[] tokens = input.split(" ");
-        
         if (tokens[0].equals("addOneSpace")) {
             ServerDocument doc1 = docList.get(tokens[2]);
-            System.out.println("new input: "+input);
             return doc1.insertContent(new Edit(" ", tokens[1]), tokens[5], tokens[1]);
         } else if (tokens[0].equals("addOneEnter")) {
             ServerDocument doc1 = docList.get(tokens[2]);
-            System.out.println("new input: "+input);
-            String str = doc1.insertContent(new Edit("\n", tokens[1]), tokens[5], tokens[1]);
-            System.out.println(doc1.getDocContent());
-            return str;
+            return doc1.insertContent(new Edit("\n", tokens[1]), tokens[5], tokens[1]);
+        } else if (tokens[0].equals("addOneTab")) {
+            ServerDocument doc1 = docList.get(tokens[2]);
+            return doc1.insertContent(new Edit("\t", tokens[1]), tokens[5], tokens[1]);
+        } else {
+            ServerDocument doc = docList.get(tokens[1]);
+            Edit edit = new Edit(tokens[3], tokens[0]);
+            return doc.insertContent(edit, tokens[4], tokens[0]);
         }
-        ServerDocument doc = docList.get(tokens[1]);
-        Edit edit;
-        edit = new Edit(tokens[3], tokens[0]);
-        return doc.insertContent(edit, tokens[4], tokens[0]);
     }
     
     /**
@@ -153,7 +151,6 @@ public class EditController {
                 return tokens[0] + SPLIT_CHAR + tokens[1] + SPLIT_CHAR+ "open"+SPLIT_CHAR+"fail";
             } else {
                 String lineAndContents = doc.getDocContent();
-                System.out.println("Returns: "+lineAndContents);
                 return tokens[0] + SPLIT_CHAR + tokens[1] + SPLIT_CHAR+"open"+SPLIT_CHAR + lineAndContents;
             }
         } else if (tokens.length > 2 && tokens[2].equals("getDocNames")) {
@@ -168,7 +165,6 @@ public class EditController {
                 names += SPLIT_CHAR;
                 names += key;
             }
-            System.out.println(tokens[0] + SPLIT_CHAR + tokens[1] + names);
             return tokens[0] + SPLIT_CHAR + tokens[1] + names;
         } else if (tokens.length > 2 && tokens[2].equals("checkNames")) {
             // For check names messages
@@ -176,7 +172,6 @@ public class EditController {
             // Output: clientName docName checkNames names
             // There can be no unsuccessful output
             
-            System.out.println("reached checknames");
             String names = SPLIT_CHAR+"checkNames";
             for (String key: docList.keySet()) {
                 names += SPLIT_CHAR;
@@ -222,30 +217,27 @@ public class EditController {
             }
             
         } else if (tokens.length > 2 && tokens[2].equals("spaceEntered")) {
-            // TODO: clean this up later with a better protocol, add in other whitespace chars
-            // For whitespace entered messages
+            // For whitespace entered messages such as space, enter, and tab
             // Input for enter: clientName docName spaceEntered enter index
             // Input for space: clientName docName spaceEntered space index
             // Successful output: clientName docName spaceEntered success
             // Unsuccessful output: clientName docName spaceEntered fail
-            
-            System.out.println("reaches spaceEntered!!");
-            
             
             String result = "";
             if (tokens[3].equals("space")) {
                 result = insert("addOneSpace "+ next);
             } else if (tokens[3].equals("enter")) {
                 result = insert("addOneEnter "+next);
+            } else if (tokens[3].equals("tab")) {
+                result = insert("addOneTab "+next);
             }
             
             endEdit(next);
             if (result.equals("LockedEdit")) {
                 return tokens[0] + SPLIT_CHAR + tokens[1] + SPLIT_CHAR+"spaceEntered"+SPLIT_CHAR+"fail";
             } else {
-
                 return tokens[0] + SPLIT_CHAR + tokens[1] + SPLIT_CHAR+"spaceEntered"+SPLIT_CHAR+ tokens[4];
-                            }
+            }
         } else if (tokens.length > 2 && tokens[2].equals("cursorMoved")) {
             // For cursor moved messages
             // Input: clientName docName cursorMoved
@@ -257,6 +249,7 @@ public class EditController {
         } else {
             // If a message somehow makes it all the way through the if/else.
             // Shouldn't reach here. Is here for debugging.
+            
             return "InvalidInput";
         }
     }

@@ -145,7 +145,6 @@ public class EditController {
             // Successful output: clientName docName open success lines content
             // Unsuccessful output: clientName docName open fail
             
-            System.out.println("made it to open");
             ServerDocument doc = docList.get(tokens[1]);
             if (doc == null) {
                 return tokens[0] + SPLIT_CHAR + tokens[1] + SPLIT_CHAR+ "open"+SPLIT_CHAR+"fail";
@@ -159,7 +158,6 @@ public class EditController {
             // Output: clientName docName getDocNames names
             // There can be no unsuccessful output
             
-            System.out.println("reached getdocnames");
             String names = SPLIT_CHAR+"getDocNames";
             for (String key: docList.keySet()) {
                 names += SPLIT_CHAR;

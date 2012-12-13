@@ -119,7 +119,7 @@ public class Server {
                         String[] name = line.split(" ");
                         socketMap.put(socket, name[0]);
                     }
-                    System.out.println("input from GUI: " + line);
+                    System.out.println("INPUT FROM GUI: " + line);
                     //String output = editCont.putOnQueue(line);
                     editCont.putOnQueue(line);
                     //System.out.println("output from server: " + output);

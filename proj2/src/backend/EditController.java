@@ -238,6 +238,7 @@ public class EditController {
                 return tokens[0] + " " + tokens[1] + " spaceEntered fail";
             } else {
                 return tokens[0] + " " + tokens[1] + " spaceEntered "+ tokens[4];
+                
             }
         } else if (tokens.length > 2 && tokens[2].equals("cursorMoved")) {
             // For cursor moved messages

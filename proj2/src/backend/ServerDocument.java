@@ -150,7 +150,7 @@ public class ServerDocument extends DefaultStyledDocument{
 
         System.out.println("begin location: "+begin);
         System.out.println("end location: "+end);
-        if (begin == end && begin >0 && begin < content.size()) {
+        if (begin == end && begin >=0 && begin < content.size()) {
             if (content.get(begin).getOwner().equals(client) || 
                 content.get(begin).getOwner().equals(DOC_NAME)) {
                 

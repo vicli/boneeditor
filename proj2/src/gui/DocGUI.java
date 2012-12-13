@@ -387,33 +387,42 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                     String[] messageList = fromServer.toString().split(" ");
                     
                     fromServer.setLength(0);
-                    System.out.println("the messageLIst is" + messageList.toString());
                     
                     if(messageList.length > 3 && messageList[2].equals("update") && messageList[1].equals(docName)){ 
                         System.out.println("youre in update");
-                        for(int i= 4; i < messageList.length; i++){                 
-                            GUIcontent.append(messageList[i]);
-                            GUIcontent.append(" ");
+                        
+                        if(messageList[0] != clientName){
+                            if(messageList.length > 4){
+                                for(int i= 4; i < messageList.length; i++){  
+                                    System.out.println("in multi for loop");
+                                    GUIcontent.append(messageList[i]);
+                                    GUIcontent.append(" ");
+                                    
+                                    System.out.println("gui contnet is now" + GUIcontent);
+                                }
+                            }
                             
-                            System.out.println("gui contnet is now" + GUIcontent);
+                            System.out.println("mur gui" + GUIcontent + "," + GUIcontent.length());
+                            docpane.setText("");
+                            if(GUIcontent.length() == 0){
+                                System.out.println("woo true");
+                                docpane.setText(GUIcontent.toString());
+                            }
+                            else{
+                                System.out.println("mur bad");
+                                System.out.println(docpane == null);
+                                docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
+                            }
                         }
-                        System.out.println("mur gui" + GUIcontent + GUIcontent.length());
-                        if(GUIcontent.length() == 0){
-                            System.out.println("woo true");
-                            docpane.setText(GUIcontent.toString());
-                        }
-                        else{
-                            System.out.println("mur bad");
-                            System.out.println(docpane == null);
-                            docpane.setText(GUIcontent.toString().substring(0, GUIcontent.length()-1));
-                        }
+                        
+                        testCaret.setDot(finalCaretPlace);
 
                     }
                     
                     if(messageList.length > 0 && messageList[0].equals(clientName)){               
                         System.out.println(fromServer);
                         System.out.println("youve read from server");  
-                        System.out.println("message 2 is" + messageList[2].toString());
+                        System.out.println("caret loc is " + finalCaretPlace);
                        // int fcp = finalCaretPlace -1;
                         if(messageList[2].equals("insert")){
 //                            if(Integer.valueOf(messageList[3]) == 0){
@@ -421,12 +430,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
 //                                        "index is " + Integer.valueOf(messageList[3]));
 //                                docpane.setCaretPosition(1);
 //                            }
-                            if(finalCaretPlace <= Integer.valueOf(messageList[3])){
+                            if(finalCaretPlace < Integer.valueOf(messageList[3])){
                                 System.out.println("2 final caretplace is:" + finalCaretPlace +
                                         "index is " + Integer.valueOf(messageList[3]));
                                 testCaret.setDot(finalCaretPlace);
                             }
-                            else if(finalCaretPlace > (Integer.valueOf(messageList[3]))){
+                            else if(finalCaretPlace >= (Integer.valueOf(messageList[3]))){
                                 System.out.println("3 final caretplace is:" + finalCaretPlace +
                                         "index is " + Integer.valueOf(messageList[3]));
                                 testCaret.setDot(finalCaretPlace +1);
@@ -846,7 +855,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
             docpane.setVisible(true);
             
             testCaret = (DefaultCaret) docpane.getCaret();
-           // testCaret.
+            testCaret.setDot(finalCaretPlace);
             
             JScrollPane scroll = new JScrollPane(docpane);
             scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);

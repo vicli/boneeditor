@@ -154,17 +154,21 @@ public class Server {
                                             PrintWriter tempOut = new PrintWriter(soc.getOutputStream(), true);
                                             tempOut.println(output);
                                             tempOut.flush();
-                                            tempOut.println(update);
-                                            tempOut.flush();
                                             System.out.println("sent: "+output+" ...to "+socketMap.get(soc));
-                                            System.out.println("update: "+update+" ...to "+socketMap.get(soc));
+                                            if (outTokens.length > 1 && !outTokens[1].equals("???")) {
+                                                tempOut.println(update);
+                                                tempOut.flush();
+                                                System.out.println("update: "+update+" ...to "+socketMap.get(soc));
+                                            }
                                         } else {
                                             out.println(output);
                                             out.flush();
-                                            out.println(update);
-                                            out.flush();
                                             System.out.println("sent: "+output+" ...to "+socketMap.get(socket));
-                                            System.out.println("update: "+update+" ...to "+socketMap.get(soc));
+                                            if (outTokens.length > 1 && !outTokens[1].equals("???")) {
+                                                out.println(update);
+                                                out.flush();
+                                                System.out.println("update: "+update+" ...to "+socketMap.get(socket));
+                                            }                                            
                                         }
                                     }
                                 }

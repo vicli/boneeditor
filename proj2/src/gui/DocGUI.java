@@ -423,7 +423,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                         }
                         testCaret.setDot(finalCaretPlace);
 
-                    }
+                    } //moo
                     
                     if(messageList.length > 0 && messageList[0].equals(clientName)){               
                         System.out.println(fromServer);

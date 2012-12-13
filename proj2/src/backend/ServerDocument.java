@@ -87,13 +87,37 @@ public class ServerDocument extends DefaultStyledDocument{
     private String listToString(ArrayList<Edit> e){
         StringBuilder string = new StringBuilder("");
         int lines = 1;
+        boolean inEdit = false;
         for (int i=0; i< e.size(); i++){
-            if (e.get(i).getValue().equals("\n")) {
-                string.append(System.getProperty("line.separator"));
-                lines++;
+            if (!e.get(i).getOwner().equals(DOC_NAME)) {
+                if (!inEdit){
+                    string.append("<font color = red>");
+                    inEdit = true;
+                }
+                
+                if (e.get(i).getValue().equals("\n")) {
+                    string.append(System.getProperty("line.separator"));
+                    lines++;
+                } else {
+                    string.append(e.get(i).toString());
+                }
+                
             } else {
-                string.append(e.get(i).toString());
+                if (inEdit) {
+                  string.append("</font>");
+                  inEdit = false;
+                }
+                
+                if (e.get(i).getValue().equals("\n")) {
+                    string.append(System.getProperty("line.separator"));
+                    lines++;
+                } else {
+                    string.append(e.get(i).toString());
+                }
             }
+        }
+        if (inEdit) {
+            string.append("</font>");
         }
         String numLines = Integer.toString(lines);
         System.out.println("line counter is at: "+numLines);

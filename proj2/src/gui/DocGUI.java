@@ -207,7 +207,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         topRow.setLayout(null);
         topRow.setLocation(0, 0);
         topRow.setSize(600, 10);
-        JLabel welcomeMessage = new JLabel("Welcome to Bone Editor! Please enter your name and color to get started.");
+        JLabel welcomeMessage = new JLabel("Welcome to Bone Editor! Please enter your name and info to get started.");
         welcomeMessage.setBounds(50, 10, 500, 20);
         topRow.add(welcomeMessage);
        

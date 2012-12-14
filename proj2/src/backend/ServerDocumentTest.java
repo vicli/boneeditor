@@ -24,4 +24,47 @@ public class ServerDocumentTest {
         string.append("cd");
         assertEquals(string.toString(), str);
     }
+    
+    @Test
+    public void getTitleTest() {
+        ServerDocument doc = new ServerDocument("title");
+        assertEquals("title", doc.getTitle());
+    }
+    
+    @Test
+    public void setTitleTest() {
+        ServerDocument doc = new ServerDocument("title");
+        assertEquals("title", doc.getTitle());
+        doc.setTitle("newTitle");
+        assertEquals("newTitle", doc.getTitle());
+    }
+    
+    @Test
+    public void getDocContentTest() {
+        ServerDocument doc = new ServerDocument("title");
+        doc.insertContent(new Edit("a", "document"), "0", "document");
+        doc.insertContent(new Edit("b", "document"), "1", "document");
+        doc.insertContent(new Edit("c", "document"), "2", "document");
+        assertEquals("1|abc", doc.getDocContent());
+    }
+    
+    @Test
+    public void insertContentTest() {
+        ServerDocument doc = new ServerDocument("title");
+        assertEquals("InsertDone", doc.insertContent(new Edit("a", "document"), "0", "document"));
+    }
+    
+    @Test
+    public void removeContentTest() {
+        ServerDocument doc = new ServerDocument("title");
+        doc.insertContent(new Edit("a", "document"), "0", "document");
+        assertEquals("Done", doc.removeContent("0", "0", "document"));
+    }
+    
+    @Test
+    public void endEditTest() {
+        ServerDocument doc = new ServerDocument("title");
+        doc.insertContent(new Edit("a", "miren"), "0", "miren");
+        assertEquals("EndEditDone", doc.endEdit("miren"));
+    }
 }

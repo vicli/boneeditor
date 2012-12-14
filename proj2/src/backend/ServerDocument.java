@@ -51,40 +51,13 @@ public class ServerDocument extends DefaultStyledDocument{
         docTitle = title;
     }
     
-    /**
-     * Updates the content from a string
-     * @param c The string
-     */
-    public void updateContent(String c){
-        content = stringToList(c);
-        System.out.println("updated content is" + content.toString());
-    }
     
     /**
-     * Takes a string and turns it into a list of Edit object
-     * TODO: Fix this, it is wrong
-     * @param s
-     * @return
+     * Returns a String version of the entire doc
+     * @return A String version of the entire doc
      */
-    private ArrayList<Edit> stringToList(String s){
-        System.out.println("string is" + s);
-        char[] newarray = s.toCharArray();
-        System.out.println("array is" + newarray.toString() + "with size" + newarray.length);
-        ArrayList<Edit> newList = new ArrayList<Edit>();
-        for(int i = 0; i < newarray.length; i++){
-            // TODO: Is having "document" here correct? I doubt it.
-            newList.add(new Edit(String.valueOf(newarray[i]), DOC_NAME));
-        }
-        
-        return newList;
-    }
-    
-    /**
-     * Essentially a toString method
-     * @param e The list of Edits
-     * @return The string version of the list
-     */
-    private String listToString(ArrayList<Edit> e){
+    public String getDocContent(){
+        ArrayList<Edit> e = content;
         StringBuilder string = new StringBuilder("");
         int lines = 1;
         boolean inEdit = false;
@@ -126,14 +99,6 @@ public class ServerDocument extends DefaultStyledDocument{
     }
     
     /**
-     * Returns a String version of the entire doc
-     * @return A String version of the entire doc
-     */
-    public String getDocContent(){
-        return listToString(content);
-    }
-    
-    /**
      * Inserts Edits into the Doc
      * @param edit The Edit to insert
      * @param location The location at which it would like to be inserted
@@ -147,7 +112,7 @@ public class ServerDocument extends DefaultStyledDocument{
         
         int loc = Integer.valueOf(location);
         
-        // lols this isn't working
+        // not sure if working
         if (loc > 0 && loc < content.size() - 1) {
             if (!content.get(loc - 1).getOwner().equals(client) && !content.get(loc + 1).getOwner().equals(DOC_NAME)) {
                 if (content.get(loc - 1).getOwner().equals(content.get(loc + 1).getOwner())) {
@@ -156,7 +121,6 @@ public class ServerDocument extends DefaultStyledDocument{
             }
         }
         content.add(loc, edit);
-        System.out.println("currently storing: "+listToString(content));
         return "InsertDone";
     }
     
@@ -179,7 +143,6 @@ public class ServerDocument extends DefaultStyledDocument{
                 content.get(begin).getOwner().equals(DOC_NAME)) {
                 
                 content.remove(begin);
-                System.out.println(listToString(content));
                 return "Done";
             } else {
                 return "SingleLock";

@@ -93,8 +93,6 @@ public class ServerDocument extends DefaultStyledDocument{
             //string.append("</font>");
         }
         String numLines = Integer.toString(lines);
-        System.out.println("line counter is at: "+numLines);
-        System.out.println("string: "+string);
         return numLines + SPLIT_CHAR + string.toString();
     }
     
@@ -135,9 +133,6 @@ public class ServerDocument extends DefaultStyledDocument{
     public synchronized String removeContent(String b, String e, String client) {
         int begin = Integer.parseInt(b);
         int end = Integer.parseInt(e);
-
-        System.out.println("begin location: "+begin);
-        System.out.println("end location: "+end);
         if (begin == end && begin >=0 && begin < content.size()) {
             if (content.get(begin).getOwner().equals(client) || 
                 content.get(begin).getOwner().equals(DOC_NAME)) {

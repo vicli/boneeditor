@@ -60,13 +60,11 @@ public class Server {
         Thread receiverThread = new Thread(new Runnable() {
             public void run() {
                 while (true) {
-                    System.out.println("you're before socket");
                     // block until a client connects
-                    System.out.println(serverSocket.toString());
                     Socket socket;
                     try {
                         socket = serverSocket.accept();
-                        System.out.println("youve accepted the socket");
+                        System.out.println("server has accepted your socket");
                         // makes threads
                         Runnable handler = new Handler(socket);
                         Thread clientThread = new Thread(handler);
@@ -96,12 +94,7 @@ public class Server {
                 e.printStackTrace();
             } finally {
                 try {
-                    System.out.println("preclose");
                     socket.close();
-                    //check the following line
-                    System.out.println("postclose");
-                    // not sure if needed:
-                    //serverSocket.close();
                     } catch (IOException e) {
                       e.printStackTrace();
                 } finally {}
@@ -119,7 +112,6 @@ public class Server {
             try {
                 synchronized (this) {
                 for (String line = in.readLine(); line!=null; line=in.readLine()) {
-                    System.out.println("beginning of handleConnection for loop");
                     if (!socketMap.containsKey(socket)) {
                         String[] name = line.split(" ");
                         socketMap.put(socket, name[0]);
@@ -137,8 +129,6 @@ public class Server {
                             System.out.println("output from server: "+output);
                             if(output != null) {
                                 String[] outTokens = output.split("\\|");
-                                System.out.println("clientName: "+outTokens[0]);
-                                System.out.println("docName: "+outTokens[1]);
                                 /**
                                  * Floods update messages to the sockets with messages according to the following:
                                  * If something was successful: send the original client the success message and send
@@ -152,7 +142,7 @@ public class Server {
                                     // do nothing, skip this loop for indexing's sake
                                 } 
                                 else {
-                                    System.out.println("FLOODING:");
+                                    System.out.println("FLOODING BEGINNING:");
                                     String lineAndContent;
                                     if (outTokens.length > 1 && docList.get(outTokens[1]) != null && docList.get(outTokens[1]).getDocContent() != null) {
                                         lineAndContent =  docList.get(outTokens[1]).getDocContent();
@@ -194,7 +184,6 @@ public class Server {
             } finally { 
                 out.close();
                 in.close();
-                System.out.println("at end of handleconnection for "+socketMap.get(socket));
                 socketMap.remove(socket);
             }
         }

@@ -6,53 +6,32 @@ import gui.DocGUI.DocumentWindow.RedoAction;
 import gui.DocGUI.DocumentWindow.UndoAction;
 
 import java.awt.BorderLayout;
-import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Dialog;
 import java.awt.Dimension;
-import java.awt.Event;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
-import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-
-import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.ActionMap;
-import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
-import javax.swing.InputMap;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -60,37 +39,23 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
-import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.border.Border;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
-import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.DefaultEditorKit;
-import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
-import javax.swing.text.StyledDocument;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-
-
-import backend.Server;
-import backend.ServerDocument;
 
 
 public class DocGUI extends JFrame implements ActionListener, KeyListener{
@@ -125,8 +90,6 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      *       
      *
      * >>> TESTING STRATEGY <<<<
-     * (See Testing.pdf for a more thorough breakdown of our testing strategy; listed below are just
-     * the main parts of it)
      * Currently: Manual Testing        (If time allows, figure out how to do it via JUnit)
      * 
      * GUI LOOK TESTING
@@ -480,8 +443,12 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
                         }
                     }
                     
-                    // Synchronized block as these messages are receisved when there is the possibility
-                    // of mulitple users and multiple edits. 
+//                     Synchronized block as these messages are received when there is the possibility
+//                     of multiple users and multiple edits.
+//                     This ensures that only one of these messages can be carried out at one time
+//                     and as a result, the updated/insertion/remove should be concurrent. 
+//                     This also makes sure that our caretlocation is update consistently, which would
+//                     help us ensure that the right things are being entered at the right place 
                     synchronized(this){                 
                         // we first check for any possible updates. 
                     if(messageList.length > 3 && messageList[2].equals("update") && messageList[1].equals(docName)){ 
@@ -623,7 +590,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         public WindowOne(){
             // Sets properties of the window
             setTitle("New/Open");
-            setSize(300, 200);
+            setSize(320, 200);
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             setLocationRelativeTo(null);
             setVisible(true);
@@ -1249,7 +1216,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         public FileWindow(){
 
             setTitle("Files");
-            setSize(300, 150);
+            setSize(300, 200);
             setLocationRelativeTo(null);
             setVisible(true);
             setBackground(Color.white);
@@ -1336,7 +1303,15 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         }
     }
     /**
-     * Handles communication with the server. Follows the protocol as stated in Design.pdf
+     * Handles communication with the server. Follows the protocol as stated in Design.pdf.
+     * 
+     * The ServerMessage is synchronized such that messages can only be sent one at a time, and that
+     * any threads created to send messages can only be run one at the time. This ensures that 
+     * multiple messages will not be sent at the exact same time.
+     * 
+     * Dead locking does not occur as the ServerMessage only cares about printing the message to the output
+     * stream. As a result, there are no cycles and thus threads would be waiting on each other
+     * in a cyclic fashion. 
      */
     // To write on Socket
     private static ArrayList<String> docNameList = new ArrayList<String>();

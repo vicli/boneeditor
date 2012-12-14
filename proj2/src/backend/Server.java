@@ -118,7 +118,11 @@ public class Server {
                         socketMap.put(socket, name[0]);
                     }
                     System.out.println("INPUT FROM GUI: " + line);
-                    editCont.putOnQueue(line);
+                    String putSuccess = editCont.putOnQueue(line);
+                    if (!putSuccess.equals("")) {
+                        out.println(putSuccess);
+                        out.flush();
+                    }
                     
                     while (!editCont.getQueue().isEmpty()) {
                         //synchronized (this) {
@@ -137,7 +141,7 @@ public class Server {
                                  * If something is a message that only the original client cares about, send the message to
                                  * that client only.
                                  */                            
-                                if (outTokens[0].equals("InvalidInput")) {
+                                if (outTokens[0].equals("InvalidInput") || outTokens[0].equals("EmptyQueue")) {
                                     // do nothing, skip this loop for indexing's sake
                                 } 
                                 else {

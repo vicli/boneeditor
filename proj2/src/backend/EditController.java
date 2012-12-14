@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
 /**
- * Deals with the actual Edits in the docs by adding things to the
+ * Deals with the actual Edits in the documents by adding things to the
  * EditQueue and dealing with the response from the queue. Also does
  * things like reassign Edit owners at the end of an Edit.
  *
@@ -17,18 +17,26 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class EditController {
     private ArrayBlockingQueue<String> queue;
     private Map<String, ServerDocument> docList;
-    //private final String SPLIT_CHAR = Character.toString((char) 0x2605);
     private final String SPLIT_CHAR = "|";
     
+    //for the unicode split character if we have time:
+    //private final String SPLIT_CHAR = Character.toString((char) 0x2605);
+    
     /**
-     * Empty EditController constructor
+     * EditController constructor
+     * @param queue The queue on which to place the messages from the GUI
+     * @param doclist The same docList that the docList in the server points 
+     *   to so that they can both access the same documents
      */
     public EditController(ArrayBlockingQueue<String> queue, Map<String, ServerDocument> docList) {
         this.queue = queue;
         this.docList = docList;
     }
     
-    //returns the queue
+    /**
+     * Returns the queue
+     * @return The queue
+     */
     public ArrayBlockingQueue<String> getQueue() {
         return queue;
     }
@@ -37,19 +45,21 @@ public class EditController {
      * Deals with inserts. Interacts with the EditQueue to make sure that 
      *   everything is threadsafe and in order
      * @param input The message from the GUI, passed through the server
-     * @param doc The ServerDocument that the GUI is currently editing
      * @return The message to return to the server. Returns "Success" if 
      *   successful and "Error" if not successful
      */
     public String insert(String input) {
         String[] tokens = input.split(" ");
         if (tokens[0].equals("addOneSpace")) {
+            // Checks for the special case that the insert is a space
             ServerDocument doc1 = docList.get(tokens[2]);
             return doc1.insertContent(new Edit(" ", tokens[1]), tokens[5], tokens[1]);
         } else if (tokens[0].equals("addOneEnter")) {
+            // Checks for the special case that the insert is an enter
             ServerDocument doc1 = docList.get(tokens[2]);
             return doc1.insertContent(new Edit("\n", tokens[1]), tokens[5], tokens[1]);
         } else if (tokens[0].equals("addOneTab")) {
+            // Checks for the special case that the insert is a tab
             ServerDocument doc1 = docList.get(tokens[2]);
             return doc1.insertContent(new Edit("\t", tokens[1]), tokens[5], tokens[1]);
         } else {
@@ -63,7 +73,6 @@ public class EditController {
      * Deals with removals. Interacts with the EditQueue to make sure that
      *   everything is threadsafe and in order
      * @param input The message from the GUI, passed through the server
-     * @param doc The ServerDocument that the GUI is currently editing
      * @return The message to return to the server
      */
     public String remove(String input) {
@@ -77,12 +86,12 @@ public class EditController {
      *   the owner and color of the finished edit. Interacts with the
      *   EditQUeue to make sure that everything is threadsafe and in order
      * @param input The message from the GUI, passed through the server
-     * @param doc The ServerDocument that the GUI is currently editing
      * @return The message to return to the server
      */
     public String endEdit(String input) {
         String[] tokens = input.split(" ");
         ServerDocument doc = docList.get(tokens[1]);
+        //ends the edits of the given clientName = tokens[0]
         return doc.endEdit(tokens[0]);
     }
     
@@ -97,7 +106,6 @@ public class EditController {
         if (!queue.add(input)) {
             return "fail with message: " + input;
         } else {
-            //return takeFromQueue();
             return "";
         }
     }
@@ -116,7 +124,7 @@ public class EditController {
         if (!queue.isEmpty()) {
             next = queue.take();
         } else {
-            return "emptyQueue";
+            return "EmptyQueue";
         }
 
         String[] tokens = next.split(" ");
@@ -131,7 +139,6 @@ public class EditController {
             // Successful output: clientName docName new success
             // Unsuccessful output: clientName docName new fail
             
-            System.out.println("made it to new doc");
             String title = tokens[1];
             if (docList.containsKey(title)) {
                 return tokens[0] + SPLIT_CHAR + tokens[1] + SPLIT_CHAR + "new" + SPLIT_CHAR + "fail";
@@ -246,7 +253,7 @@ public class EditController {
             return tokens[0] + SPLIT_CHAR  + tokens[1] +SPLIT_CHAR+ "cursorMoved";
         } else {
             // If a message somehow makes it all the way through the if/else.
-            // Shouldn't reach here. Is here for debugging.
+            // It shouldn't reach here. This is here for debugging.
             
             return "InvalidInput";
         }

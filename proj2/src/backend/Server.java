@@ -24,7 +24,14 @@ import java.util.concurrent.ArrayBlockingQueue;
  * to the ServerDocument. Additionally, Edits belong to the original 
  * client until that client moves the Cursor or presses space or newline.
  * This helps narrow down the case where clients will try to edit right on
- * top of each other. They still type right next to each other,
+ * top of each other. They still type right next to each other, but both 
+ * inserts will be made. See the Design document for details.
+ * 
+ * Testing Strategy
+ * -------------------
+ * The Server prints many things to the console to act as a log for debugging
+ * purposes.
+ * 
  */
 public class Server {
     private ServerSocket serverSocket = null;

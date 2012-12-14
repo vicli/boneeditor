@@ -623,7 +623,7 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
         public WindowOne(){
             // Sets properties of the window
             setTitle("New/Open");
-            setSize(250, 150);
+            setSize(300, 200);
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             setLocationRelativeTo(null);
             setVisible(true);

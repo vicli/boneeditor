@@ -90,8 +90,6 @@ public class DocGUI extends JFrame implements ActionListener, KeyListener{
      *       
      *
      * >>> TESTING STRATEGY <<<<
-     * (See Testing.pdf for a more thorough breakdown of our testing strategy; listed below are just
-     * the main parts of it)
      * Currently: Manual Testing        (If time allows, figure out how to do it via JUnit)
      * 
      * GUI LOOK TESTING

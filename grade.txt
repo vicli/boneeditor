@@ -1,0 +1,30 @@
+
+Milestone 1 checkoff	7 / 9 
+	Incomplete protocol 
+Milestone 2 checkoff	10 / 10
+
+Design
+	Overview + State Machine Diagrams 5 / 7
+		State machines could be better specified.
+	Protocol 4 / 7
+		Incomplete and not updated.
+	Message format 6 / 7
+
+Specifications 5 / 5
+Testing Strategy 3 / 5
+Testing 	3 / 5
+
+comment: Overall testing was incomplete. 
+
+Implementation
+	Networking	6 / 6
+	GUI	5 / 5
+	Realtime responsiveness	4 / 4
+	Persistance	5 / 5
+	Multiple Doc	5 / 5
+	Multiple Users	5 / 5
+	Concurrency	7 / 10
+		Deletions on same character and deletions adjacent characters don't work.
+		Words interleave when typed in same location. 
+
+Total 	80 / 95

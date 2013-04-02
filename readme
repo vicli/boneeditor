@@ -1,7 +1,6 @@
 This is the code for a collaborative editor created with JAVA, for 6.005 Elements of Software Construction.
 
-It allows for the collaborative editing of documents for multiple clients, with documents stored on a locally 
-hosted server. 
+It allows for the collaborative editing of documents for multiple clients, with documents stored on a locally hosted server. 
 
 This project was done over the course of 2 weeks.
 
